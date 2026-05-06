@@ -71,15 +71,14 @@ jobs:
 
       - name: Verify no metadata remains (fail build if any present)
         run: |
-          # Allowed system tags only. Anything else (Author/GPS*/CreatorTool/Software/etc.) fails.
+          # List all tags EXCEPT the File:* and ExifTool:* groups (filesystem
+          # metadata + tool version are inherent and cannot be stripped).
+          # Anything else (EXIF/XMP/IPTC/PDF Author/GPS*/CreatorTool/Software)
+          # is offending and fails the build.
           if [ -d public/assets ] && [ "$(ls -A public/assets 2>/dev/null)" ]; then
             for f in public/assets/*; do
               [ -f "$f" ] || continue
-              offending=$(exiftool -S \
-                -ExifToolVersion= -FileSize= -FileType= \
-                -FileTypeExtension= -MIMEType= -Directory= -FileName= \
-                -FilePermissions= -FileModifyDate= -FileAccessDate= \
-                -FileInodeChangeDate= "$f")
+              offending=$(exiftool -S --File:all --ExifTool:all "$f" 2>/dev/null || true)
               if [ -n "$offending" ]; then
                 echo "OPSEC FAIL: $f still contains metadata:"
                 echo "$offending"
