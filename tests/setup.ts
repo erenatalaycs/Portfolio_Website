@@ -9,6 +9,7 @@
 //   per-test polyfill keyed on the query string.
 
 import { afterEach, vi } from 'vitest';
+import { cleanup } from '@testing-library/react';
 
 type MqlListener = (e: MediaQueryListEvent) => void;
 
@@ -72,4 +73,8 @@ afterEach(() => {
   window.history.replaceState(null, '', '/');
   // Reset matchMedia state
   mqlRegistry.clear();
+  // Unmount any React Testing Library renders so the next test starts with a
+  // clean DOM. Required because vitest.config.ts has globals: false, which
+  // disables @testing-library/react's auto-cleanup.
+  cleanup();
 });
