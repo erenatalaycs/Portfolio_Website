@@ -8,7 +8,7 @@
 ### Foundation & Hosting
 
 - [x] **FND-01**: Vite + React 19 + TypeScript + Tailwind v4 scaffold with pinned R3F / three / drei versions
-- [ ] **FND-02**: GitHub Pages deploy via GitHub Actions (`actions/deploy-pages`), `vite.config.ts` `base` set, `404.html` copy of `index.html` produced in CI
+- [x] **FND-02**: GitHub Pages deploy via GitHub Actions (`actions/deploy-pages`), `vite.config.ts` `base` set, `404.html` copy of `index.html` produced in CI
 - [x] **FND-03**: Query-param routing (`?view=text|3d&focus=…`) — no React Router in v1
 - [x] **FND-04**: Custom 404 page rendered in terminal style
 
@@ -17,7 +17,7 @@
 - [ ] **CNT-01**: Typed content layer (`src/content/*.ts`) covering projects, certifications, skills, education, experience
 - [ ] **CNT-02**: MDX write-up pipeline (`@mdx-js/rollup` + `rehype-pretty-code` + Shiki) and 2–3 CTF/lab write-ups authored during the build
 - [ ] **CNT-03**: 3–5 cyber projects published, each with provenance (every tool listed in skills has at least one project or write-up demonstrating it)
-- [ ] **CNT-04**: CV PDF in repo, EXIF/metadata stripped, downloadable from both shells
+- [x] **CNT-04**: CV PDF in repo, EXIF/metadata stripped, downloadable from both shells
 - [x] **CNT-05**: SEO basics — OG tags, JSON-LD `Person` schema, real `<title>`, meta description, favicon
 
 ### Text Shell (Recruiter Path)
@@ -115,13 +115,13 @@ Explicit exclusions. Anti-features from research are documented here so they can
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | FND-01 | Phase 1 | Complete |
-| FND-02 | Phase 1 | Pending |
+| FND-02 | Phase 1 | Complete |
 | FND-03 | Phase 1 | Pending |
 | FND-04 | Phase 1 | Complete |
 | CNT-01 | Phase 1 | Pending |
 | CNT-02 | Phase 3 | Pending |
 | CNT-03 | Phase 3 | Pending |
-| CNT-04 | Phase 1 | Pending |
+| CNT-04 | Phase 1 | Complete |
 | CNT-05 | Phase 1 | Complete |
 | TXT-01 | Phase 1 | Pending |
 | TXT-02 | Phase 1 | Pending |
