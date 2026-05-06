@@ -1,10 +1,11 @@
 ---
 phase: 2
 slug: 3d-shell-asset-pipeline-capability-gating
-status: draft
+status: approved
 shadcn_initialized: false
 preset: not applicable
 created: 2026-05-06
+reviewed_at: 2026-05-06T00:00:00Z
 extends: .planning/phases/01-foundation-2d-recruiter-grade-shell/01-UI-SPEC.md
 ---
 
