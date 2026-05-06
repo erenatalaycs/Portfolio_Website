@@ -1,17 +1,17 @@
 // src/shells/TextShell.tsx
 //
-// Phase 1 only shell. Composes: SkipToContent, StickyNav, Hero, 7 sections,
-// Footer.
+// Phase 2: shell composition unchanged except StickyNav → Header. Header
+// now renders BOTH the $ goto nav line AND the $ view [3d] [text] toggle
+// line. Camera toggle does not appear here (text shell — D-11).
 //
-// Phase 2 will add a sibling <ThreeDShell /> selected by ?view=; Phase 3
-// will wrap the same content components inside drei <Html transform occlude>
-// surfaces inside the 3D scene. The export shape (no props, named export) is
-// stable.
+// The 3D shell (Plan 04) renders the same Header with showCameraToggle and
+// cameraMode/onCameraModeChange wired up.
 //
-// Source: 01-UI-SPEC.md § Single-page long-scroll structure; 01-CONTEXT.md D-01
+// Source: 01-UI-SPEC.md § Single-page long-scroll structure (preserved);
+//         02-UI-SPEC.md § View-toggle line layout (added)
 
 import { SkipToContent } from '../ui/SkipToContent';
-import { StickyNav } from '../ui/StickyNav';
+import { Header } from '../ui/Header';
 import { Hero } from '../sections/Hero';
 import { About } from '../sections/About';
 import { Education } from '../sections/Education';
@@ -27,7 +27,7 @@ export function TextShell() {
   return (
     <>
       <SkipToContent />
-      <StickyNav />
+      <Header currentView="text" />
       <main
         id="main"
         tabIndex={-1}
