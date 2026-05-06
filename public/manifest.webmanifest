@@ -1,0 +1,22 @@
+{
+  "name": "Eren Atalay — Junior Cybersecurity Analyst",
+  "short_name": "Eren Atalay",
+  "description": "Eren Atalay — Junior Cybersecurity Analyst (UK). CV, projects, certifications, and home-lab write-ups.",
+  "start_url": "/Portfolio_Website/",
+  "scope": "/Portfolio_Website/",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "icons": [
+    {
+      "src": "/Portfolio_Website/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/Portfolio_Website/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    }
+  ]
+}

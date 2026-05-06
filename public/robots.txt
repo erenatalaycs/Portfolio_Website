@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://erenatalaycs.github.io/Portfolio_Website/sitemap.xml

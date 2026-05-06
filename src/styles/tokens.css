@@ -1,0 +1,39 @@
+/* src/styles/tokens.css
+   Source: 01-UI-SPEC.md § Color § Tailwind v4 @theme token encoding
+           01-RESEARCH.md Pattern 2 + Pattern 8 (cursor-blink keyframe) */
+
+@import "tailwindcss";
+
+@theme {
+  --color-bg:        #0d1117;
+  --color-fg:        #c9d1d9;
+  --color-accent:    #7ee787;
+  --color-warn:      #e3b341;
+  --color-negative:  #ff7b72;
+  --color-muted:     #8b949e;
+  --color-surface-1: #161b22;
+  --color-focus:     #79c0ff;
+
+  --font-mono:       'JetBrains Mono', ui-monospace, 'SF Mono', 'Menlo', 'Consolas', monospace;
+}
+
+/* The single permitted Phase 1 keyframe: hero cursor block.
+   Plan 04 attaches the `motion-safe:animate-cursor-blink` class to the cursor span.
+   prefers-reduced-motion: reduce → keyframe never plays (Tailwind motion-safe gate). */
+@keyframes cursor-blink {
+  0%, 49.9% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@theme {
+  --animate-cursor-blink: cursor-blink 1s steps(2, end) infinite;
+}
+
+/* Native smooth scroll, gated by reduced-motion via Tailwind's motion-safe variant on <html>.
+   The class `motion-safe:scroll-smooth` is applied in index.html. */
+
+/* Accessible :focus-visible default (Plan 04's components override per-element where needed). */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}

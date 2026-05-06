@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+public
+*.lock
+*.min.js
+
+# Planning artifacts and project docs are authored markdown — leave verbatim.
+.planning
+.claude
+CLAUDE.md
+
+# Design tokens are UI-SPEC verbatim (aligned hex values, double-quote @import) —
+# Plan 01-01 acceptance criteria grep these literally, do not let Prettier reformat.
+src/styles/tokens.css

@@ -1,0 +1,116 @@
+# .github/workflows/deploy.yml
+# Source: 01-RESEARCH.md Pattern 11; 01-CONTEXT.md D-15, D-16, D-17
+# Deploys the static Vite bundle to GitHub Pages on every push to main.
+# Action versions verified live 2026-05-06.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment; do not cancel an in-progress run.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Phase 1 CI gates — all blocking, all run BEFORE build (D-16).
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit
+
+      - name: ESLint (warnings are errors)
+        run: npx eslint . --max-warnings=0
+
+      - name: Prettier check
+        run: npx prettier --check .
+
+      # Phase 1 test surface (Plan 03's lib tests). Empty until Plan 03 lands;
+      # vitest run on no test files exits 0, so this is safe in Wave 2.
+      - name: Vitest (utility tests)
+        run: npm test
+
+      # OPSEC gate (D-17 / OPS-01) — strip + verify metadata in public/assets/.
+      - name: Install exiftool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libimage-exiftool-perl
+
+      - name: Strip metadata from public/assets
+        run: |
+          # If public/assets/ does not exist yet (Plan 02 ships before Plan 05's
+          # CV PDF and Plan 06's og-image.png) the loop is a no-op. Once those
+          # plans land the strip becomes meaningful. Build does not fail on an
+          # empty directory.
+          if [ -d public/assets ] && [ "$(ls -A public/assets 2>/dev/null)" ]; then
+            exiftool -all= -P -overwrite_original public/assets/*
+          else
+            echo "public/assets/ is empty or absent — strip step skipped (will activate once content lands)."
+          fi
+
+      - name: Verify no metadata remains (fail build if any present)
+        run: |
+          # Allowed system tags only. Anything else (Author/GPS*/CreatorTool/Software/etc.) fails.
+          if [ -d public/assets ] && [ "$(ls -A public/assets 2>/dev/null)" ]; then
+            for f in public/assets/*; do
+              [ -f "$f" ] || continue
+              offending=$(exiftool -S \
+                -ExifToolVersion= -FileSize= -FileType= \
+                -FileTypeExtension= -MIMEType= -Directory= -FileName= \
+                -FilePermissions= -FileModifyDate= -FileAccessDate= \
+                -FileInodeChangeDate= "$f")
+              if [ -n "$offending" ]; then
+                echo "OPSEC FAIL: $f still contains metadata:"
+                echo "$offending"
+                exit 1
+              fi
+            done
+          else
+            echo "public/assets/ is empty or absent — verify step has nothing to check."
+          fi
+
+      - name: Build (Vite)
+        run: npm run build
+
+      - name: Copy index.html → 404.html (SPA fallback for GH Pages deep links)
+        run: cp dist/index.html dist/404.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

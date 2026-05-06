@@ -1,0 +1,19 @@
+node_modules
+dist
+coverage
+.DS_Store
+.env
+.env.local
+.env.*.local
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.vite
+
+# Claude Code local-only config (do not commit per-user settings)
+.claude/
