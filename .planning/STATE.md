@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
+status: verifying
 stopped_at: Plan 02-04 (3D Shell + procedural Workstation) complete
-last_updated: "2026-05-06T19:09:02.456Z"
+last_updated: "2026-05-06T19:20:36.808Z"
 last_activity: 2026-05-06
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 12
-  completed_plans: 11
-  percent: 92
+  completed_plans: 12
+  percent: 100
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 
 Phase: 02 (3D Shell + Asset Pipeline + Capability Gating) — EXECUTING
 Plan: 5 of 5 (Plans 01 + 02 complete; Plan 03 next)
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-06
 
-Progress: [█████████░] 92%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [█████████░] 92%
 | Phase 02 P02 | 5min | 2 tasks | 5 files |
 | Phase 02 P03 | 6min | 3 tasks | 10 files |
 | Phase 02 P04 | 8min | 2 tasks | 10 files |
+| Phase 02 P05 | 6min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,11 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 02]: Plan 02-04: lamp shade uses side={2} (numeric THREE.DoubleSide) instead of importing DoubleSide from three — keeps scene/* free of direct three.js imports
 - [Phase ?]: [Phase 02]: Plan 02-04: webglcontextlost handler does NOT register webglcontextrestored — D-14 always full-reload via [retry 3D]
 - [Phase ?]: [Phase 02]: Plan 02-04: bundle metrics — entry 65.4 KB gz, 3D chunk 236.7 KB gz; lazy-load contract verified (R3F absent from index-*.js)
+- [Phase ?]: Plan 02-05: replaced ignore: ['all'] with 48 B placeholder GLB — file plugin doesn't support ignore option
+- [Phase ?]: Plan 02-05: GLB entry uses gzip:false + brotli:false (Draco binary-compressed; raw on-disk size is the correct metric)
+- [Phase ?]: Plan 02-05: bundle metrics frozen — text shell 65.3 KB gz/120 KB (54%), 3D chunk 236.7 KB gz/450 KB (53%); CI gate exit-fails between Build and 404 copy
+- [Phase ?]: Plan 02-05: size:why script registered but errors (webpack-only); kept for future use
+- [Phase ?]: Phase 2 complete: 5/5 plans landed; 12/12 cross-phase plans done
 
 ### Pending Todos
 
@@ -127,6 +133,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-06T19:09:02.450Z
+Last session: 2026-05-06T19:20:11.101Z
 Stopped at: Plan 02-04 (3D Shell + procedural Workstation) complete
-Resume file: .planning/phases/02-3d-shell-asset-pipeline-capability-gating/02-05-PLAN.md
+Resume file: None

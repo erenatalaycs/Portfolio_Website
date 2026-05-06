@@ -50,7 +50,7 @@
 ### OPSEC & Polish
 
 - [x] **OPS-01**: Asset OPSEC pipeline — `exiftool -all=` strip step + manual full-resolution review of every screenshot; no IPs, hostnames, paths, employer info, or live CTF flags published
-- [ ] **OPS-02**: `size-limit` budgets enforced in CI — text shell <120 KB gz, 3D chunk <450 KB gz, GLB <2.5 MB
+- [x] **OPS-02**: `size-limit` budgets enforced in CI — text shell <120 KB gz, 3D chunk <450 KB gz, GLB <2.5 MB
 - [ ] **OPS-03**: Lighthouse on text shell — Performance ≥80, Accessibility ≥90, Best Practices ≥90, SEO ≥90
 - [ ] **OPS-04**: Real-device QA pass on iOS (one mid-tier model) and Android (3–4 GB RAM tier) before launch
 - [ ] **OPS-05**: Pre-launch checklist executed (≈25 items: redirects, OG image, favicon, console errors, Lighthouse, dev-helper strip via `import.meta.env.DEV`, `npm audit` clean, external links `rel="noopener noreferrer"`, etc.)
@@ -142,7 +142,7 @@ Explicit exclusions. Anti-features from research are documented here so they can
 | CTC-02 | Phase 1 | Pending |
 | CTC-03 | Phase 4 | Pending |
 | OPS-01 | Phase 1 | Complete |
-| OPS-02 | Phase 2 | Pending |
+| OPS-02 | Phase 2 | Complete |
 | OPS-03 | Phase 4 | Pending |
 | OPS-04 | Phase 4 | Pending |
 | OPS-05 | Phase 4 | Pending |
