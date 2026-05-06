@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 02 Plan 01 complete
-last_updated: "2026-05-06T19:26:00.000Z"
-last_activity: 2026-05-06 -- Plan 02-01 (3D dep bootstrap + scene token mirror) complete
+stopped_at: Phase 02 Plan 02 complete
+last_updated: "2026-05-06T19:38:00.000Z"
+last_activity: 2026-05-06 -- Plan 02-02 (capability detection + lazy ThreeDShell wiring) complete
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 12
-  completed_plans: 8
-  percent: 67
+  completed_plans: 9
+  percent: 75
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 ## Current Position
 
 Phase: 02 (3D Shell + Asset Pipeline + Capability Gating) — EXECUTING
-Plan: 2 of 5 (Plan 01 complete; Plan 02 next)
+Plan: 3 of 5 (Plans 01 + 02 complete; Plan 03 next)
 Status: Executing Phase 02
-Last activity: 2026-05-06 -- Plan 02-01 (3D dep bootstrap + scene token mirror) complete
+Last activity: 2026-05-06 -- Plan 02-02 (capability detection + lazy ThreeDShell wiring) complete
 
-Progress: [████░░░░░░] 20% of Phase 02 (1/5 plans)
+Progress: [████████░░] 40% of Phase 02 (2/5 plans)
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [████░░░░░░] 20% of Phase 02 (1/5 plans)
 | Phase 01 P03 | 7min | 2 tasks | 11 files |
 | Phase 01 P06 | 15min | 2 tasks | 7 files |
 | Phase 02 P01 | 3min | 3 tasks | 5 files |
+| Phase 02 P02 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,10 @@ Recent decisions affecting current work:
 - [Phase 2]: Plan 02-01: surface ↔ surface-1 asymmetry encoded in colors.test.ts it.each table (CSS uses --color-surface-1 numeric suffix; SCENE_COLORS exposes terser .surface key)
 - [Phase 2]: Plan 02-01: vite.config.ts uses hyphenated "manual-chunks" prose in inline anti-pattern guard so the acceptance grep gate `! grep -F "manualChunks"` does not false-positive on the warning copy itself
 - [Phase 2]: Plan 02-01: npm pinned three with caret on first install; corrected to tilde manually before first commit (Pitfall 16 carries from Phase 1)
+- [Phase 2]: Plan 02-02: detectCapability test for iPhone UA must explicitly set platform='iPhone' — beforeEach restores platform='MacIntel' which would false-trigger isIpad's iPadOS-13+ branch (MacIntel + maxTouchPoints>1)
+- [Phase 2]: Plan 02-02: ThreeDShell placeholder uses `void props.onContextLost` instead of `_props` underscore prefix — project's tseslint config does not auto-allow `^_` argsIgnorePattern; void-reference satisfies linter without inline disable
+- [Plan 02-02]: detectCapability.ts comment reworded "no localStorage cache" → "no client-side caching layer" so the file's own acceptance gate `! grep -F localStorage` does not false-positive (same pattern as Plan 02-01's manual-chunks resolution)
+- [Plan 02-02]: ThreeDShell.tsx + ContextLossBar.tsx ship as PLACEHOLDER stubs with locked export shapes (default ThreeDShell + named ContextLossBar) — Plans 03 + 04 OVERWRITE wholesale, do not append
 
 ### Pending Todos
 
@@ -112,6 +117,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-06T19:26:00.000Z
-Stopped at: Plan 02-01 complete (3D dep bootstrap + scene token mirror)
-Resume file: .planning/phases/02-3d-shell-asset-pipeline-capability-gating/02-02-PLAN.md
+Last session: 2026-05-06T19:38:00.000Z
+Stopped at: Plan 02-02 complete (capability detection + lazy ThreeDShell wiring)
+Resume file: .planning/phases/02-3d-shell-asset-pipeline-capability-gating/02-03-PLAN.md
