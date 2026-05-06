@@ -1290,30 +1290,19 @@ If this table is empty: not applicable — six assumptions surfaced. None are lo
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **`<ThreeDShell>` chunk name verification** — Will Vite/Rollup name the lazy chunk `dist/assets/ThreeDShell-[hash].js`?
-   - What we know: Vite's default `chunkFileNames: 'assets/[name]-[hash].js'` and the import path `import('../shells/ThreeDShell')` together imply yes. Verified pattern in published Vite + React-lazy demos.
-   - What's unclear: edge-case where Vite picks a numeric chunk ID instead.
-   - Recommendation: Plan 02-N adds explicit `chunkFileNames` to `vite.config.ts` (Pattern 9 Option A) AND verifies via `ls dist/assets/` after first build. Belt-and-braces.
+   - **RESOLVED:** Plan 02-01 adds explicit `chunkFileNames: 'assets/[name]-[hash].js'` to `vite.config.ts`. Plan 02-04 acceptance criteria verify via `ls dist/assets/ThreeDShell-*.js`. Belt-and-braces — config + post-build grep.
 
 2. **WebGL2 context creation cost in jsdom** — Does the unit test for `detectCapability()` need a WebGL2 mock?
-   - What we know: jsdom does NOT implement WebGL — `canvas.getContext('webgl2')` returns `null`. So in jsdom, `hasWebGL2()` always returns `false`.
-   - What's unclear: do we want unit tests to assert "this device passes" against a synthesized WebGL2 mock, or accept that the dimension is unobservable in jsdom and assert only the OTHER 4 dimensions?
-   - Recommendation: write `detectCapability.test.ts` with three test groups:
-     1. Tests where `hasWebGL2` is mocked to return `true` — assert other dimensions.
-     2. Tests with no mock — assert `reasons.includes('no-webgl2')` (validates that the WebGL2 check fires when context creation fails).
-     3. Tests for `isIpad`, `isAndroidTablet`, `isPhone` as standalone exports — pure UA logic, no WebGL needed.
+   - **RESOLVED:** Use the three-test-group pattern documented below. Plan 02-02 `detectCapability.test.ts` follows it: (1) mock `hasWebGL2` to true and assert other dimensions; (2) no mock + assert `reasons.includes('no-webgl2')`; (3) `isIpad`, `isAndroidTablet`, `isPhone` as standalone exports tested with pure UA logic.
 
 3. **Touch behaviour on mobile after `?view=3d` bypass** — Does drei's pinch-zoom collide with browser-zoom?
-   - What we know: UI-SPEC sets `touch-action: pan-y` on the canvas — this gives browser priority for vertical pans (so page scroll wins). Pinch is undefined behaviour with `pan-y` alone.
-   - What's unclear: actual behaviour on iOS Safari + Android Chrome.
-   - Recommendation: Phase 2 ships the `pan-y` setting and acknowledges this is verified in Phase 4 OPS-04 real-device QA (D-15 defers iOS memory-pressure to Phase 4; mobile gesture quirks are in the same bucket). Phase 2 acceptance is "the code path exists and works in DevTools mobile emulation."
+   - **RESOLVED:** Phase 2 ships `touch-action: pan-y` on the canvas (UI-SPEC). Mobile gesture quirks are deferred to Phase 4 OPS-04 real-device QA (D-15 batches iOS memory-pressure + mobile gestures together). Phase 2 acceptance: code path exists + works in DevTools mobile emulation.
 
-4. **Bookshelf "books" detail level** — UI-SPEC + D-Claude's-discretion leaves this open.
-   - What we know: bare shelves are minimal-effort and acceptable. Box-stack books add ~30-90 mesh instances.
-   - What's unclear: does adding box-books push the 3D chunk over budget?
-   - Recommendation: planner ships bare shelves first (cheapest). If size-limit shows headroom, add minimal book stack (5 boxes per shelf × 4 shelves = 20 meshes — negligible). Either is correct for Phase 2; Phase 4 GLB replaces both options.
+4. **Bookshelf "books" detail level** — UI-SPEC + Claude's-discretion leaves this open.
+   - **RESOLVED:** Bare shelves chosen (cheapest). Plan 02-04 ships 4 horizontal shelf planes + 2 vertical sides = 6 box meshes. No procedural book stacks. Phase 4 GLB replaces this entirely.
 
 ---
 
