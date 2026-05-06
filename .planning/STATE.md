@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Phase 2 context gathered
-last_updated: "2026-05-06T16:49:57.112Z"
-last_activity: 2026-05-06
+status: executing
+stopped_at: Phase 02 Plan 01 complete
+last_updated: "2026-05-06T19:26:00.000Z"
+last_activity: 2026-05-06 -- Plan 02-01 (3D dep bootstrap + scene token mirror) complete
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+  total_plans: 12
+  completed_plans: 8
+  percent: 67
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-06)
 
 **Core value:** Make a cyber recruiter or hiring manager think *"this person actually gets this field"* within seconds — without forcing recruiters to wait for a 3D scene before they can find the CV and contact details.
-**Current focus:** Phase 01 — Foundation + 2D Recruiter-Grade Shell
+**Current focus:** Phase 02 — 3D Shell + Asset Pipeline + Capability Gating
 
 ## Current Position
 
-Phase: 01 (Foundation + 2D Recruiter-Grade Shell) — EXECUTING
-Plan: 7 of 7
-Status: Phase complete — ready for verification
-Last activity: 2026-05-06
+Phase: 02 (3D Shell + Asset Pipeline + Capability Gating) — EXECUTING
+Plan: 2 of 5 (Plan 01 complete; Plan 02 next)
+Status: Executing Phase 02
+Last activity: 2026-05-06 -- Plan 02-01 (3D dep bootstrap + scene token mirror) complete
 
-Progress: [██████████] 100%
+Progress: [████░░░░░░] 20% of Phase 02 (1/5 plans)
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [██████████] 100%
 | Phase 01 P01 | 7min | 2 tasks | 14 files |
 | Phase 01 P03 | 7min | 2 tasks | 11 files |
 | Phase 01 P06 | 15min | 2 tasks | 7 files |
+| Phase 02 P01 | 3min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,10 @@ Recent decisions affecting current work:
 - [Phase ?]: Plan 01-06: og-image.png is a 1200x630 placeholder; Plan 07 OPSEC swaps in real terminal screenshot before live deploy
 - [Phase ?]: Plan 01-06: visual smoke test (Task 3) deferred to Plan 07 pre-launch checklist (same pattern as Plans 02 + 05)
 - [Phase ?]: Plan 01-06: baseline CSP via meta http-equiv permissive (style-src unsafe-inline for Tailwind v4); Phase 4 tightens with hashes/nonces
+- [Phase 2]: Plan 02-01: SCENE_COLORS mirrors only 4 of 8 Phase 1 palette tokens (bg/surface/accent/warn) — fg/muted/negative/focus stay DOM-only per UI-SPEC mapping; mirror grows when an in-canvas use lands
+- [Phase 2]: Plan 02-01: surface ↔ surface-1 asymmetry encoded in colors.test.ts it.each table (CSS uses --color-surface-1 numeric suffix; SCENE_COLORS exposes terser .surface key)
+- [Phase 2]: Plan 02-01: vite.config.ts uses hyphenated "manual-chunks" prose in inline anti-pattern guard so the acceptance grep gate `! grep -F "manualChunks"` does not false-positive on the warning copy itself
+- [Phase 2]: Plan 02-01: npm pinned three with caret on first install; corrected to tilde manually before first commit (Pitfall 16 carries from Phase 1)
 
 ### Pending Todos
 
@@ -107,6 +112,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-06T16:49:57.102Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-3d-shell-asset-pipeline-capability-gating/02-CONTEXT.md
+Last session: 2026-05-06T19:26:00.000Z
+Stopped at: Plan 02-01 complete (3D dep bootstrap + scene token mirror)
+Resume file: .planning/phases/02-3d-shell-asset-pipeline-capability-gating/02-02-PLAN.md
