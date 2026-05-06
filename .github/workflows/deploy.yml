@@ -71,16 +71,30 @@ jobs:
 
       - name: Verify no metadata remains (fail build if any present)
         run: |
-          # List all tags EXCEPT the File:* and ExifTool:* groups (filesystem
-          # metadata + tool version are inherent and cannot be stripped).
-          # Anything else (EXIF/XMP/IPTC/PDF Author/GPS*/CreatorTool/Software)
-          # is offending and fails the build.
+          # Targeted OPSEC blocklist. Inherent file-format tags (PDFVersion,
+          # PageCount, ImageWidth, etc.) are NOT in scope — they're structural,
+          # not user-attributable. We fail only on real OPSEC threats:
+          #   Author/Creator/Producer (PDF/Office docs identify the author)
+          #   Title/Subject/Keywords  (often filled by the authoring app with leaked context)
+          #   CreationDate/ModDate    (timeline correlation)
+          #   DocumentID/InstanceID   (XMP IDs link documents across uploads)
+          #   CreatorTool/Software    (which application produced this)
+          #   GPS*                    (location)
+          #   ICC_Profile / EXIF / IPTC / XMP — entire groups (camera, location,
+          #     descriptive metadata) — these never need to ship for a CV PDF or
+          #     a portfolio screenshot.
           if [ -d public/assets ] && [ "$(ls -A public/assets 2>/dev/null)" ]; then
             for f in public/assets/*; do
               [ -f "$f" ] || continue
-              offending=$(exiftool -S --File:all --ExifTool:all "$f" 2>/dev/null || true)
+              offending=$(exiftool -S \
+                -Author -Creator -Producer -Title -Subject -Keywords \
+                -CreationDate -ModDate -DocumentID -InstanceID \
+                -CreatorTool -Software \
+                -GPSLatitude -GPSLongitude -GPSPosition -GPSAltitude \
+                -EXIF:all -XMP:all -IPTC:all -ICC_Profile:all \
+                "$f" 2>/dev/null || true)
               if [ -n "$offending" ]; then
-                echo "OPSEC FAIL: $f still contains metadata:"
+                echo "OPSEC FAIL: $f still contains user-attributable metadata:"
                 echo "$offending"
                 exit 1
               fi
