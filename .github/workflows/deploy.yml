@@ -106,6 +106,16 @@ jobs:
       - name: Build (Vite)
         run: npm run build
 
+      # Phase 2 OPS-02: enforce three byte budgets via size-limit.
+      # The config lives in package.json's "size-limit" field. This step
+      # exit-fails if any non-ignored entry exceeds its limit:
+      #   text shell entry: 120 KB gz
+      #   3D lazy chunk:    450 KB gz
+      #   GLB workstation:  2500 KB raw (48 B placeholder until Phase 4)
+      # Source: 02-RESEARCH.md Pattern 9 (size-limit Configuration)
+      - name: Enforce bundle size budgets
+        run: npx size-limit
+
       - name: Copy index.html → 404.html (SPA fallback for GH Pages deep links)
         run: cp dist/index.html dist/404.html
 
