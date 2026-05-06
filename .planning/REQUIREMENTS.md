@@ -34,7 +34,7 @@
 - [x] **3D-01**: `<ThreeDShell />` lazy-loaded via `React.lazy`, Suspense fallback shows text-shell skeleton
 - [x] **3D-02**: `detectCapability()` synchronous check — mobile UA / `deviceMemory<4` / `hardwareConcurrency≤4` / no-WebGL2 / `prefers-reduced-motion: reduce` all default to text shell; `?view=3d` overrides
 - [x] **3D-03**: View-toggle DOM overlay always visible (sibling of `<Canvas>`)
-- [ ] **3D-04**: Composed scene — `<Desk />`, `<Monitor />` ×3, `<Lamp />`, `<Bookshelf />` — using procedural primitives in Week 2 and a Draco-compressed GLB (≤2 MB) in Week 4
+- [x] **3D-04**: Composed scene — `<Desk />`, `<Monitor />` ×3, `<Lamp />`, `<Bookshelf />` — using procedural primitives in Week 2 and a Draco-compressed GLB (≤2 MB) in Week 4
 - [ ] **3D-05**: drei `<Html transform occlude="blending">` on each monitor renders the same `src/ui/*` components used by the text shell — single source of truth
 - [ ] **3D-06**: Free-look + click navigation — clamped `OrbitControls` for drag-to-look, click monitor → GSAP camera-focus animation
 - [ ] **3D-07**: Animated `whoami` terminal greeting on the main monitor (constrained, not a fake REPL); skips to final state when `prefers-reduced-motion` is set
@@ -132,7 +132,7 @@ Explicit exclusions. Anti-features from research are documented here so they can
 | 3D-01 | Phase 2 | Complete |
 | 3D-02 | Phase 2 | Complete |
 | 3D-03 | Phase 2 | Complete |
-| 3D-04 | Phase 2 | Pending |
+| 3D-04 | Phase 2 | Complete |
 | 3D-05 | Phase 3 | Pending |
 | 3D-06 | Phase 3 | Pending |
 | 3D-07 | Phase 3 | Pending |

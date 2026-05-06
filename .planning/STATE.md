@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Plan 02-03 (BracketLink + Header + Toggles + ContextLossBar) complete
-last_updated: "2026-05-06T18:54:56.388Z"
+stopped_at: Plan 02-04 (3D Shell + procedural Workstation) complete
+last_updated: "2026-05-06T19:09:02.456Z"
 last_activity: 2026-05-06
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 12
-  completed_plans: 10
-  percent: 83
+  completed_plans: 11
+  percent: 92
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 ## Current Position
 
 Phase: 02 (3D Shell + Asset Pipeline + Capability Gating) — EXECUTING
-Plan: 4 of 5 (Plans 01 + 02 complete; Plan 03 next)
+Plan: 5 of 5 (Plans 01 + 02 complete; Plan 03 next)
 Status: Ready to execute
 Last activity: 2026-05-06
 
-Progress: [████████░░] 83%
+Progress: [█████████░] 92%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [████████░░] 83%
 | Phase 02 P01 | 3min | 3 tasks | 5 files |
 | Phase 02 P02 | 5min | 2 tasks | 5 files |
 | Phase 02 P03 | 6min | 3 tasks | 10 files |
+| Phase 02 P04 | 8min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,10 @@ Recent decisions affecting current work:
 - [Phase 02]: Plan 02-03: tests/setup.ts gained afterEach(cleanup) hook — required because vitest globals: false disables RTL auto-cleanup; benefits all future component tests
 - [Phase 02]: Plan 02-03: StickyNav kept as @deprecated thin re-export delegating to Header — preserves grep target for Plan 07 OPSEC sweep, conservative diff
 - [Phase 02]: Plan 02-03: ContextLossBar [retry 3D] uses window.location.pathname + '?view=3d' — RESEARCH Pitfall 4 mitigation, preserves /Portfolio_Website/ base prefix
+- [Phase ?]: [Phase 02]: Plan 02-04: index.html body classes added (Rule 3 deviation) — UI-SPEC body contract was missing in Phase 1; required for 3D shell main flexbox sizing
+- [Phase ?]: [Phase 02]: Plan 02-04: lamp shade uses side={2} (numeric THREE.DoubleSide) instead of importing DoubleSide from three — keeps scene/* free of direct three.js imports
+- [Phase ?]: [Phase 02]: Plan 02-04: webglcontextlost handler does NOT register webglcontextrestored — D-14 always full-reload via [retry 3D]
+- [Phase ?]: [Phase 02]: Plan 02-04: bundle metrics — entry 65.4 KB gz, 3D chunk 236.7 KB gz; lazy-load contract verified (R3F absent from index-*.js)
 
 ### Pending Todos
 
@@ -122,6 +127,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-06T18:54:56.384Z
-Stopped at: Plan 02-03 (BracketLink + Header + Toggles + ContextLossBar) complete
-Resume file: .planning/phases/02-3d-shell-asset-pipeline-capability-gating/02-04-PLAN.md
+Last session: 2026-05-06T19:09:02.450Z
+Stopped at: Plan 02-04 (3D Shell + procedural Workstation) complete
+Resume file: .planning/phases/02-3d-shell-asset-pipeline-capability-gating/02-05-PLAN.md
