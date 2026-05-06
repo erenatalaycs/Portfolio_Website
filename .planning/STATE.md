@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 02 Plan 02 complete
-last_updated: "2026-05-06T19:38:00.000Z"
-last_activity: 2026-05-06 -- Plan 02-02 (capability detection + lazy ThreeDShell wiring) complete
+stopped_at: Plan 02-03 (BracketLink + Header + Toggles + ContextLossBar) complete
+last_updated: "2026-05-06T18:54:56.388Z"
+last_activity: 2026-05-06
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 12
-  completed_plans: 9
-  percent: 75
+  completed_plans: 10
+  percent: 83
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 ## Current Position
 
 Phase: 02 (3D Shell + Asset Pipeline + Capability Gating) — EXECUTING
-Plan: 3 of 5 (Plans 01 + 02 complete; Plan 03 next)
-Status: Executing Phase 02
-Last activity: 2026-05-06 -- Plan 02-02 (capability detection + lazy ThreeDShell wiring) complete
+Plan: 4 of 5 (Plans 01 + 02 complete; Plan 03 next)
+Status: Ready to execute
+Last activity: 2026-05-06
 
-Progress: [████████░░] 40% of Phase 02 (2/5 plans)
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Progress: [████████░░] 40% of Phase 02 (2/5 plans)
 | Phase 01 P06 | 15min | 2 tasks | 7 files |
 | Phase 02 P01 | 3min | 3 tasks | 5 files |
 | Phase 02 P02 | 5min | 2 tasks | 5 files |
+| Phase 02 P03 | 6min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,10 @@ Recent decisions affecting current work:
 - [Phase 2]: Plan 02-02: ThreeDShell placeholder uses `void props.onContextLost` instead of `_props` underscore prefix — project's tseslint config does not auto-allow `^_` argsIgnorePattern; void-reference satisfies linter without inline disable
 - [Plan 02-02]: detectCapability.ts comment reworded "no localStorage cache" → "no client-side caching layer" so the file's own acceptance gate `! grep -F localStorage` does not false-positive (same pattern as Plan 02-01's manual-chunks resolution)
 - [Plan 02-02]: ThreeDShell.tsx + ContextLossBar.tsx ship as PLACEHOLDER stubs with locked export shapes (default ThreeDShell + named ContextLossBar) — Plans 03 + 04 OVERWRITE wholesale, do not append
+- [Phase 02]: Plan 02-03: BracketLink discriminated-union props (anchor | button) — additive, type-safe, Phase 1 anchor call sites unchanged
+- [Phase 02]: Plan 02-03: tests/setup.ts gained afterEach(cleanup) hook — required because vitest globals: false disables RTL auto-cleanup; benefits all future component tests
+- [Phase 02]: Plan 02-03: StickyNav kept as @deprecated thin re-export delegating to Header — preserves grep target for Plan 07 OPSEC sweep, conservative diff
+- [Phase 02]: Plan 02-03: ContextLossBar [retry 3D] uses window.location.pathname + '?view=3d' — RESEARCH Pitfall 4 mitigation, preserves /Portfolio_Website/ base prefix
 
 ### Pending Todos
 
@@ -117,6 +122,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-06T19:38:00.000Z
-Stopped at: Plan 02-02 complete (capability detection + lazy ThreeDShell wiring)
-Resume file: .planning/phases/02-3d-shell-asset-pipeline-capability-gating/02-03-PLAN.md
+Last session: 2026-05-06T18:54:56.384Z
+Stopped at: Plan 02-03 (BracketLink + Header + Toggles + ContextLossBar) complete
+Resume file: .planning/phases/02-3d-shell-asset-pipeline-capability-gating/02-04-PLAN.md

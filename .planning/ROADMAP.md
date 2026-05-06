@@ -60,10 +60,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Triggering a `webglcontextlost` event (via DevTools or real iOS Safari memory pressure) cleanly swaps the user to the text shell — no blank screen, no console crash, no half-restored scene.
   5. CI enforces `size-limit` budgets — text-shell initial JS <120 KB gz, 3D lazy chunk <450 KB gz, GLB <2.5 MB — and the build fails if any budget is exceeded.
 
-**Plans:** 5 plans
+**Plans:** 3/5 plans executed
 - [x] 02-01-PLAN.md — Bootstrap R3F/drei/three deps, scene/colors.ts token mirror, vite.config chunkFileNames (no manualChunks) ✓ 2026-05-06
 - [x] 02-02-PLAN.md — Capability detection (5 checks + tablet pass-through) + App.tsx React.lazy + Suspense + contextLost state lift ✓ 2026-05-06
-- [ ] 02-03-PLAN.md — BracketLink as/active props, shared Header, ViewToggle, CameraToggle, ContextLossBar full UI-SPEC implementation
+- [x] 02-03-PLAN.md — BracketLink as/active props, shared Header, ViewToggle, CameraToggle, ContextLossBar full UI-SPEC implementation
 - [ ] 02-04-PLAN.md — ThreeDShell + procedural Workstation (Desk, 3 Monitors, Lamp, Bookshelf, Floor) + Lighting + OrbitControls + webglcontextlost listener
 - [ ] 02-05-PLAN.md — size-limit budgets in package.json + CI gate in deploy.yml (text <120 KB gz, 3D <450 KB gz, GLB <2.5 MB ignored until Phase 4)
 
@@ -117,7 +117,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 (decimal phases inserted as
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation + 2D Recruiter-Grade Shell | 2/7 | In Progress | - |
-| 2. 3D Shell + Asset Pipeline + Capability Gating | 2/5 | In Progress | - |
+| 2. 3D Shell + Asset Pipeline + Capability Gating | 3/5 | In Progress|  |
 | 3. Content Integration + MDX Write-ups + Camera Choreography | 0/TBD | Not started | - |
 | 4. Real Asset, Postprocessing, Polish, Pre-Launch QA | 0/TBD | Not started | - |
 
