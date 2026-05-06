@@ -18,7 +18,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "encode-email": "node scripts/encode-email.mjs"
+    "encode-email": "node scripts/encode-email.mjs",
+    "size": "size-limit",
+    "size:why": "size-limit --why"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "~5.2.8",
@@ -53,5 +55,26 @@
     "typescript-eslint": "~8.59.2",
     "vite": "~8.0.10",
     "vitest": "~3.2.4"
-  }
+  },
+  "size-limit": [
+    {
+      "name": "text shell (initial bundle, gzipped)",
+      "path": "dist/assets/index-*.js",
+      "limit": "120 KB",
+      "gzip": true
+    },
+    {
+      "name": "3D chunk (lazy-loaded, gzipped)",
+      "path": "dist/assets/ThreeDShell-*.js",
+      "limit": "450 KB",
+      "gzip": true
+    },
+    {
+      "name": "GLB workstation model (Phase 4)",
+      "path": "public/assets/models/workstation.glb",
+      "limit": "2500 KB",
+      "gzip": false,
+      "brotli": false
+    }
+  ]
 }
