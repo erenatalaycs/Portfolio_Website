@@ -1,10 +1,11 @@
 ---
 phase: 3
 slug: content-integration-mdx-write-ups-camera-choreography
-status: draft
+status: approved
 shadcn_initialized: false
 preset: not applicable
 created: 2026-05-07
+reviewed_at: 2026-05-07T00:00:00Z
 extends:
   - .planning/phases/01-foundation-2d-recruiter-grade-shell/01-UI-SPEC.md
   - .planning/phases/02-3d-shell-asset-pipeline-capability-gating/02-UI-SPEC.md
