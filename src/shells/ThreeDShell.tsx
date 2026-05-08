@@ -3,46 +3,61 @@
 // The 3D shell: shared <Header /> (with view + camera toggles) + <main>
 // containing <Canvas> with the procedural workstation + footer.
 //
-// Camera-mode state is held HERE (D-11 — ephemeral, NOT URL, NOT cached
+// Camera-mode state held HERE (D-11 — ephemeral, NOT URL, NOT cached
 // across reloads). Re-renders when toggled; <Controls> reads the prop and
-// swaps clamps without remounting (RESEARCH Pattern 4 — prop-swap not
-// key-swap).
+// swaps clamps without remounting.
 //
-// webglcontextlost listener registered in <Canvas onCreated>. On fire:
-// event.preventDefault() (allows browser to attempt restoration later) +
-// call props.onContextLost() so App.tsx can lift to TextShell + show the
-// ContextLossBar (D-13).
+// Phase 3 additions (Plan 03-03):
+//   - focused: FocusId | null state (URL ↔ state sync via FocusController)
+//   - controlsRef: forwarded to <Controls> so <FocusController> mutates
+//     OrbitControls.enabled + .target directly (Pattern 4)
+//   - onFocusToggle: handler called by <Monitor> screen-plane onClick
+//     (re-click on focused monitor → defocus; otherwise → focus that id)
+//   - <Canvas onPointerMissed>: outside-click defocus (D-10 #2)
+//   - Expanded canvas aria-label (UI-SPEC § ARIA contract Phase 3)
+//   - <FocusController> mounted inside <Canvas> (uses useThree)
 //
-// Source: 02-UI-SPEC.md § 3D shell DOM structure (3D-03); § <Canvas>
-//         configuration; 02-RESEARCH.md Pattern 3, Pattern 5;
-//         02-CONTEXT.md D-09, D-11, D-13, D-14
+// Source: 02-UI-SPEC.md § 3D shell DOM structure (3D-03);
+//         02-RESEARCH.md Pattern 3, Pattern 5;
+//         02-CONTEXT.md D-09, D-11, D-13, D-14;
+//         03-RESEARCH.md Example 2 + Pattern 5;
+//         03-UI-SPEC.md § Click-outside defocus + § ARIA contract
 
-import { useCallback, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { Header } from '../ui/Header';
 import type { CameraMode } from '../ui/CameraToggle';
 import { Workstation } from '../scene/Workstation';
 import { Lighting } from '../scene/Lighting';
 import { Controls } from '../scene/Controls';
+import { FocusController } from '../scene/FocusController';
+import type { FocusId } from '../scene/cameraPoses';
+import { setQueryParams } from '../lib/useQueryParams';
 import { BracketLink } from '../ui/BracketLink';
 import { identity } from '../content/identity';
-import type { FocusId } from '../scene/cameraPoses';
 
 interface ThreeDShellProps {
   onContextLost: () => void;
 }
 
+// FocusId → URL ?focus= value mapping (inverse of parseFocusFromUrl).
+const URL_VALUE_FOR: Record<FocusId, string> = {
+  left: 'projects',
+  center: 'about',
+  right: 'writeups',
+};
+
 export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
-  const [cameraMode, setCameraMode] = useState<CameraMode>('orbit'); // D-11 ephemeral
-  // Plan 03-02 (Wave 2) intermediate stub: ThreeDShell holds focused-monitor
-  // state locally so <Workstation> compiles. Plan 03-03 (Wave 3) replaces this
-  // with <FocusController> + GSAP timeline; the prop contract on Workstation
-  // stays identical so this swap is a localised refactor.
+  const [cameraMode, setCameraMode] = useState<CameraMode>('orbit');
   const [focused, setFocused] = useState<FocusId | null>(null);
-  const handleFocusToggle = useCallback(
-    (id: FocusId) => setFocused((current) => (current === id ? null : id)),
-    [],
-  );
+  const controlsRef = useRef<OrbitControlsImpl>(null);
+
+  const onFocusToggle = (id: FocusId) => {
+    const next: FocusId | null = focused === id ? null : id;
+    setFocused(next);
+    setQueryParams({ focus: next === null ? null : URL_VALUE_FOR[next] });
+  };
 
   return (
     <>
@@ -52,14 +67,7 @@ export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
         cameraMode={cameraMode}
         onCameraModeChange={setCameraMode}
       />
-      <main
-        id="main"
-        tabIndex={-1}
-        className="flex-1 min-h-0 relative font-mono"
-        // The 3D shell's <main> fills remaining height; flexbox parent on <body>
-        // (set globally by index.html: <body class="... flex flex-col min-h-screen">)
-        // makes the Canvas size to the viewport minus header/footer.
-      >
+      <main id="main" tabIndex={-1} className="flex-1 min-h-0 relative font-mono">
         <Canvas
           className="block w-full h-full"
           camera={{ position: [2.4, 1.4, 2.4], fov: 50, near: 0.1, far: 50 }}
@@ -68,29 +76,28 @@ export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
           shadows
           gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
           onCreated={({ gl }) => {
-            // 3D-09: webglcontextlost → App-level state → instant swap to
-            // TextShell + ContextLossBar (D-13). Browser restoration is
-            // possible via `webglcontextrestored`, but D-14 says we always
-            // do a full page reload via [retry 3D] instead, so we don't
-            // listen for restored.
             const handler = (event: Event) => {
               event.preventDefault();
               onContextLost();
             };
             gl.domElement.addEventListener('webglcontextlost', handler);
-            // ARIA per UI-SPEC.
             gl.domElement.setAttribute(
               'aria-label',
-              'Interactive 3D workstation scene. Drag to look around.',
+              'Interactive 3D workstation scene. Three monitors render projects, identity, and write-ups. Drag to look around. Click a monitor to focus, press Escape to return.',
             );
-            // touch-action: pan-y so vertical scroll passes through Canvas
-            // on touch devices (RESEARCH Pattern 10 / Pitfall 8).
             gl.domElement.style.touchAction = 'pan-y';
+          }}
+          onPointerMissed={() => {
+            if (focused !== null) {
+              setFocused(null);
+              setQueryParams({ focus: null });
+            }
           }}
         >
           <Lighting />
-          <Workstation focused={focused} onFocusToggle={handleFocusToggle} />
-          <Controls cameraMode={cameraMode} />
+          <Workstation focused={focused} onFocusToggle={onFocusToggle} />
+          <Controls cameraMode={cameraMode} ref={controlsRef} />
+          <FocusController controlsRef={controlsRef} focused={focused} setFocused={setFocused} />
         </Canvas>
       </main>
       <footer
