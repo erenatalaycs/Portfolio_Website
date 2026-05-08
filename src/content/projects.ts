@@ -4,7 +4,8 @@
 // Phase 3 expands to 3-5 with full provenance (CNT-03).
 //
 // Provenance rule: every tool/tech in skills.ts must have at least one
-// project or write-up demonstrating it. Don't list tools you haven't shipped.
+// project tagline (case-insensitive substring) or write-up frontmatter `tags:`
+// entry that mentions it. The parity script (scripts/check-parity.mjs) enforces.
 //
 // Source: 01-CONTEXT.md D-13; 01-UI-SPEC.md § Project rows;
 //   REQUIREMENTS.md "Out of Scope: Listing every tool ever opened…"
@@ -22,18 +23,27 @@ export interface Project {
 }
 
 export const projects: Project[] = [
-  // Honest in-progress stub per D-13. Eren may refine the tagline at the
-  // Plan 05 checkpoint with whatever the home-lab actually runs today.
   {
-    slug: 'home-lab',
-    tagline: 'Splunk + pfSense + Wireshark home SOC, write-up planned',
+    slug: 'wazuh-siem',
+    tagline:
+      'Wazuh SIEM + correlation rules across Microsoft 365, Azure AD, Cloudflare on Linux at PyramidLedger',
+    status: 'shipped',
+  },
+  {
+    slug: 'ai-phishing-detection',
+    tagline: 'AI-assisted phishing-detection tool — Python email-header analysis at PyramidLedger',
     status: 'in-progress',
   },
-  // This portfolio site itself — honest, in-progress, real repo URL.
+  {
+    slug: 'ai-network-threat-detection',
+    tagline:
+      'ML IDS — Python + Scikit-learn + Pandas; 90%+ F1 on CICIDS2017 detecting DDoS + PortScan',
+    status: 'shipped',
+  },
   {
     slug: 'portfolio-website',
     tagline:
-      'this site — terminal-styled portfolio with 2D recruiter shell + 3D workstation (Phase 2+)',
+      'this site — terminal-styled React + Tailwind portfolio with 2D shell + 3D R3F workstation',
     status: 'in-progress',
     href: 'https://github.com/erenatalaycs/Portfolio_Website',
   },
