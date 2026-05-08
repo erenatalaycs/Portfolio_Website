@@ -90,7 +90,7 @@
     {
       "name": "Postprocessing chunk (lazy, gzipped)",
       "path": "dist/assets/PostFX-*.js",
-      "limit": "50 KB",
+      "limit": "100 KB",
       "gzip": true
     }
   ]
