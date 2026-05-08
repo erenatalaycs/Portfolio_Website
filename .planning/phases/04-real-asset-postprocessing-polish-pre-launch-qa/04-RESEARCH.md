@@ -1628,32 +1628,17 @@ export async function submitContact(payload: ContactFormPayload): Promise<Contac
 | A9 | Lighthouse default mobile preset (Slow 4G + Moto G4 + 4× CPU) is unchanged in current Lighthouse 13.3.0 | Pattern 13 | If preset has been replaced with newer device class (e.g. "Moto G Power"), CONTEXT D-17's named preset is misnamed but still equivalent. Mitigation: doc strings, not load-bearing for the assertion thresholds. `[VERIFIED via Lighthouse throttling.md but documentation may lag the binary; verify by inspecting `lhci autorun` output line "Emulated Moto G4..."]` |
 | A10 | The composite GLB approach (4-5 separate Poly Haven models combined in code) totals ≤ 2 MB after `gltfjsx --transform` | Pattern 1 | If component models are larger than estimated, total breaches 2 MB GLB budget → size-limit fails → blocked. Mitigation: 7-day timebox in CONTEXT D-04. `[ASSUMED based on Poly Haven Metal Office Desk = 7K tris; per-prop budget assumes similar.]` |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Which Eren-handle to use across the live profile links?**
-   - What we know: identity.ts has `github` and `linkedin` URLs; CTC-03 adds TryHackMe + HackTheBox.
-   - What's unclear: Eren needs to provide actual TryHackMe and HackTheBox handles (and confirm at least one of the two platforms is active). CONTEXT D-13 fallback rules cover the missing-platform case.
-   - Recommendation: Plan 04-?? ContactForm slice asks Eren for handles at execution time; missing platform is omitted per D-13.
+1. **Which Eren-handle to use across the live profile links?** — **RESOLVED.** Plan 04-03 surfaces handles at execution time via Eren-supplied input on `identity.ts`. Missing platform omitted per CONTEXT D-13 fallback. No platform = `<LiveProfiles />` returns null entirely.
 
-2. **Which deployed URL host: `eren-atalay.github.io` or `erenatalaycs.github.io`?**
-   - What we know: CONTEXT D-17 says `eren-atalay.github.io`; current `index.html` and `public/sitemap.xml` use `erenatalaycs.github.io`.
-   - What's unclear: did Eren rename the GitHub username, or is one of these stale?
-   - Recommendation: Phase 4 plan starts by asking Eren which is the canonical username. Whichever wins must propagate to: `index.html` `<link rel="canonical">`, `<meta og:url>`, `<meta og:image>`, JSON-LD `url` and `image`, `public/sitemap.xml` `<loc>` lines, `public/robots.txt` `Sitemap:` line. Plus Lighthouse CI URLs in CONTEXT D-17.
+2. **Which deployed URL host: `eren-atalay.github.io` or `erenatalaycs.github.io`?** — **RESOLVED.** Plan 04-04 Task 1 is a `checkpoint:decision` that asks Eren which is canonical. Whichever wins propagates to `index.html` `<link rel="canonical">`, `<meta og:url>`, `<meta og:image>`, JSON-LD `url`/`image`, `public/sitemap.xml`, `public/robots.txt`, and Lighthouse CI URLs (overrides CONTEXT D-17 if Eren picks differently).
 
-3. **The Web3Forms 250/mo claim — is it still accurate in 2026?**
-   - What we know: CLAUDE.md says 250/mo. Cited widely.
-   - What's unclear: web3forms.com/pricing returned 403 to my fetch; couldn't confirm directly. Limit may have changed.
-   - Recommendation: Eren manually checks web3forms.com/pricing during Plan 04-?? execution and updates this document if the limit has changed. If lower than 250 (e.g. 100), reconsider hCaptcha integration.
+3. **The Web3Forms 250/mo claim — is it still accurate in 2026?** — **RESOLVED.** Assumed 250/mo for planning. Eren verifies live limit at Plan 04-08 Task 3 (Gmail+Outlook delivery test). If lower than expected, hCaptcha integration becomes a v1.1 follow-up (not v1.0 blocker).
 
-4. **Should the OG image be regenerated automatically on every deploy, or one-shot?**
-   - What we know: CONTEXT § Claude's Discretion says "macOS native screenshot + ImageOptim".
-   - What's unclear: if the hero copy changes (e.g. status line update), the OG image becomes stale. Manual regeneration could lag.
-   - Recommendation: one-shot for v1.0 (regenerate only when hero text changes). v1.1+ could add Playwright-based auto-regen.
+4. **Should the OG image be regenerated automatically on every deploy, or one-shot?** — **RESOLVED.** One-shot per Plan 04-08 Task 1 (`checkpoint:human-action`). Eren takes the screenshot at full resolution, runs ImageOptim, replaces `public/og-image.png`. Auto-regen via Playwright deferred to v1.1.
 
-5. **Should Lighthouse-CI be a blocking CI gate or advisory?**
-   - What we know: CONTEXT D-17 says "manual deployed-URL Lighthouse run remains the source of truth" — implying CI is advisory.
-   - What's unclear: is the planner expected to add the lhci CI job as advisory now, or defer to v1.1?
-   - Recommendation: ADD as advisory non-blocking in deploy.yml (Pattern 13) — gives Eren a build-trend artifact without gating deploys. The OPS-03 sign-off is still the manual median-of-3.
+5. **Should Lighthouse-CI be a blocking CI gate or advisory?** — **RESOLVED.** Advisory non-blocking per Plan 04-07 Task 2 (`lighthouse.yml` workflow gives a build-trend artifact). OPS-03 sign-off authoritative source is the manual deployed-URL median-of-3 in Plan 04-08 Task 2.
 
 ## Environment Availability
 
