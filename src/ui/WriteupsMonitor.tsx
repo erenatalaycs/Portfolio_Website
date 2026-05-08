@@ -1,19 +1,25 @@
 // src/ui/WriteupsMonitor.tsx
 //
-// Wave 2 placeholder. Mounts the existing text-shell <Writeups /> section
-// verbatim so the right-monitor's MonitorOverlay has SOMETHING to render
-// and the parity audit (Plan 03-07) sees `writeups` covered by a 3D
-// monitor mount.
+// OVERWRITES Plan 03-02 placeholder. Right-monitor switcher: reads
+// ?focus= via useQueryParams; when focus starts with 'writeups/',
+// renders <WriteupView slug={...} />; else <WriteupList />.
 //
-// Plan 03-05 (Wave 4) overwrites this with the real list/view switcher
-// driven by useQueryParams() — when ?focus=writeups → <WriteupList />,
-// when ?focus=writeups/<slug> → <WriteupView slug={...} />.
+// In-place mode (D-19): the right monitor's content swaps without a
+// camera animation. <FocusController> stays at 'right' regardless.
 //
 // Source: 03-UI-SPEC.md § <WriteupsMonitor> composition (D-19);
 //         03-CONTEXT.md D-19
 
-import { Writeups } from '../sections/Writeups';
+import { useQueryParams } from '../lib/useQueryParams';
+import { WriteupList } from './WriteupList';
+import { WriteupView } from './WriteupView';
 
 export function WriteupsMonitor() {
-  return <Writeups />;
+  const params = useQueryParams();
+  const focus = params.get('focus') ?? '';
+  if (focus.startsWith('writeups/')) {
+    const slug = focus.slice('writeups/'.length);
+    return <WriteupView slug={slug} />;
+  }
+  return <WriteupList />;
 }
