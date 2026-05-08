@@ -38,13 +38,14 @@ export default function App() {
   const reduced = useReducedMotion();
   const [contextLost, setContextLost] = useState(false);
 
-  // Phase 1 behaviour preserved: ?focus=projects → scroll to #projects after
-  // first paint, then clear the param so refresh doesn't re-scroll. Behaviour
-  // is text-shell-only; the 3D shell ignores ?focus= until Phase 3's click-to-
-  // focus camera animation wires it up.
+  // Phase 1 behaviour preserved for text shell; 3D shell handles its own
+  // focus via <FocusController> (Plan 03-03), so we MUST NOT clear the
+  // ?focus= param here when view === '3d' — the controller is subscribed
+  // to it.
   useEffect(() => {
     const focus = params.get('focus');
     if (!focus) return;
+    if (params.get('view') === '3d') return;
     const el = document.getElementById(focus);
     if (!el) return;
     el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
