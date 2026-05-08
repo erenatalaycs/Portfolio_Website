@@ -37,3 +37,16 @@
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
+
+@layer components {
+  /* rehype-pretty-code highlighted lines (Phase 3 Plan 03-01).
+     UI-SPEC § <CodeBlock> color contract: bg-surface-1 alt-surface,
+     full-width across the code area. The negative margin compensates
+     for the px-4 (16px) padding the <CodeBlock> chrome adds (Plan 05). */
+  pre [data-highlighted-line] {
+    background-color: var(--color-surface-1);
+    display: block;
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+}
