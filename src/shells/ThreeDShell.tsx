@@ -17,7 +17,7 @@
 //         configuration; 02-RESEARCH.md Pattern 3, Pattern 5;
 //         02-CONTEXT.md D-09, D-11, D-13, D-14
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Header } from '../ui/Header';
 import type { CameraMode } from '../ui/CameraToggle';
@@ -26,6 +26,7 @@ import { Lighting } from '../scene/Lighting';
 import { Controls } from '../scene/Controls';
 import { BracketLink } from '../ui/BracketLink';
 import { identity } from '../content/identity';
+import type { FocusId } from '../scene/cameraPoses';
 
 interface ThreeDShellProps {
   onContextLost: () => void;
@@ -33,6 +34,15 @@ interface ThreeDShellProps {
 
 export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
   const [cameraMode, setCameraMode] = useState<CameraMode>('orbit'); // D-11 ephemeral
+  // Plan 03-02 (Wave 2) intermediate stub: ThreeDShell holds focused-monitor
+  // state locally so <Workstation> compiles. Plan 03-03 (Wave 3) replaces this
+  // with <FocusController> + GSAP timeline; the prop contract on Workstation
+  // stays identical so this swap is a localised refactor.
+  const [focused, setFocused] = useState<FocusId | null>(null);
+  const handleFocusToggle = useCallback(
+    (id: FocusId) => setFocused((current) => (current === id ? null : id)),
+    [],
+  );
 
   return (
     <>
@@ -79,7 +89,7 @@ export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
           }}
         >
           <Lighting />
-          <Workstation />
+          <Workstation focused={focused} onFocusToggle={handleFocusToggle} />
           <Controls cameraMode={cameraMode} />
         </Canvas>
       </main>
