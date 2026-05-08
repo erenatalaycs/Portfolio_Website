@@ -90,7 +90,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 03-01-PLAN.md — MDX pipeline + 9 deps + vite.config @mdx-js/rollup with enforce:'pre' (CNT-02 foundation)
-- [ ] 03-02-PLAN.md — Monitor refactor (children) + MonitorOverlay (drei Html transform occlude="blending") + cameraPoses + Workstation overlay mount (3D-05)
+- [x] 03-02-PLAN.md — Monitor refactor (children) + MonitorOverlay (drei Html transform occlude="blending") + cameraPoses + Workstation overlay mount (3D-05)
 - [ ] 03-03-PLAN.md — FocusController (GSAP useGSAP single-timeline) + Controls forwardRef + ThreeDShell focused state + Canvas onPointerMissed + Header bracket → setQueryParams in 3D shell (3D-06)
 - [ ] 03-04-PLAN.md — WhoamiGreeting animated typing (3 prompts, useState+setTimeout chain, reduced-motion gate) + identity.status field + sticky-top CenterMonitorContent (3D-07)
 - [ ] 03-05-PLAN.md — MDX components (CodeBlock + ScreenshotFrame + ProvenanceFooter) + MDXRenderer full components map + WriteupList/View/Monitor + writeups barrel + ATT&CK lookup + lazy WriteupsRoute (Pattern 7 Option A) (CNT-02 + 3D-05)
