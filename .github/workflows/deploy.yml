@@ -103,6 +103,12 @@ jobs:
             echo "public/assets/ is empty or absent — verify step has nothing to check."
           fi
 
+      # TXT-06 / CNT-03 / Pitfall 8 parity audit (Phase 3 D-19).
+      # Fails the build BEFORE Vite if a SECTIONS id is unrendered, a skill is
+      # provenance-orphan, or a writeup references an unknown ATT&CK id.
+      - name: Parity audit (TXT-06)
+        run: npm run parity
+
       - name: Build (Vite)
         run: npm run build
 
