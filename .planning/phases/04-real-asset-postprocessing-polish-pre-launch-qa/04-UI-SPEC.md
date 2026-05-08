@@ -1,10 +1,12 @@
 ---
 phase: 4
 slug: real-asset-postprocessing-polish-pre-launch-qa
-status: draft
+status: approved
 shadcn_initialized: false
 preset: not applicable
 created: 2026-05-08
+reviewed_at: 2026-05-08T00:00:00Z
+review_dimensions: { copywriting: FLAG, visuals: PASS, color: FLAG, typography: PASS, spacing: FLAG, registry: PASS }
 ---
 
 # Phase 4 — UI Design Contract
