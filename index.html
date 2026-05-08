@@ -55,10 +55,14 @@
       content="https://erenatalaycs.github.io/Portfolio_Website/assets/og-image.png"
     />
 
-    <!-- Permissive baseline CSP — Phase 4 tightens with hashes/nonces. -->
+    <!-- Phase 4 (CTC-01): connect-src + form-action extended for Web3Forms.
+         Source: 04-RESEARCH.md Pattern 7 + Pitfall 3. The cross-origin POST
+         to https://api.web3forms.com/submit is silently blocked in
+         production without these two extensions — fetch returns network
+         error, ContactForm renders failure state forever. -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.web3forms.com; base-uri 'self'; form-action 'self' https://api.web3forms.com; frame-ancestors 'none';"
     />
 
     <!-- JSON-LD Person schema. Email is INTENTIONALLY OMITTED — including it
