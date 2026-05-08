@@ -69,6 +69,20 @@
 - [ ] Hostnames replaced with descriptive labels (`pfsense-fw`, not `pfsense.eren-home.lan`).
 - [ ] No real ISP, no real router/modem make/model unless explicitly chosen for the writeup.
 
+## Write-up Screenshots (Phase 3)
+
+- [ ] **[CI]** `exiftool -all= -P -overwrite_original public/assets/writeups/<slug>/*.png` succeeded for every write-up's screenshot directory.
+- [ ] **Manual full-resolution review** of every PNG in `public/assets/writeups/<slug>/`: no IPs, hostnames, employer terms, file paths, browser-tab titles, Slack/Teams notifications, live CTF flags. Redactions use a **solid black box** (NOT blur — blur is reversible).
+- [ ] Each `<ScreenshotFrame>` in MDX carries the `[✓ sanitized]` badge automatically; verify it actually rendered in the deployed view (3D shell + text shell).
+- [ ] CTI write-ups: VirusTotal screenshots redact submission email, side-pane history; ATT&CK Navigator only shows the public matrix; sandbox host IP/MAC redacted with a black box. JWT screenshots: tokens redacted (or use a clearly-fake placeholder); host bar shows only the generic PortSwigger lab URL.
+
+## TXT-06 parity (Phase 3)
+
+- [ ] **[CI]** `npm run parity` exits 0 (gates the `npm run build` chain). Three assertions covered: TXT-06 section parity, CNT-03 skills provenance, Pitfall 8 ATT&CK lookup completeness.
+- [ ] **Manual** (every release): text shell renders all 7 SECTIONS (about, skills, projects, certs, writeups, contact + education anchor) with real content — no placeholder copy.
+- [ ] **Manual** (every release): 3D shell monitors render the curated subset — Left=projects, Center=about/skills/whoami, Right=writeups. Deep-link `?focus=<id>` works in both shells (text-shell anchor scroll; 3D-shell camera animation).
+- [ ] **Manual** (every release): every skill in `skills.ts` has a recruiter-defensible answer to "show me" — either a project tagline mentioning it or a write-up demonstrating it. CI enforces the substring match; you enforce the *truth* of the demonstration.
+
 ---
 
-> Last updated: 2026-05-06 · checklist run before every release.
+> Last updated: 2026-05-08 · checklist run before every release.
