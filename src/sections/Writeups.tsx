@@ -1,11 +1,24 @@
 // src/sections/Writeups.tsx
 //
-// Phase 1 stub. Phase 3 (CNT-02) introduces the MDX pipeline + 2-3
-// CTF/lab write-ups. The exact placeholder copy is locked by UI-SPEC.
+// Text-shell index of write-ups. Reads writeups[] (frontmatter only —
+// does NOT mount MDX runtime; that's the lazy <WriteupsRoute>). Each
+// row links to ?focus=writeups/<slug> — TextShell intercepts that URL
+// and lazy-loads <WriteupsRoute> for the actual MDX render.
 //
-// Source: 01-UI-SPEC.md § Empty/placeholder states; 01-CONTEXT.md D-11
+// Empty-state copy (UI-SPEC) preserved when writeups[] is empty.
+//
+// Source: 03-RESEARCH.md Pattern 7 Option A; 03-UI-SPEC.md §
+//         <WriteupList>; 03-CONTEXT.md D-19
 
 import { TerminalPrompt } from '../ui/TerminalPrompt';
+import { BracketLink } from '../ui/BracketLink';
+import { writeups, type WriteupType } from '../content/writeups';
+
+const TYPE_MARKER: Record<WriteupType, string> = {
+  detection: '[D]',
+  cti: '[I]',
+  'web-auth': '[W]',
+};
 
 export function Writeups() {
   return (
@@ -18,9 +31,24 @@ export function Writeups() {
           <span className="text-fg">ls writeups/</span>
         </TerminalPrompt>
       </h2>
-      <p className="mt-3 text-muted text-base font-normal font-mono">
-        # No write-ups published yet — first lands during Phase 3.
-      </p>
+      {writeups.length === 0 ? (
+        <p className="mt-3 text-muted text-base font-normal font-mono">
+          # No write-ups published yet — first lands during Phase 3.
+        </p>
+      ) : (
+        <ul aria-label="Write-ups index" className="mt-4 flex flex-col gap-y-3 font-mono">
+          {writeups.map((w) => (
+            <li key={w.slug} className="text-base">
+              <span className="text-accent">{TYPE_MARKER[w.type]}</span>
+              {'  '}
+              <BracketLink href={`?focus=writeups/${w.slug}`}>{w.title}</BracketLink>
+              <div className="text-muted text-base mt-1" style={{ paddingLeft: '5ch' }}>
+                {w.date} · {w.duration}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
