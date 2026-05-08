@@ -93,7 +93,7 @@ Plans:
 - [x] 03-02-PLAN.md — Monitor refactor (children) + MonitorOverlay (drei Html transform occlude="blending") + cameraPoses + Workstation overlay mount (3D-05)
 - [x] 03-03-PLAN.md — FocusController (GSAP useGSAP single-timeline) + Controls forwardRef + ThreeDShell focused state + Canvas onPointerMissed + Header bracket → setQueryParams in 3D shell (3D-06)
 - [x] 03-04-PLAN.md — WhoamiGreeting animated typing (3 prompts, useState+setTimeout chain, reduced-motion gate) + identity.status field + sticky-top CenterMonitorContent (3D-07)
-- [ ] 03-05-PLAN.md — MDX components (CodeBlock + ScreenshotFrame + ProvenanceFooter) + MDXRenderer full components map + WriteupList/View/Monitor + writeups barrel + ATT&CK lookup + lazy WriteupsRoute (Pattern 7 Option A) (CNT-02 + 3D-05)
+- [x] 03-05-PLAN.md — MDX components (CodeBlock + ScreenshotFrame + ProvenanceFooter) + MDXRenderer full components map + WriteupList/View/Monitor + writeups barrel + ATT&CK lookup + lazy WriteupsRoute (Pattern 7 Option A) (CNT-02 + 3D-05)
 - [ ] 03-06-PLAN.md — Author 3 collaborative MDX write-ups (Detection, CTI, Web Auth) — 3 human-verify checkpoints with OPSEC review (CNT-02 + CNT-03)
 - [ ] 03-07-PLAN.md — D-20 close-out (real CV/OG/identity/projects/skills/certs/education/bio) + scripts/check-parity.mjs + CI gate + OPSEC checklist Phase 3 extension + final live-deploy sweep (CNT-03 + TXT-06)
 
