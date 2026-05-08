@@ -15,6 +15,14 @@ export interface EducationEntry {
 }
 
 export const education: EducationEntry[] = [
-  // TODO(checkpoint): Eren fills with the real institution + degree at the
-  // Plan 05 checkpoint (Task 3). Schema below is final.
+  {
+    institution: 'City, University of London',
+    credential: 'BSc Computer Science',
+    date: '2022 — 2025',
+  },
+  {
+    institution: 'Kaplan International College London',
+    credential: 'Foundation Certificate in Science and Engineering',
+    date: '2021 — 2022',
+  },
 ];
