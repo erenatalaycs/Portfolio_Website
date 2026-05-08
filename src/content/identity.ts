@@ -30,6 +30,10 @@ export interface Identity {
   homeLocationLabel: string;
   /** OG image filename in public/assets/ */
   ogImageFilename: string;
+  /** Phase 3 D-05 — drives the `$ status` line in <WhoamiGreeting>.
+   *  Updateable as situation changes; Plan 03-07 fills the real value
+   *  during D-20 content fill. */
+  status: string;
 }
 
 export const identity: Identity = {
@@ -48,4 +52,7 @@ export const identity: Identity = {
   cvFilename: 'Eren-Atalay-CV.pdf',
   homeLocationLabel: 'United Kingdom',
   ogImageFilename: 'og-image.png',
+  // TODO(checkpoint): Plan 03-07 confirms the exact phrasing during D-20
+  // content fill. Phase 3 default below matches D-05 lock.
+  status: 'QA at Fin-On — studying Security+ — available for SOC analyst roles',
 };
