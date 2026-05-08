@@ -15,6 +15,7 @@ import { BracketLink } from './BracketLink';
 import { TerminalPrompt } from './TerminalPrompt';
 import { ViewToggle } from './ViewToggle';
 import { CameraToggle, type CameraMode } from './CameraToggle';
+import { setQueryParams } from '../lib/useQueryParams';
 
 interface HeaderProps {
   currentView: 'text' | '3d';
@@ -48,7 +49,20 @@ export function Header({
             <span className="text-fg">goto</span>
           </TerminalPrompt>
           {SECTIONS.map((s) => (
-            <BracketLink key={s.id} href={`#${s.id}`}>
+            <BracketLink
+              key={s.id}
+              href={`#${s.id}`}
+              onClick={
+                currentView === '3d'
+                  ? (e) => {
+                      // 3D shell: delegate to FocusController via URL.
+                      // Text shell: anchor href handles scroll natively.
+                      e.preventDefault();
+                      setQueryParams({ focus: s.id });
+                    }
+                  : undefined
+              }
+            >
               {s.label}
             </BracketLink>
           ))}
