@@ -32,6 +32,7 @@ import { Workstation } from '../scene/Workstation';
 import { Lighting } from '../scene/Lighting';
 import { Controls } from '../scene/Controls';
 import { FocusController } from '../scene/FocusController';
+import { ScenePostprocessing } from '../3d/ScenePostprocessing';
 import type { FocusId } from '../scene/cameraPoses';
 import { setQueryParams } from '../lib/useQueryParams';
 import { BracketLink } from '../ui/BracketLink';
@@ -98,6 +99,7 @@ export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
           <Workstation focused={focused} onFocusToggle={onFocusToggle} />
           <Controls cameraMode={cameraMode} ref={controlsRef} />
           <FocusController controlsRef={controlsRef} focused={focused} setFocused={setFocused} />
+          <ScenePostprocessing />
         </Canvas>
       </main>
       <footer
