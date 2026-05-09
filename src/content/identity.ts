@@ -13,7 +13,16 @@
 //
 // D-20 closed in Plan 03-07 — values below are real, not placeholders.
 //
-// Source: 01-CONTEXT.md D-12; 01-UI-SPEC.md § Source-of-Truth Cross-Reference
+// Phase 4 CTC-03 (Plan 04-03) — adds four optional live-profile fields:
+//   tryHackMeUrl, tryHackMeHandle, hackTheBoxUrl, hackTheBoxHandle
+// Consumers: src/ui/LiveProfiles.tsx (<LiveProfiles /> + <LiveProfilesShortcut />).
+// Visibility / fallback rules (CONTEXT D-13): if BOTH URLs are absent the
+// entire LiveProfiles block omits; single-platform absence omits only that
+// row. The Identity type keeps the four fields OPTIONAL so consumers must
+// gate on truthiness before reading.
+//
+// Source: 01-CONTEXT.md D-12; 01-UI-SPEC.md § Source-of-Truth Cross-Reference;
+//   04-CONTEXT.md D-13; 04-UI-SPEC.md § Live profiles sub-list layout
 
 export interface Identity {
   name: string;
@@ -30,6 +39,18 @@ export interface Identity {
   /** Phase 3 D-05 — drives the `$ status` line in <WhoamiGreeting>.
    *  Updateable as situation changes. */
   status: string;
+  /** Phase 4 CTC-03 — TryHackMe profile URL. Consumed by <LiveProfiles /> +
+   *  <LiveProfilesShortcut />. Omit if no THM presence (CONTEXT D-13). */
+  tryHackMeUrl?: string;
+  /** Phase 4 CTC-03 — display handle, rendered as @{handle} in muted color
+   *  next to the TryHackMe BracketLink. Optional even if URL is set. */
+  tryHackMeHandle?: string;
+  /** Phase 4 CTC-03 — HackTheBox profile URL. Consumed by <LiveProfiles /> +
+   *  <LiveProfilesShortcut />. Omit if no HTB presence (CONTEXT D-13). */
+  hackTheBoxUrl?: string;
+  /** Phase 4 CTC-03 — display handle, rendered as @{handle} in muted color
+   *  next to the HackTheBox BracketLink. Optional even if URL is set. */
+  hackTheBoxHandle?: string;
 }
 
 export const identity: Identity = {
@@ -43,4 +64,10 @@ export const identity: Identity = {
   homeLocationLabel: 'United Kingdom',
   ogImageFilename: 'og-image.png',
   status: 'Cybersec Engineer at PyramidLedger — open to UK SOC roles',
+  // Phase 4 CTC-03 — real handles supplied by Eren at execution time
+  // (recorded in STATE.md "Phase 4 Human Decisions Captured" section).
+  tryHackMeUrl: 'https://tryhackme.com/p/volvoxkill',
+  tryHackMeHandle: 'volvoxkill',
+  hackTheBoxUrl: 'https://app.hackthebox.com/users/1704641',
+  hackTheBoxHandle: 'volvoxkill',
 };
