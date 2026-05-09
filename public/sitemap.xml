@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://erenatalaycs.github.io/Portfolio_Website/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>1.0</priority>
-  </url>
+  <!-- Source: 04-CONTEXT.md § Claude's Discretion (sitemap content);
+       04-UI-SPEC.md § SEO surfaces; 04-RESEARCH.md State of the Art.
+       Change-frequency and priority tags deprecated by Google in 2023 — omit. -->
+  <url><loc>https://eren-atalay.github.io/Portfolio_Website/</loc><lastmod>2026-05-09</lastmod></url>
+  <url><loc>https://eren-atalay.github.io/Portfolio_Website/?view=3d</loc><lastmod>2026-05-09</lastmod></url>
+  <url><loc>https://eren-atalay.github.io/Portfolio_Website/?focus=projects</loc><lastmod>2026-05-09</lastmod></url>
+  <url><loc>https://eren-atalay.github.io/Portfolio_Website/?focus=writeups</loc><lastmod>2026-05-09</lastmod></url>
+  <url><loc>https://eren-atalay.github.io/Portfolio_Website/?focus=certs</loc><lastmod>2026-05-09</lastmod></url>
+  <url><loc>https://eren-atalay.github.io/Portfolio_Website/?focus=contact</loc><lastmod>2026-05-09</lastmod></url>
 </urlset>
