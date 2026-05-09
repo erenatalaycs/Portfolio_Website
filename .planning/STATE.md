@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_plan
-stopped_at: Phase 3 context gathered
-last_updated: "2026-05-08T07:28:44.007Z"
-last_activity: 2026-05-08 -- Phase 03 execution started
+status: executing
+stopped_at: Phase 4 Wave 1 merged to main; human decisions gathered; Wave 2 ready to dispatch
+last_updated: "2026-05-09T16:10:00.000Z"
+last_activity: 2026-05-09 -- 04-01 + 04-02 worktrees merged + validated
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 2
   total_plans: 19
-  completed_plans: 12
-  percent: 75
+  completed_plans: 14
+  percent: 74
 ---
 
 # Project State
@@ -21,16 +21,31 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-06)
 
 **Core value:** Make a cyber recruiter or hiring manager think *"this person actually gets this field"* within seconds — without forcing recruiters to wait for a 3D scene before they can find the CV and contact details.
-**Current focus:** Phase 03 — content-integration-mdx-write-ups-camera-choreography
+**Current focus:** Phase 04 — real asset, postprocessing, polish, pre-launch QA (v1.0 ship phase)
 
 ## Current Position
 
-Phase: 4
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-05-08
+Phase: 4 of 4
+Plans complete in Phase 4: 2 of 8 (04-01 postprocessing, 04-02 ContactForm)
+Plans remaining in Phase 4: 6 (04-03 LiveProfiles, 04-04 SEO, 04-05 3D-shell mounts, 04-06 GLB, 04-07 CHECKLIST+CI, 04-08 human sign-off)
+Status: Wave 1 merged + validated; ready to dispatch Wave 2 (04-03 + 04-04 in parallel) with human decisions baked in
+Last activity: 2026-05-09
 
-Progress: [██████████] 100%
+Progress: [████████░░] 74%
+
+## Phase 4 Human Decisions Captured (2026-05-09)
+
+| # | Decision | Value |
+|---|----------|-------|
+| D-17 final | Canonical GH-Pages host | `eren-atalay.github.io` (overrides existing `erenatalaycs.github.io` in index.html + sitemap.xml — Plan 04-04 propagates) |
+| 2a | GLB asset path | Poly Haven composite (D-04 option-a, recommended) |
+| 2b | GLB integration timebox | 2026-05-09 → 2026-05-16 (7 days). If not working by 2026-05-16, fall back to procedural primitives, ship v1.0, GLB → v1.1 |
+| 2c | Texture format | WebP confirmed (overrides CONTEXT D-02 KTX2 — gltfjsx default; KTX2 unreachable per CLAUDE.md) |
+| 3a | TryHackMe handle | `volvoxkill` — https://tryhackme.com/p/volvoxkill |
+| 3b | HackTheBox handle | `volvoxkill` (user 1704641) — https://app.hackthebox.com/users/1704641 |
+| 4a | Web3Forms access key | `f2193ff4-b5d3-4bc5-83a1-012498c5a7b7` (lives in `.env.local` as `VITE_WEB3FORMS_KEY`; public-safe — domain-locked + rate-limited) |
+| 4b | Web3Forms notification email | eren.atalay.cs@gmail.com (cyber-specific, NOT pyramidledger) |
+| 4c | Web3Forms domain | `eren-atalay.github.io` |
 
 ## Performance Metrics
 
@@ -110,6 +125,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Plan 02-05: bundle metrics frozen — text shell 65.3 KB gz/120 KB (54%), 3D chunk 236.7 KB gz/450 KB (53%); CI gate exit-fails between Build and 404 copy
 - [Phase ?]: Plan 02-05: size:why script registered but errors (webpack-only); kept for future use
 - [Phase ?]: Phase 2 complete: 5/5 plans landed; 12/12 cross-phase plans done
+- [Phase 4]: Plan 04-01: @react-three/postprocessing@~3.0.4 + PostFX.tsx (Bloom luminanceThreshold, Scanline density, ChromaticAberration tuple offset, Vignette) + ScenePostprocessing wrapper with PerformanceMonitor function-shaped bounds; lazy-mounted into ThreeDShell. Postprocessing chunk 84.9/100 kB gz (within budget). 4 commits merged 2026-05-09.
+- [Phase 4]: Plan 04-02: web3forms POST helper (src/lib/web3forms.ts) + ContactForm 4-states (idle/submitting/success/failure) + honeypot silent abort + CSP `connect-src` extended to `https://api.web3forms.com` + .env.example template. Mounted in src/sections/Contact.tsx (text-shell). BracketLink button branch extended with type+disabled (backward-compatible). 4 commits merged 2026-05-09. NOTE: CTC-01 ships code; end-to-end Gmail+Outlook delivery verification deferred to Plan 04-08.
+- [Phase 4]: Wave 1 merge (2026-05-09): both worktrees merged --no-ff into main, no package.json conflict (only 04-01 added size-limit budget). Post-merge validation: 80/80 tests pass, build OK, all size budgets within limit (postprocessing 84.9/100 kB, 3D chunk 38.96/450 kB, GLB placeholder 48 B/2.5 MB). Worktrees + branches deleted.
 
 ### Pending Todos
 
@@ -134,6 +152,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-07T20:18:11.919Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-content-integration-mdx-write-ups-camera-choreography/03-CONTEXT.md
+Last session: 2026-05-09T16:10:00.000Z
+Stopped at: Phase 4 Wave 1 merged + validated; Wave 2 dispatch pending user confirmation
+Next dispatch: 04-03 LiveProfiles (handles ready) + 04-04 SEO (host = eren-atalay.github.io) — parallel; 04-05 + 04-06 + 04-07 follow per dependency graph; 04-08 stays last (human sign-off only)
+Resume file: (none — HANDOFF.json + .continue-here.md cleared on resume per workflow)
