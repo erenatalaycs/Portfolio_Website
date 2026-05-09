@@ -1,15 +1,18 @@
 // src/sections/Contact.tsx
 //
 // Contact section. Phase 1: obfuscated email + GitHub + LinkedIn.
-// Phase 4 (CTC-01): Web3Forms contact form lands here; CTC-03 adds
-// TryHackMe + HackTheBox profile links.
+// Phase 4 CTC-01 contact form mounted below the recruiter-fast-path strip
+// per UI-SPEC § Form mount-point integration. CTC-03 (TryHackMe + HackTheBox
+// shortcut line) lands in Plan 04-03.
 //
-// Source: 01-UI-SPEC.md § Section headings + § Email obfuscation
+// Source: 01-UI-SPEC.md § Section headings + § Email obfuscation;
+//         04-UI-SPEC.md § Form mount-point integration (text shell).
 
 import { identity } from '../content/identity';
 import { TerminalPrompt } from '../ui/TerminalPrompt';
 import { BracketLink } from '../ui/BracketLink';
 import { EmailReveal } from '../ui/EmailReveal';
+import { ContactForm } from '../ui/ContactForm';
 
 export function Contact() {
   return (
@@ -33,6 +36,8 @@ export function Contact() {
             LinkedIn
           </BracketLink>
         </p>
+        {/* Phase 4 CTC-01 — contact form mounted below the recruiter-fast-path strip. */}
+        <ContactForm />
       </div>
     </section>
   );

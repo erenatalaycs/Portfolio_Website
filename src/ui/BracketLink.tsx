@@ -41,8 +41,18 @@ interface BracketLinkAnchorProps extends BracketLinkBaseProps {
 
 interface BracketLinkButtonProps extends BracketLinkBaseProps {
   as: 'button';
-  onClick: (e: ReactMouseEvent<HTMLButtonElement>) => void;
+  onClick?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
   ariaPressed?: boolean;
+  /** Phase 4 (CTC-01): allow type="submit" so the bracket link can drive an
+   *  HTML form's native submit (HTML5 `required` + `pattern` validation
+   *  fires before onSubmit handler runs). Defaults to 'button' — Phase 1/2
+   *  consumers (ViewToggle, CameraToggle, ContextLossBar dismiss [×]) keep
+   *  the type="button" contract verbatim. */
+  type?: 'button' | 'submit';
+  /** Phase 4 (CTC-01): disable the submit button while the fetch is in
+   *  flight. Field values stay preserved across the disabled state for
+   *  retry. Default undefined leaves Phase 1/2 consumers unchanged. */
+  disabled?: boolean;
   // explicitly: NO href, NO external, NO download (TS will reject these)
 }
 
@@ -77,14 +87,20 @@ function innerLabelClasses(active: boolean | undefined): string {
 
 export function BracketLink(props: BracketLinkProps) {
   if (props.as === 'button') {
-    const { children, className, active, onClick, ariaLabel, ariaPressed } = props;
+    const { children, className, active, onClick, ariaLabel, ariaPressed, type, disabled } = props;
     return (
       <button
-        type="button"
+        type={type ?? 'button'}
         onClick={onClick}
+        disabled={disabled}
         aria-label={ariaLabel}
         aria-pressed={ariaPressed}
-        className={sharedClasses(active, className)}
+        className={[
+          sharedClasses(active, className),
+          disabled ? 'disabled:opacity-60 disabled:cursor-not-allowed disabled:no-underline' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
       >
         [<span className={innerLabelClasses(active)}>{children}</span>]
       </button>
