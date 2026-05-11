@@ -43,9 +43,9 @@
 
 ### Contact & External Links
 
-- [ ] **CTC-01**: Web3Forms contact form (free tier, 250/mo), endpoint in `VITE_FORM_ENDPOINT`; verified end-to-end into both Gmail and Outlook (not spam) before launch
+- [x] **CTC-01**: Web3Forms contact form (free tier, 250/mo), endpoint in `VITE_FORM_ENDPOINT`; verified end-to-end into both Gmail and Outlook (not spam) before launch
 - [ ] **CTC-02**: GitHub and LinkedIn link-outs reachable from both shells in <2 seconds
-- [ ] **CTC-03**: TryHackMe and HackTheBox profile links surfaced near contact / certifications
+- [x] **CTC-03**: TryHackMe and HackTheBox profile links surfaced near contact / certifications
 
 ### OPSEC & Polish
 
@@ -138,9 +138,9 @@ Explicit exclusions. Anti-features from research are documented here so they can
 | 3D-07 | Phase 3 | Pending |
 | 3D-08 | Phase 4 | Pending |
 | 3D-09 | Phase 2 | Complete |
-| CTC-01 | Phase 4 | Pending |
+| CTC-01 | Phase 4 | Complete |
 | CTC-02 | Phase 1 | Pending |
-| CTC-03 | Phase 4 | Pending |
+| CTC-03 | Phase 4 | Complete |
 | OPS-01 | Phase 1 | Complete |
 | OPS-02 | Phase 2 | Complete |
 | OPS-03 | Phase 4 | Pending |
