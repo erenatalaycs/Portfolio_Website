@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Phase 4 Wave 1 fully complete (04-01..04-04 on main); ready to dispatch Wave 2 (04-05 + 04-06)
-last_updated: "2026-05-11T15:10:00.000Z"
-last_activity: 2026-05-11 -- 04-03 + 04-04 merged to main, 91/91 tests pass
+status: 04-06 done in worktree (a6241fad4b7054f01); awaiting merge by orchestrator
+stopped_at: Phase 4 Plan 04-06 (real CC0 GLB) complete in worktree; main HEAD includes 04-05 merge
+last_updated: "2026-05-11T15:08:00.000Z"
+last_activity: 2026-05-11 -- 04-06 done; 869 KB total CC0 GLBs shipped (Path A — D-04 timebox not triggered)
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 19
-  completed_plans: 16
-  percent: 84
+  total_plans: 27
+  completed_plans: 24
+  percent: 89
 ---
 
 # Project State
@@ -26,12 +26,12 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 ## Current Position
 
 Phase: 4 of 4
-Plans complete in Phase 4: 4 of 8 (04-01 postprocessing, 04-02 ContactForm, 04-03 LiveProfiles, 04-04 SEO)
-Plans remaining in Phase 4: 4 (04-05 3D-shell mounts, 04-06 GLB, 04-07 CHECKLIST+CI, 04-08 human sign-off)
-Status: Wave 1 fully merged + validated; ready to dispatch Wave 2 (04-05 + 04-06 in parallel)
+Plans complete in Phase 4: 6 of 8 (04-01 postprocessing, 04-02 ContactForm, 04-03 LiveProfiles, 04-04 SEO, 04-05 3D-shell mounts [merged in parallel by another agent], 04-06 real GLB workstation [this plan, awaiting merge])
+Plans remaining in Phase 4: 2 (04-07 CHECKLIST+CI, 04-08 human sign-off)
+Status: 04-06 done in worktree (worktree-agent-a6241fad4b7054f01); awaiting merge by orchestrator. Path A (Poly Haven composite) shipped in ~14 min — D-04 timebox not triggered.
 Last activity: 2026-05-11
 
-Progress: [█████████░] 84%
+Progress: [█████████░] 89%
 
 ## Phase 4 Human Decisions Captured (2026-05-09)
 
@@ -79,6 +79,7 @@ Progress: [█████████░] 84%
 | Phase 02 P03 | 6min | 3 tasks | 10 files |
 | Phase 02 P04 | 8min | 2 tasks | 10 files |
 | Phase 02 P05 | 6min | 2 tasks | 4 files |
+| Phase 04 P06 | 14min | 2 tasks (Task 1 pre-resolved) | 7 files (3 GLB + LICENSE + Workstation.tsx + package.json + SUMMARY) |
 
 ## Accumulated Context
 
@@ -131,6 +132,7 @@ Recent decisions affecting current work:
 - [Phase 4]: Plan 04-03: Identity extended with 4 optional fields (tryHackMeHandle/Url, hackTheBoxHandle/Url) populated with `volvoxkill` on both platforms; LiveProfiles + LiveProfilesShortcut components render `$ ls certs/live-profiles/` block in Certs section + `See also:` shortcut below Contact form. 11 new tests (4 identity + 7 LiveProfiles). 4 commits merged 2026-05-11. RED+GREEN combined per task (pre-commit hook gate). Text shell now 64.86 KB gz (+1.57 KB delta).
 - [Phase 4]: Plan 04-04: SEO surfaces reconciled to canonical host `eren-atalay.github.io` (was `erenatalaycs.github.io`) across index.html (canonical link + og:url + og:image + JSON-LD url/image), public/sitemap.xml (every <loc>), public/robots.txt (Sitemap line). Sitemap rewritten to 6-URL form with <loc>+<lastmod> only (dropped deprecated <changefreq>+<priority>). 3 commits merged 2026-05-11 — required manual conflict resolution on index.html JSON-LD: kept HEAD's real LinkedIn `eren-atalay/` + took 04-04's new og-image host. JSON-LD `github.com/erenatalaycs` username mismatch with new host deferred to deferred-items.md (Plan 04-07/04-08 sweep).
 - [Phase 4]: Wave 1 full validation post-merge (2026-05-11): 91/91 tests pass (13 files), build OK, size budgets within limit (text shell 64.86/120 KB gz, 3D chunk 38.95/450 KB gz, postprocessing 84.9/100 KB gz, GLB placeholder 48 B/2.5 MB).
+- [Phase 4]: Plan 04-06: Real CC0 GLB workstation shipped Path A — Poly Haven composite (desk 194 KB + lamp 320 KB + bookshelf 355 KB = 869 KB total post-`gltfjsx --transform`); replaces procedural primitives in `<Workstation />` via drei `useGLTF`. **DEVIATION:** Poly Haven has no CC0 monitor (API search 2026-05-11 returned only `chinese_screen_panels` — a folding privacy screen, not a display), so procedural `<Monitor>` wrapper geometry retained → composition is "CC0 + procedural", not pure CC0. Documented in `public/assets/workstation/LICENSE.txt` + 04-06 SUMMARY. Lamp emissive overridden via `scene.traverse` material clone (UI-SPEC § Real GLB swap option b; material name `desk_lamp_arm_01_light` confirmed via `gltfjsx --types --console`). Per-asset size-limit budgets replace single Phase 2 placeholder entry; Phase 2 `public/assets/models/workstation.glb` (48-byte stub) deleted. D-04 7-day timebox NOT triggered — shipped in ~14 min, 5+ days of headroom. All 91 tests pass; all 6 size budgets pass. CWD-drift incident (#3097) encountered + recovered: subsequent Bash calls prefixed with `cd <worktree>` for safety. 2 commits in worktree-agent-a6241fad4b7054f01 (f256faa + 7019d08); awaiting merge.
 
 ### Pending Todos
 
@@ -143,7 +145,7 @@ None yet.
 [Issues that affect future work]
 
 - Phase 2: Real-device QA matrix needs concrete test devices (e.g., iPhone 12 / iOS 17, mid-tier 3-4 GB Android, M1 iPad). Decide before Phase 4 launch QA.
-- Phase 4: Workstation GLB authoring path (procedural primitives in v1 vs Blender-modelled vs CC0-sourced + customised). Fork point at start of Phase 4.
+- ~~Phase 4: Workstation GLB authoring path (procedural primitives in v1 vs Blender-modelled vs CC0-sourced + customised). Fork point at start of Phase 4.~~ — **RESOLVED 2026-05-11 by Plan 04-06**: CC0-sourced (Poly Haven composite) shipped. Monitor mesh stays procedural (no CC0 monitor available); desk + lamp + bookshelf ship as Draco-compressed WebP-texture GLBs (869 KB total).
 
 ## Deferred Items
 
@@ -155,8 +157,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-11T15:10:00.000Z
-Stopped at: Phase 4 Wave 1 FULLY merged + validated (04-01..04-04); ready to dispatch Wave 2
-Next dispatch: 04-05 3D-shell mounts (depends 04-01,02,03 — all on main) + 04-06 GLB integration (depends 04-01; Poly Haven path, timebox 2026-05-09 → 2026-05-16) — parallel worktrees; 04-07 follows; 04-08 stays last (human sign-off only).
+Last session: 2026-05-11T15:08:00.000Z
+Stopped at: Plan 04-06 (real CC0 GLB workstation) done in worktree-agent-a6241fad4b7054f01; 2 commits (f256faa + 7019d08) awaiting merge by orchestrator. Plan 04-05 already merged in parallel by another agent.
+Next dispatch: 04-07 CHECKLIST+CI gates (depends 04-05, 04-06, 04-01..04 — all need to be on main first). 04-08 stays last (human sign-off only). Orchestrator merges this worktree branch + the parallel 04-05 branch before dispatching 04-07.
 Outstanding deferred: GitHub username discrepancy — JSON-LD `sameAs` still points to `github.com/erenatalaycs` while GH-Pages host is `eren-atalay.github.io`. Tracked in .planning/phases/04-real-asset-postprocessing-polish-pre-launch-qa/deferred-items.md for Plan 04-07/04-08 sweep — decide whether to rename the GitHub account or leave the mismatch.
 Resume file: (none — HANDOFF.json + .continue-here.md cleared on resume per workflow)
