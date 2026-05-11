@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Phase 4 Wave 2 fully complete (04-05 + 04-06 merged); ready to dispatch 04-07 CHECKLIST + CI gates
-last_updated: "2026-05-11T16:15:00.000Z"
-last_activity: 2026-05-11 -- 04-05 + 04-06 merged; real CC0 GLB workstation shipped (Path A — D-04 timebox not triggered)
+status: awaiting_human
+stopped_at: Phase 4 Plan 04-07 merged — all autonomous Phase 4 work complete; 04-08 is human-only sign-off
+last_updated: "2026-05-11T16:30:00.000Z"
+last_activity: 2026-05-11 -- 04-07 CHECKLIST-LAUNCH + 5 CI gates + Lighthouse advisory merged; 7/8 plans on main
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 27
-  completed_plans: 24
-  percent: 89
+  completed_plans: 25
+  percent: 93
 ---
 
 # Project State
@@ -26,12 +26,23 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 ## Current Position
 
 Phase: 4 of 4
-Plans complete in Phase 4: 6 of 8 (04-01 postprocessing, 04-02 ContactForm, 04-03 LiveProfiles, 04-04 SEO, 04-05 3D-shell mounts, 04-06 real CC0 GLB workstation)
-Plans remaining in Phase 4: 2 (04-07 CHECKLIST+CI, 04-08 human sign-off)
-Status: Wave 2 fully merged + validated; ready to dispatch 04-07 CHECKLIST-LAUNCH + CI gates (sequential, depends_on 04-01..04-06)
-Last activity: 2026-05-11 — Path A (Poly Haven composite) shipped; D-04 timebox not triggered
+Plans complete in Phase 4: 7 of 8 (04-01..04-07 — all autonomous work done)
+Plans remaining in Phase 4: 1 (04-08 — human-only sign-off, autonomous: false)
+Status: AWAITING ERREN — 04-08 is fundamentally human work. See .planning/CHECKLIST-LAUNCH.md for 14-item fillable structure. No more agents to dispatch.
+Last activity: 2026-05-11
 
-Progress: [█████████░] 89%
+Progress: [█████████▓] 93%
+
+## 04-08 Human-Only Tasks (cannot be agent-completed)
+
+| # | Task | Blocker |
+|---|------|---------|
+| 1 | OG image swap: take 1200×630 screenshot of deployed text shell hero, ImageOptim, replace public/og-image.png | Site must be deployed first; full-resolution OPSEC review (no notification banners, no localhost in URL bar) |
+| 2 | Lighthouse manual median-of-3 (deployed text shell + 3D shell). Targets: Perf ≥80, A11y ≥90, BP ≥90, SEO ≥90. Document 3 runs + median in CHECKLIST-LAUNCH.md | Site must be deployed first; warmup curl + 5s sleep before runs |
+| 3 | Web3Forms delivery end-to-end test: real submission via deployed contact form → arrives in Gmail inbox (not spam) AND Outlook inbox (not spam). Verify reply-to header. | Web3Forms account: key + notification email + domain restriction must be configured in Web3Forms dashboard |
+| 4 | Real-device QA (7-step protocol per CHECKLIST-LAUNCH): one iOS device (model + version) + one Android device (model + version) | Eren needs physical access to both devices; ~30 min soak per device |
+| 5 | Peer reviews: named cyber-professional + named non-cyber usability reviewer with verdicts in CHECKLIST-LAUNCH | Two real humans willing to spend 15 min each |
+| 6 | GitHub username discrepancy decision (deferred-items.md): rename GH account `erenatalaycs` → `eren-atalay` to match new host, OR keep the mismatch and update JSON-LD sameAs to point at new username, OR accept the discrepancy for v1.0 | Eren only — affects GitHub account ownership |
 
 ## Phase 4 Human Decisions Captured (2026-05-09)
 
