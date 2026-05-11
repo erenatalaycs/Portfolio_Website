@@ -116,7 +116,7 @@ Plans:
   4. The site has been tested in-hand on one real iOS device (mid-tier model) and one real Android device (3-4 GB RAM tier) — text shell is excellent on both, 3D shell either works gracefully or is gracefully refused with the always-visible toggle to switch.
   5. The pre-launch checklist is fully executed and signed off: EXIF stripped from every image, all screenshots reviewed at full resolution for IPs/hostnames/employer leaks, no `console.log`/`<Stats>`/`<Perf>`/helpers in the production bundle (verified by `grep` + bundle inspection, gated by `import.meta.env.DEV`), `npm audit` clean, all external links carry `rel="noopener noreferrer"`, CSP `<meta>` tag present, one cyber-professional peer review and one non-cyber usability review completed.
 
-**Plans:** 5/8 plans executed
+**Plans:** 6/8 plans executed
 
 Plans:
 - [x] 04-01-PLAN.md — Postprocessing pipeline: install @react-three/postprocessing@~3.0.4 + ScenePostprocessing wrapper (PerformanceMonitor binary tier) + lazy PostFX (Bloom + Scanline + CA + Noise verified prop names) + size-limit PostFX entry + ThreeDShell mount (3D-08)
@@ -124,7 +124,7 @@ Plans:
 - [x] 04-03-PLAN.md — Live Profiles: extend Identity type (4 optional fields) + src/ui/LiveProfiles.tsx (LiveProfiles + LiveProfilesShortcut exports with both/single/neither variants) + tests + mount in Certs.tsx and Contact.tsx (CTC-03)
 - [x] 04-04-PLAN.md — SEO surfaces: pick canonical GH-Pages host + replace public/sitemap.xml (six URLs no changefreq/priority) + reconcile index.html (canonical/og:url/og:image/twitter:image/JSON-LD url+image/title/meta description per UI-SPEC) + verify JSON-LD email omission + update robots.txt Sitemap host (OPS-05 + CTC-03 host alignment)
 - [x] 04-05-PLAN.md — ContactForm + LiveProfilesShortcut mounted in 3D-shell center monitor (CenterMonitorContent.tsx extension; depends on 04-01/04-02/04-03; CTC-01 + CTC-03 single-source-of-truth)
-- [ ] 04-06-PLAN.md — Real GLB: CC0 Poly Haven composite (desk + monitor + lamp + bookshelf) → gltfjsx --transform pipeline → public/assets/workstation/*.glb + LICENSE.txt + Workstation.tsx swap (primitive object={glb.scene}) + per-asset size-limit budgets; **7-day timebox per CONTEXT D-04 — fallback to procedural + V2-3D-01 promotion if expired** (3D-08)
+- [x] 04-06-PLAN.md — Real GLB: CC0 Poly Haven composite (desk + lamp + bookshelf; **NO monitor.glb** — Poly Haven has no CC0 monitor model, procedural <Monitor> wrapper geometry retained) → gltfjsx --transform pipeline → public/assets/workstation/*.glb + LICENSE.txt + Workstation.tsx swap (primitive object={glb.scene}) + per-asset size-limit budgets (1000+500+500 KB; 869 KB on disk total); **7-day timebox per CONTEXT D-04 NOT triggered — shipped Path A in 14 min** (3D-08)
 - [ ] 04-07-PLAN.md — Pre-launch automation: .planning/CHECKLIST-LAUNCH.md (14-item structure) + lighthouserc.json + 5 new BLOCKING CI gates in deploy.yml (dev-helper strip, target=_blank rel audit, CSP connect-src audit, JSON-LD email omission audit, npm audit) + advisory Lighthouse-CI job after deploy (OPS-03 advisory + OPS-05)
 - [ ] 04-08-PLAN.md — Final ship gate (human_needed): OG image binary swap + full-resolution OPSEC review + Lighthouse manual median-of-3 + CTC-01 Gmail+Outlook delivery verification + real-device QA on iOS+Android (7-step protocol) + cyber peer review + non-cyber usability review + final OPSEC sweep (OPS-03 + OPS-04 + OPS-05 + CTC-01 sign-off)
 
@@ -140,7 +140,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 (decimal phases inserted as
 | 1. Foundation + 2D Recruiter-Grade Shell | 2/7 | In Progress | - |
 | 2. 3D Shell + Asset Pipeline + Capability Gating | 3/5 | In Progress|  |
 | 3. Content Integration + MDX Write-ups + Camera Choreography | 0/7 | Planned | - |
-| 4. Real Asset, Postprocessing, Polish, Pre-Launch QA | 5/8 | In Progress|  |
+| 4. Real Asset, Postprocessing, Polish, Pre-Launch QA | 6/8 | In Progress | - |
 
 ---
 

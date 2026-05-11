@@ -81,9 +81,23 @@
       "gzip": true
     },
     {
-      "name": "GLB workstation model (Phase 4)",
-      "path": "public/assets/models/workstation.glb",
-      "limit": "2500 KB",
+      "name": "GLB workstation desk (Phase 4)",
+      "path": "public/assets/workstation/desk.glb",
+      "limit": "1000 KB",
+      "gzip": false,
+      "brotli": false
+    },
+    {
+      "name": "GLB workstation lamp (Phase 4)",
+      "path": "public/assets/workstation/lamp.glb",
+      "limit": "500 KB",
+      "gzip": false,
+      "brotli": false
+    },
+    {
+      "name": "GLB workstation bookshelf (Phase 4)",
+      "path": "public/assets/workstation/bookshelf.glb",
+      "limit": "500 KB",
       "gzip": false,
       "brotli": false
     },

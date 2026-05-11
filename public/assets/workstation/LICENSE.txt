@@ -1,0 +1,85 @@
+workstation/ — CC0 GLB composite provenance
+=============================================
+
+All assets in this directory are licensed CC0 1.0 Universal (Public Domain
+Dedication). No attribution is required, but it is recorded here for
+provenance per Phase 4 CONTEXT D-01 + OPSEC posture (Plan 04-06).
+
+Pipeline: every asset passed through `gltfjsx@~6.5 --transform` (which
+bundles draco geometry compression + texture resize + webp recompress +
+dedup + prune). The transform rebuilds the GLB binary from raw geometry
++ raw textures, so any source-side metadata (author, software, hostnames
+embedded in JPEG EXIF, etc.) is discarded at pipeline time. exiftool
+post-pass confirmed no author / software / copyright / GPS / artist /
+creator metadata detectable in the output GLBs.
+
+Source assets
+-------------
+
+desk.glb
+  Source URL:    https://polyhaven.com/a/metal_office_desk
+  License:       CC0 1.0 Universal — https://creativecommons.org/publicdomain/zero/1.0/
+  Verified at:   https://api.polyhaven.com/info/metal_office_desk (Poly Haven is uniformly CC0)
+  Author:        Ulan Cabanilla
+  Reviewer:      James Ray Cock
+  Original tris: 6,898
+  Original dim:  2000 × 947 × 788 mm (W × D × H)
+  Downloaded:    2026-05-11
+  Source res:    1k (gltf + bin + 3 textures @ 1024²)
+  Modifications: gltfjsx@6.5.3 --transform --resolution 1024 --format webp
+  Output size:   194 KB
+
+lamp.glb
+  Source URL:    https://polyhaven.com/a/desk_lamp_arm_01
+  License:       CC0 1.0 Universal — https://creativecommons.org/publicdomain/zero/1.0/
+  Verified at:   https://api.polyhaven.com/info/desk_lamp_arm_01 (Poly Haven is uniformly CC0)
+  Authors:       Yann Kervran, Kuutti Siitonen
+  Original tris: 25,710
+  Original dim:  617 × 408 × 879 mm (W × D × H)
+  Downloaded:    2026-05-11
+  Source res:    1k (gltf + bin + 3 textures @ 1024²)
+  Modifications: gltfjsx@6.5.3 --transform --resolution 512 --format webp
+  Output size:   320 KB
+
+bookshelf.glb
+  Source URL:    https://polyhaven.com/a/wooden_bookshelf_worn
+  License:       CC0 1.0 Universal — https://creativecommons.org/publicdomain/zero/1.0/
+  Verified at:   https://api.polyhaven.com/info/wooden_bookshelf_worn (Poly Haven is uniformly CC0)
+  Author:        Ulan Cabanilla
+  Original tris: 10,106
+  Original dim:  1374 × 581 × 2063 mm (W × D × H)
+  Downloaded:    2026-05-11
+  Source res:    1k (gltf + bin + 3 textures @ 1024²)
+  Modifications: gltfjsx@6.5.3 --transform --resolution 512 --format webp
+  Output size:   355 KB
+
+Monitor mesh
+------------
+NOT shipped as a CC0 GLB. The Poly Haven catalogue (verified 2026-05-11 via
+`https://api.polyhaven.com/assets?type=models` keyword search for "monitor",
+"screen", "tv", "computer") contains NO CC0 monitor / display model — only
+`chinese_screen_panels` (a folding privacy screen, not a computer display).
+
+The Phase 4 deviation is to retain the existing **procedural monitor geometry**
+already shipped inside `src/scene/Monitor.tsx` (frame box + emissive screen
+plane + stand cylinder, Phase 2 D-06). This preserves:
+  - The Phase 3 click-to-focus screen plane that drei `<Html transform>`
+    projects DOM content onto (the geometry-coupled invariant).
+  - The Phase 4 D-08 Bloom tuning (screen emissive uses --color-accent token).
+
+The monitor wrapper geometry remains procedural; the desk, lamp, and bookshelf
+ship as CC0 GLBs. The scene composition is therefore a "CC0 + procedural
+composite", not a pure CC0 composite. Acknowledged deviation from the Plan
+04-06 file-list (no monitor.glb shipped); documented in 04-06-SUMMARY.md.
+
+Total on-disk
+-------------
+3 GLBs × ~289 KB avg = 866 KB total. Well under the Plan 04-06 budget of
+2 MB and Phase 2 OPS-02 ceiling of 2.5 MB.
+
+Metadata gate
+-------------
+exiftool 13.55 -all= post-pass over each GLB confirmed no embedded
+metadata. The CI deploy gate (.github/workflows/deploy.yml lines 60-104,
+Phase 1) also runs exiftool on every release as belt-and-braces. See
+threat T-04-06-01 in Plan 04-06 PLAN.md.
