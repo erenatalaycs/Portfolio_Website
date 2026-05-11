@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 4 Wave 1 merged to main; human decisions gathered; Wave 2 ready to dispatch
-last_updated: "2026-05-09T16:10:00.000Z"
-last_activity: 2026-05-09 -- 04-01 + 04-02 worktrees merged + validated
+stopped_at: Phase 4 Wave 1 fully complete (04-01..04-04 on main); ready to dispatch Wave 2 (04-05 + 04-06)
+last_updated: "2026-05-11T15:10:00.000Z"
+last_activity: 2026-05-11 -- 04-03 + 04-04 merged to main, 91/91 tests pass
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 19
-  completed_plans: 14
-  percent: 74
+  completed_plans: 16
+  percent: 84
 ---
 
 # Project State
@@ -26,12 +26,12 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 ## Current Position
 
 Phase: 4 of 4
-Plans complete in Phase 4: 2 of 8 (04-01 postprocessing, 04-02 ContactForm)
-Plans remaining in Phase 4: 6 (04-03 LiveProfiles, 04-04 SEO, 04-05 3D-shell mounts, 04-06 GLB, 04-07 CHECKLIST+CI, 04-08 human sign-off)
-Status: Wave 1 merged + validated; ready to dispatch Wave 2 (04-03 + 04-04 in parallel) with human decisions baked in
-Last activity: 2026-05-09
+Plans complete in Phase 4: 4 of 8 (04-01 postprocessing, 04-02 ContactForm, 04-03 LiveProfiles, 04-04 SEO)
+Plans remaining in Phase 4: 4 (04-05 3D-shell mounts, 04-06 GLB, 04-07 CHECKLIST+CI, 04-08 human sign-off)
+Status: Wave 1 fully merged + validated; ready to dispatch Wave 2 (04-05 + 04-06 in parallel)
+Last activity: 2026-05-11
 
-Progress: [████████░░] 74%
+Progress: [█████████░] 84%
 
 ## Phase 4 Human Decisions Captured (2026-05-09)
 
@@ -128,6 +128,9 @@ Recent decisions affecting current work:
 - [Phase 4]: Plan 04-01: @react-three/postprocessing@~3.0.4 + PostFX.tsx (Bloom luminanceThreshold, Scanline density, ChromaticAberration tuple offset, Vignette) + ScenePostprocessing wrapper with PerformanceMonitor function-shaped bounds; lazy-mounted into ThreeDShell. Postprocessing chunk 84.9/100 kB gz (within budget). 4 commits merged 2026-05-09.
 - [Phase 4]: Plan 04-02: web3forms POST helper (src/lib/web3forms.ts) + ContactForm 4-states (idle/submitting/success/failure) + honeypot silent abort + CSP `connect-src` extended to `https://api.web3forms.com` + .env.example template. Mounted in src/sections/Contact.tsx (text-shell). BracketLink button branch extended with type+disabled (backward-compatible). 4 commits merged 2026-05-09. NOTE: CTC-01 ships code; end-to-end Gmail+Outlook delivery verification deferred to Plan 04-08.
 - [Phase 4]: Wave 1 merge (2026-05-09): both worktrees merged --no-ff into main, no package.json conflict (only 04-01 added size-limit budget). Post-merge validation: 80/80 tests pass, build OK, all size budgets within limit (postprocessing 84.9/100 kB, 3D chunk 38.96/450 kB, GLB placeholder 48 B/2.5 MB). Worktrees + branches deleted.
+- [Phase 4]: Plan 04-03: Identity extended with 4 optional fields (tryHackMeHandle/Url, hackTheBoxHandle/Url) populated with `volvoxkill` on both platforms; LiveProfiles + LiveProfilesShortcut components render `$ ls certs/live-profiles/` block in Certs section + `See also:` shortcut below Contact form. 11 new tests (4 identity + 7 LiveProfiles). 4 commits merged 2026-05-11. RED+GREEN combined per task (pre-commit hook gate). Text shell now 64.86 KB gz (+1.57 KB delta).
+- [Phase 4]: Plan 04-04: SEO surfaces reconciled to canonical host `eren-atalay.github.io` (was `erenatalaycs.github.io`) across index.html (canonical link + og:url + og:image + JSON-LD url/image), public/sitemap.xml (every <loc>), public/robots.txt (Sitemap line). Sitemap rewritten to 6-URL form with <loc>+<lastmod> only (dropped deprecated <changefreq>+<priority>). 3 commits merged 2026-05-11 — required manual conflict resolution on index.html JSON-LD: kept HEAD's real LinkedIn `eren-atalay/` + took 04-04's new og-image host. JSON-LD `github.com/erenatalaycs` username mismatch with new host deferred to deferred-items.md (Plan 04-07/04-08 sweep).
+- [Phase 4]: Wave 1 full validation post-merge (2026-05-11): 91/91 tests pass (13 files), build OK, size budgets within limit (text shell 64.86/120 KB gz, 3D chunk 38.95/450 KB gz, postprocessing 84.9/100 KB gz, GLB placeholder 48 B/2.5 MB).
 
 ### Pending Todos
 
@@ -152,7 +155,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-09T16:10:00.000Z
-Stopped at: Phase 4 Wave 1 merged + validated; Wave 2 dispatch pending user confirmation
-Next dispatch: 04-03 LiveProfiles (handles ready) + 04-04 SEO (host = eren-atalay.github.io) — parallel; 04-05 + 04-06 + 04-07 follow per dependency graph; 04-08 stays last (human sign-off only)
+Last session: 2026-05-11T15:10:00.000Z
+Stopped at: Phase 4 Wave 1 FULLY merged + validated (04-01..04-04); ready to dispatch Wave 2
+Next dispatch: 04-05 3D-shell mounts (depends 04-01,02,03 — all on main) + 04-06 GLB integration (depends 04-01; Poly Haven path, timebox 2026-05-09 → 2026-05-16) — parallel worktrees; 04-07 follows; 04-08 stays last (human sign-off only).
+Outstanding deferred: GitHub username discrepancy — JSON-LD `sameAs` still points to `github.com/erenatalaycs` while GH-Pages host is `eren-atalay.github.io`. Tracked in .planning/phases/04-real-asset-postprocessing-polish-pre-launch-qa/deferred-items.md for Plan 04-07/04-08 sweep — decide whether to rename the GitHub account or leave the mismatch.
 Resume file: (none — HANDOFF.json + .continue-here.md cleared on resume per workflow)
