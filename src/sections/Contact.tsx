@@ -2,17 +2,20 @@
 //
 // Contact section. Phase 1: obfuscated email + GitHub + LinkedIn.
 // Phase 4 CTC-01 contact form mounted below the recruiter-fast-path strip
-// per UI-SPEC § Form mount-point integration. CTC-03 (TryHackMe + HackTheBox
-// shortcut line) lands in Plan 04-03.
+// per UI-SPEC § Form mount-point integration. Phase 4 CTC-03 (Plan 04-03)
+// adds the <LiveProfilesShortcut /> "See also:" line BELOW the form for
+// secondary discoverability of TryHackMe + HackTheBox profiles.
 //
 // Source: 01-UI-SPEC.md § Section headings + § Email obfuscation;
-//         04-UI-SPEC.md § Form mount-point integration (text shell).
+//         04-UI-SPEC.md § Form mount-point integration (text shell);
+//         04-UI-SPEC.md § Live profiles sub-list (secondary placement).
 
 import { identity } from '../content/identity';
 import { TerminalPrompt } from '../ui/TerminalPrompt';
 import { BracketLink } from '../ui/BracketLink';
 import { EmailReveal } from '../ui/EmailReveal';
 import { ContactForm } from '../ui/ContactForm';
+import { LiveProfilesShortcut } from '../ui/LiveProfiles';
 
 export function Contact() {
   return (
@@ -38,6 +41,9 @@ export function Contact() {
         </p>
         {/* Phase 4 CTC-01 — contact form mounted below the recruiter-fast-path strip. */}
         <ContactForm />
+        {/* Phase 4 CTC-03 — TryHackMe + HackTheBox shortcut. <LiveProfilesShortcut />
+            returns null when both URLs absent (CONTEXT D-13). */}
+        <LiveProfilesShortcut />
       </div>
     </section>
   );
