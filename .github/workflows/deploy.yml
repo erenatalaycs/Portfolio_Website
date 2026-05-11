@@ -122,6 +122,86 @@ jobs:
       - name: Enforce bundle size budgets
         run: npx size-limit
 
+      # Phase 4 OPS-05 — operational launch gates (Plan 04-07).
+      # Five new BLOCKING gates that audit dist/ BEFORE upload-pages-artifact.
+      # Source: 04-RESEARCH.md Pattern 19 + Pattern 20; 04-CONTEXT.md D-14.
+
+      - name: 'Dev-helper strip (no <Stats>, <Perf>, console.log, leva, r3f-perf in dist)'
+        run: |
+          # Source: 04-RESEARCH.md Pattern 19 + Pattern 20.
+          # Fail if any dev helper leaks into the production bundle UNLESS
+          # explicitly tagged `// dev-only` (manual exception marker).
+          # console.warn / console.error are KEPT (acceptable error reporting).
+          if grep -rE '(<Stats|<Perf|console\.log|console\.debug|leva|r3f-perf)' dist/assets/ 2>/dev/null \
+              | grep -v '// dev-only' \
+              | grep -v '^Binary file'; then
+            echo 'OPS-05 FAIL: dev helper(s) leaked into dist/. Gate behind import.meta.env.DEV.'
+            exit 1
+          fi
+          echo 'Dev-helper strip: OK.'
+
+      - name: 'External-link audit (every target="_blank" carries rel="noopener noreferrer")'
+        run: |
+          # Source: 04-RESEARCH.md Pattern 19. CHECKLIST-OPSEC § External Links.
+          # OPS-05 explicit. Phase 1 BracketLink already auto-attaches rel for
+          # external links; this gate verifies no hand-rolled <a target="_blank">
+          # slipped past either at SSR-string-build time (index.html) or as an
+          # inlined string in the JS bundle.
+          offenders=$(grep -E 'target="_blank"' dist/index.html | grep -v 'rel="noopener noreferrer"' || true)
+          if [ -n "$offenders" ]; then
+            echo 'OPS-05 FAIL: target="_blank" in dist/index.html without rel="noopener noreferrer":'
+            echo "$offenders"
+            exit 1
+          fi
+          # Also audit the bundled JS — match both unescaped and JS-string-escaped forms.
+          if grep -rE 'target=\\?"_blank\\?"' dist/assets/ 2>/dev/null \
+              | grep -v 'rel=\\?"noopener noreferrer\\?"' \
+              | grep -v '^Binary file'; then
+            echo 'OPS-05 FAIL: target="_blank" in dist/assets/ without rel.'
+            exit 1
+          fi
+          echo 'External-link audit: OK.'
+
+      - name: 'CSP connect-src includes api.web3forms.com (Pitfall 3)'
+        run: |
+          # Source: 04-RESEARCH.md Pitfall 3. Plan 04-02 extended the CSP
+          # <meta http-equiv="Content-Security-Policy"> with the Web3Forms
+          # endpoint; this gate verifies the extension survives every build.
+          # Without it, ContactForm submit is blocked silently by the browser
+          # in production and Eren only finds out via missing inbox messages.
+          if ! grep -F 'connect-src' dist/index.html | grep -F 'https://api.web3forms.com' >/dev/null; then
+            echo 'OPS-05 FAIL: dist/index.html CSP <meta> does not allow Web3Forms in connect-src.'
+            echo 'ContactForm submit will be blocked silently in production.'
+            exit 1
+          fi
+          echo 'CSP connect-src: OK.'
+
+      - name: 'JSON-LD email-omission audit (Pitfall 4)'
+        run: |
+          # Source: 04-RESEARCH.md Pattern 20; Phase 1 D-09 + STATE.md
+          # `[Phase 1] Plan 01-06: JSON-LD Person omits email field`.
+          # This gate verifies the omission survives every build. A plain-email
+          # leak via JSON-LD defeats the rot13+base64 obfuscation in
+          # src/lib/obfuscate.ts — a scraper just reads the schema.
+          if ! grep -F 'application/ld+json' dist/index.html >/dev/null; then
+            echo 'OPS-05 FAIL: dist/index.html missing JSON-LD <script> entirely.'
+            exit 1
+          fi
+          if sed -n '/application\/ld+json/,/<\/script>/p' dist/index.html | grep -E '"email"[[:space:]]*:' >/dev/null; then
+            echo 'OPS-05 FAIL: JSON-LD includes "email" field (Pitfall 4 information disclosure).'
+            exit 1
+          fi
+          echo 'JSON-LD email-omission: OK.'
+
+      - name: 'npm audit --production (no high/critical advisories)'
+        run: |
+          # Source: 04-RESEARCH.md Pattern 19. Production deps only;
+          # dev deps are not part of the shipped bundle. --audit-level=high
+          # fails on high+critical only (moderate/low warnings allowed per
+          # threat-register T-04-07-07: a transitive low CVE that has no patch
+          # should not block deploy — accept and escalate as a deviation).
+          npm audit --production --audit-level=high
+
       - name: Copy index.html → 404.html (SPA fallback for GH Pages deep links)
         run: cp dist/index.html dist/404.html
 
@@ -143,3 +223,41 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+  lighthouse:
+    # Source: 04-CONTEXT.md D-17; 04-RESEARCH.md Pattern 13 + Pattern 15 +
+    #   Pitfall 8. ADVISORY only — manual median-of-3 in Plan 04-08 is the
+    #   OPS-03 sign-off source of truth. continue-on-error: true keeps the
+    #   workflow green even if scores drop below the lighthouserc.json
+    #   thresholds, so a deploy is never blocked by an advisory regression.
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: ${{ success() }}
+    continue-on-error: true
+    steps:
+      - name: Checkout (for lighthouserc.json)
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Wait for GH Pages CDN propagation + warm cache (Pitfall 8)
+        run: |
+          # Sleep gives the actions/deploy-pages@v5 invalidation time to
+          # propagate across the Pages CDN edges. Without this, the first
+          # Lighthouse run frequently captures a 404 or stale cache hit
+          # and the score is meaningless.
+          sleep 60
+          # Warm CDN cache to make first lighthouse run representative
+          # (RESEARCH Pitfall 8). Failures here are non-fatal — Lighthouse
+          # itself will report any persistent fetch issue.
+          curl -s -o /dev/null https://eren-atalay.github.io/Portfolio_Website/ || true
+          curl -s -o /dev/null 'https://eren-atalay.github.io/Portfolio_Website/?view=text' || true
+          curl -s -o /dev/null 'https://eren-atalay.github.io/Portfolio_Website/?view=3d' || true
+          sleep 5
+
+      - name: Run Lighthouse-CI (advisory)
+        run: npx -y @lhci/cli@~0.15.1 autorun
