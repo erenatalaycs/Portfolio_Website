@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Phase 4 Wave 1 fully complete (04-01..04-04 on main); ready to dispatch Wave 2 (04-05 + 04-06)
-last_updated: "2026-05-11T15:10:00.000Z"
-last_activity: 2026-05-11 -- 04-03 + 04-04 merged to main, 91/91 tests pass
+status: Wave 1 fully merged + validated; ready to dispatch Wave 2 (04-05 + 04-06 in parallel)
+stopped_at: Phase 4 Wave 1 FULLY merged + validated (04-01..04-04); ready to dispatch Wave 2
+last_updated: "2026-05-11T15:02:10.029Z"
+last_activity: 2026-05-11
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 19
-  completed_plans: 16
-  percent: 84
+  total_plans: 27
+  completed_plans: 23
+  percent: 85
 ---
 
 # Project State
@@ -26,12 +26,12 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 ## Current Position
 
 Phase: 4 of 4
-Plans complete in Phase 4: 4 of 8 (04-01 postprocessing, 04-02 ContactForm, 04-03 LiveProfiles, 04-04 SEO)
-Plans remaining in Phase 4: 4 (04-05 3D-shell mounts, 04-06 GLB, 04-07 CHECKLIST+CI, 04-08 human sign-off)
+Plans complete in Phase 4: 5 of 8 (04-01 postprocessing, 04-02 ContactForm, 04-03 LiveProfiles, 04-04 SEO, 04-05 3D-shell mounts)
+Plans remaining in Phase 4: 3 (04-06 GLB, 04-07 CHECKLIST+CI, 04-08 human sign-off)
 Status: Wave 1 fully merged + validated; ready to dispatch Wave 2 (04-05 + 04-06 in parallel)
 Last activity: 2026-05-11
 
-Progress: [█████████░] 84%
+Progress: [█████████░] 85%
 
 ## Phase 4 Human Decisions Captured (2026-05-09)
 
