@@ -100,14 +100,16 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
   return (
     <>
       <Floor />
-      {/* Desk: real-world 2.0 × 0.95 × 0.79 m → scaled 1.4 (oversized
-          executive workstation feel) so monitors look small on it.
-          Final dimensions 2.8 × 1.33 × 1.106 m. Camera is pulled back
-          to [4.2, 2.2, 4.2] to keep the whole desk + monitors + bookshelf
-          framed. Asset origin at floor level. */}
-      <primitive object={deskScene} position={[0, 0, 0]} scale={1.4} />
+      {/* Desk: real-world 2.0 × 0.95 × 0.79 m → scale 0.95 puts the
+          top surface at y≈0.75 m matching Phase 2's procedural envelope
+          (02-UI-SPEC desk at y=0.75). Width becomes 1.9 m vs procedural
+          1.2 m — the irreducible delta of swapping a real CC0 asset
+          into a contract calibrated for procedural geometry. Camera
+          poses and monitor positions stay on the Phase 2/3 spec values
+          per 04-UI-SPEC § Real GLB swap visual contract. */}
+      <primitive object={deskScene} position={[0, 0, 0]} scale={0.95} />
       <Monitor
-        position={[-0.45, 1.3785, -0.05]}
+        position={[-0.45, 0.95, -0.05]}
         rotation={[0, 0.18, 0]}
         monitorId="left"
         focused={focused}
@@ -118,7 +120,7 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
         </MonitorOverlay>
       </Monitor>
       <Monitor
-        position={[0, 1.3785, -0.05]}
+        position={[0, 0.95, -0.05]}
         rotation={[0, 0, 0]}
         monitorId="center"
         focused={focused}
@@ -129,7 +131,7 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
         </MonitorOverlay>
       </Monitor>
       <Monitor
-        position={[0.45, 1.3785, -0.05]}
+        position={[0.45, 0.95, -0.05]}
         rotation={[0, -0.18, 0]}
         monitorId="right"
         focused={focused}
@@ -139,15 +141,12 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
           <WriteupsMonitor />
         </MonitorOverlay>
       </Monitor>
-      {/* Lamp: real-world 0.62 × 0.41 × 0.88 m (W × D × H) → scale 0.5
-          gives 0.31 × 0.205 × 0.44 m. Base sits ON the (now bigger)
-          desk top y=1.106 m. */}
-      <primitive object={lampScene} position={[-0.5, 1.106, 0]} scale={0.5} />
+      {/* Lamp: scale 0.5, base y=0.78 per Phase 2 spec (sits flush on
+          the desk-top surface at y≈0.77). */}
+      <primitive object={lampScene} position={[-0.5, 0.78, 0]} scale={0.5} />
       {/* Bookshelf: scale 0.85 → 1.165 × 0.493 × 1.751 m. Position
-          Z=-1.0 (was -0.6) — the new 1.4-scale desk is 1.33 m deep
-          (extends to Z=-0.665 at the back), so the bookshelf has to
-          move further back to avoid intersecting the desk. */}
-      <primitive object={bookshelfScene} position={[0, 0, -1.0]} scale={0.85} />
+          Z=-0.6 per Phase 2 spec (60 cm behind desk centre). */}
+      <primitive object={bookshelfScene} position={[0, 0, -0.6]} scale={0.85} />
     </>
   );
 }

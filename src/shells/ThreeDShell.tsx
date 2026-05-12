@@ -72,7 +72,7 @@ export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
         <Canvas
           className="block"
           style={{ position: 'absolute', inset: 0 }}
-          camera={{ position: [3.6, 1.9, 3.6], fov: 50, near: 0.1, far: 50 }}
+          camera={{ position: [2.4, 1.4, 2.4], fov: 50, near: 0.1, far: 50 }}
           dpr={[1, 1.5]}
           frameloop="demand"
           shadows

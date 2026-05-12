@@ -35,19 +35,19 @@ export interface CameraPose {
 }
 
 export const MONITOR_FOCUS_POSES: Record<FocusId, CameraPose> = {
-  left: { position: [-0.45, 1.45, 0.7], target: [-0.45, 1.3785, -0.05] },
-  center: { position: [0, 1.48, 0.65], target: [0, 1.3785, -0.05] },
-  right: { position: [0.45, 1.45, 0.7], target: [0.45, 1.3785, -0.05] },
+  left: { position: [-0.45, 1.0, 0.7], target: [-0.45, 0.95, -0.05] },
+  center: { position: [0, 1.05, 0.65], target: [0, 0.95, -0.05] },
+  right: { position: [0.45, 1.0, 0.7], target: [0.45, 0.95, -0.05] },
 };
 
 export const DEFAULT_ORBIT_POSE: CameraPose = {
-  position: [3.6, 1.9, 3.6],
-  target: [0, 1.25, 0],
+  position: [2.4, 1.4, 2.4],
+  target: [0, 0.6, 0],
 };
 
-// drei <Html transform distanceFactor>: matrix elements multiplied by
-// DF/400. Higher DF → BIGGER HTML in world (the docs are misleading;
-// empirical: DF=2.6 → HTML bigger than monitor; DF=8 → way bigger;
-// DF=1.3 ≈ proportional to Phase 2's DF=1.8 calibration scaled by the
-// new screen plane ratio (0.385/0.55 = 0.7)).
-export const DISTANCE_FACTOR = 1.3;
+// drei <Html transform>: matrix elements (basis vectors) multiplied by
+// DF/400. World width = CSS_px × DF/400. For CSS 600 px → 0.55 m
+// monitor screen → DF = 0.55 × 400/600 ≈ 0.37. Phase 2/3 spec value
+// 1.8 was theoretical, never verified at production deploy; empirically
+// produces HTML ~4× the monitor frame width.
+export const DISTANCE_FACTOR = 0.5;
