@@ -35,14 +35,14 @@ export interface CameraPose {
 }
 
 export const MONITOR_FOCUS_POSES: Record<FocusId, CameraPose> = {
-  left: { position: [-0.45, 1.1, 0.7], target: [-0.45, 1.0225, -0.05] },
-  center: { position: [0, 1.13, 0.65], target: [0, 1.0225, -0.05] },
-  right: { position: [0.45, 1.1, 0.7], target: [0.45, 1.0225, -0.05] },
+  left: { position: [-0.45, 1.45, 0.7], target: [-0.45, 1.3785, -0.05] },
+  center: { position: [0, 1.48, 0.65], target: [0, 1.3785, -0.05] },
+  right: { position: [0.45, 1.45, 0.7], target: [0.45, 1.3785, -0.05] },
 };
 
 export const DEFAULT_ORBIT_POSE: CameraPose = {
-  position: [3.0, 1.7, 3.0],
-  target: [0, 0.9, 0],
+  position: [4.2, 2.2, 4.2],
+  target: [0, 1.25, 0],
 };
 
 // Calibrated empirically per Pattern 12. Tuned for the Plan 04-06

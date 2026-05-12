@@ -100,14 +100,14 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
   return (
     <>
       <Floor />
-      {/* Desk: real-world 2.0 × 0.95 × 0.79 m → scaled 0.95 so the top
-          surface sits at y≈0.75 m (real-world ergonomic desk height).
-          Width becomes 1.9 m (wider than Phase 2's 1.2 m procedural
-          envelope) — camera framing is widened to match. Asset origin
-          at floor level (0,0,0). */}
-      <primitive object={deskScene} position={[0, 0, 0]} scale={0.95} />
+      {/* Desk: real-world 2.0 × 0.95 × 0.79 m → scaled 1.4 (oversized
+          executive workstation feel) so monitors look small on it.
+          Final dimensions 2.8 × 1.33 × 1.106 m. Camera is pulled back
+          to [4.2, 2.2, 4.2] to keep the whole desk + monitors + bookshelf
+          framed. Asset origin at floor level. */}
+      <primitive object={deskScene} position={[0, 0, 0]} scale={1.4} />
       <Monitor
-        position={[-0.45, 1.0225, -0.05]}
+        position={[-0.45, 1.3785, -0.05]}
         rotation={[0, 0.18, 0]}
         monitorId="left"
         focused={focused}
@@ -118,7 +118,7 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
         </MonitorOverlay>
       </Monitor>
       <Monitor
-        position={[0, 1.0225, -0.05]}
+        position={[0, 1.3785, -0.05]}
         rotation={[0, 0, 0]}
         monitorId="center"
         focused={focused}
@@ -129,7 +129,7 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
         </MonitorOverlay>
       </Monitor>
       <Monitor
-        position={[0.45, 1.0225, -0.05]}
+        position={[0.45, 1.3785, -0.05]}
         rotation={[0, -0.18, 0]}
         monitorId="right"
         focused={focused}
@@ -140,13 +140,14 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
         </MonitorOverlay>
       </Monitor>
       {/* Lamp: real-world 0.62 × 0.41 × 0.88 m (W × D × H) → scale 0.5
-          gives 0.31 × 0.205 × 0.44 m. Base sits ON the new desk top
-          (y=0.75 m), not above it. */}
-      <primitive object={lampScene} position={[-0.5, 0.75, 0]} scale={0.5} />
-      {/* Bookshelf: real-world 1.37 × 0.58 × 2.06 m → scale 0.85 fits the
-          new desk envelope (1.165 × 0.493 × 1.751 m — real bookshelf height).
-          Anchored 0.6 m behind the desk centre, ground level. */}
-      <primitive object={bookshelfScene} position={[0, 0, -0.6]} scale={0.85} />
+          gives 0.31 × 0.205 × 0.44 m. Base sits ON the (now bigger)
+          desk top y=1.106 m. */}
+      <primitive object={lampScene} position={[-0.5, 1.106, 0]} scale={0.5} />
+      {/* Bookshelf: scale 0.85 → 1.165 × 0.493 × 1.751 m. Position
+          Z=-1.0 (was -0.6) — the new 1.4-scale desk is 1.33 m deep
+          (extends to Z=-0.665 at the back), so the bookshelf has to
+          move further back to avoid intersecting the desk. */}
+      <primitive object={bookshelfScene} position={[0, 0, -1.0]} scale={0.85} />
     </>
   );
 }

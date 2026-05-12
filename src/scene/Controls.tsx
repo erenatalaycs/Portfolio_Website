@@ -34,10 +34,10 @@ const ORBIT_CLAMPS = {
   minAzimuthAngle: -Math.PI / 2,
   maxAzimuthAngle: Math.PI / 2,
   minDistance: 1.2,
-  // Plan 04-06 desk widened to 1.9 m (real GLB at scale 0.95) — default
-  // orbit pose distance is ~4.65 m; cap at 5.5 to leave headroom for
-  // user zoom-out without OrbitControls clamping mid-drag.
-  maxDistance: 5.5,
+  // Desk scaled to 1.4 (oversized executive workstation, 2.8 m wide) —
+  // default orbit pose at [4.2, 2.2, 4.2] sits 6.0 m from target [0, 1.25, 0];
+  // cap at 7.5 for user zoom-out headroom.
+  maxDistance: 7.5,
 } as const;
 
 export const Controls = forwardRef<OrbitControlsImpl, ControlsProps>(function Controls(
@@ -51,7 +51,7 @@ export const Controls = forwardRef<OrbitControlsImpl, ControlsProps>(function Co
     <OrbitControls
       ref={ref}
       makeDefault
-      target={[0, 0.9, 0]}
+      target={[0, 1.25, 0]}
       enablePan={false}
       enableDamping={!reduced}
       dampingFactor={0.08}
