@@ -128,16 +128,31 @@ jobs:
       # Five new BLOCKING gates that audit dist/ BEFORE upload-pages-artifact.
       # Source: 04-RESEARCH.md Pattern 19 + Pattern 20; 04-CONTEXT.md D-14.
 
-      - name: 'Dev-helper strip (no <Stats>, <Perf>, console.log, leva, r3f-perf in dist)'
+      - name: 'Dev-helper strip (no <Stats>, <Perf>, leva, r3f-perf in dist; project console.log gated to entry chunk)'
         run: |
           # Source: 04-RESEARCH.md Pattern 19 + Pattern 20.
           # Fail if any dev helper leaks into the production bundle UNLESS
           # explicitly tagged `// dev-only` (manual exception marker).
           # console.warn / console.error are KEPT (acceptable error reporting).
-          if grep -rE '(<Stats|<Perf|console\.log|console\.debug|leva|r3f-perf)' dist/assets/ 2>/dev/null \
+          #
+          # Project-specific dev helpers (<Stats>, <Perf>, leva, r3f-perf):
+          # scan ALL chunks. These names are unique to project dev tooling.
+          if grep -rE '(<Stats|<Perf|leva|r3f-perf)' dist/assets/ 2>/dev/null \
               | grep -v '// dev-only' \
               | grep -v '^Binary file'; then
-            echo 'OPS-05 FAIL: dev helper(s) leaked into dist/. Gate behind import.meta.env.DEV.'
+            echo 'OPS-05 FAIL: project dev helper(s) leaked into dist/. Gate behind import.meta.env.DEV.'
+            exit 1
+          fi
+          # Generic console.log / console.debug: only audit the ENTRY chunk
+          # (dist/assets/index-*.js — our first-party code surface).
+          # Lazy-loaded chunks (ThreeDShell, PostFX, vendor) include
+          # third-party libraries (three.js DRACOLoader, drei, postprocessing)
+          # that legitimately use console.log/debug internally; we can't strip
+          # those without forking. Our own console.log uses are gated behind
+          # `import.meta.env.DEV` (see src/ui/ContactForm.tsx + src/lib/web3forms.ts).
+          if grep -E '(console\.log|console\.debug)' dist/assets/index-*.js 2>/dev/null \
+              | grep -v '// dev-only'; then
+            echo 'OPS-05 FAIL: console.log/console.debug in entry chunk. Gate behind import.meta.env.DEV.'
             exit 1
           fi
           echo 'Dev-helper strip: OK.'
