@@ -42,14 +42,17 @@ import type { FocusId } from './cameraPoses';
 import { Projects } from '../sections/Projects';
 import { CenterMonitorContent } from '../ui/CenterMonitorContent';
 import { WriteupsMonitor } from '../ui/WriteupsMonitor';
-import { assetUrl } from '../lib/baseUrl';
+import { BASE, assetUrl } from '../lib/baseUrl';
 
 // Draco decoder self-hosted at public/draco/ — CSP `script-src 'self'`
 // blocks the default `https://www.gstatic.com/draco/...` CDN path that
 // drei configures by default. Self-hosting eliminates the third-party
 // runtime dep + CSP escape hatch. setDecoderPath MUST run before any
 // useGLTF call below.
-useGLTF.setDecoderPath(assetUrl('draco/'));
+// NOTE: cannot use assetUrl() here — that helper hardcodes the `assets/`
+// subpath (`${BASE}assets/<file>`); draco lives at the project root next
+// to assets/, not under it. Compose from BASE directly.
+useGLTF.setDecoderPath(`${BASE}draco/`);
 
 // Preload at module scope so the GLB fetch starts before <Workstation />
 // mounts; the lazy 3D chunk is already a Suspense boundary in <App />.
