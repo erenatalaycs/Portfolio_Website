@@ -1,0 +1,38 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-05-12T16:04:57.394Z",
+  "phase": "4",
+  "phase_name": "Real Asset, Postprocessing, Polish, Pre-Launch QA",
+  "phase_dir": ".planning/phases/04-real-asset-postprocessing-polish-pre-launch-qa",
+  "plan": "post-04-08",
+  "task": 0,
+  "total_tasks": 1,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": "v1.0-deploy", "name": "v1.0 live deploy at erenatalaycs.github.io", "status": "done", "commit": "6b94678"},
+    {"id": "csp-fixes", "name": "CSP allowlist (data:, blob:, wasm-unsafe-eval, worker-src) for fonts + Draco workers + GLB textures", "status": "done", "commits": ["834e9a7", "d53c525"]},
+    {"id": "draco-selfhost", "name": "Self-hosted Draco decoder at public/draco/ (gstatic CDN blocked)", "status": "done", "commit": "8496420"},
+    {"id": "invalidate-fix", "name": "Canvas frameloop='demand' first-paint via onCreated invalidate() + FocusController invalidate calls", "status": "done", "commit": "d16e508"},
+    {"id": "scene-revert-procedural", "name": "Reverted Workstation.tsx from real GLB (Plan 04-06) to Phase 2 procedural geometry — GLB scaling couldn't satisfy spec envelope", "status": "done", "commit": "342d2e7"},
+    {"id": "monitor-spread", "name": "Iter 10: shrunk monitors to 15\" (0.36×0.21) + spaced at x=±0.4 to eliminate overlap; DF=0.34 empirical (spec's 1.8 produces HTML 4× monitor)", "status": "done", "commit": "6b94678"},
+    {"id": "fallback-tag", "name": "Git tag iter10-3-monitors-baseline for rollback", "status": "done"}
+  ],
+  "remaining_tasks": [
+    {"id": "hs-redesign", "name": "Hacker Simulator-style 3D scene redesign — major scope: 1 ultrawide monitor instead of 3, keyboard + mouse + mug on desk, tower PC beside, neon strip behind monitor, wall poster/sign, chair, cyan/teal ambient accent. Spec deviation: 3-monitor content structure → tabbed/scrollable single-monitor presentation. Reference: https://store.steampowered.com/app/1754840/Hacker_Simulator/ — screenshots saved at /tmp/hs1.jpg /tmp/hs2.jpg /tmp/hs3.jpg (may be deleted on reboot — re-download from steamstatic if needed).", "status": "not_started"}
+  ],
+  "blockers": [
+    {"description": "User has 8 external prerequisites for 04-08 ship sign-off (Web3Forms account, OG image screenshot, 2 real devices for QA, peer reviewers). Independent of HS redesign.", "type": "human_action", "workaround": "Track separately in CHECKLIST-LAUNCH.md"}
+  ],
+  "human_actions_pending": [
+    {"action": "Decide scope of HS redesign: 1 ultrawide monitor (spec deviation) vs 2 monitors vs keep 3 with HS decor only", "context": "Plan 02 D-04 / Plan 03 D-01 lock 3 monitors mapped to 3 content sections (left=projects, center=identity, right=writeups). Reducing to 1 requires content restructure.", "blocking": true}
+  ],
+  "decisions": [
+    {"decision": "Tagged iter10-3-monitors-baseline before HS redesign for safe rollback", "rationale": "User explicitly asked to save current state in case redesign fails", "phase": "post-04"},
+    {"decision": "Pause session before HS redesign", "rationale": "Context at 65% in current session; many iterations made; fresh session needed for major rework", "phase": "post-04"},
+    {"decision": "drei <Html transform distanceFactor> empirical formula: world_size ≈ CSS_px × DF / 400", "rationale": "Spec range 1.5–2.5 is THEORETICAL and was never deploy-verified; empirically DF=1.8 with 600px CSS produces 2.7m HTML overlay vs 0.55m monitor screen (~5× overflow). Inverse of original mental model.", "phase": "4"},
+    {"decision": "Phase 2 procedural geometry > Plan 04-06 real GLB", "rationale": "Real Poly Haven GLB at any uniform scale fails to satisfy spec envelope (1.2m × 0.79m, ratio 1.52 vs GLB 2.0×0.79=2.53). Plan 04-06 Path A is fragile; procedural is coherent.", "phase": "post-04"}
+  ],
+  "uncommitted_files": [],
+  "next_action": "Start fresh session via /gsd-resume-work. The resume workflow will detect this HANDOFF.json + .continue-here.md. Then: (1) confirm with user whether HS redesign should retain 3 monitors with decor (low-risk) OR go to 1 ultrawide (spec deviation, content restructure). (2) Re-fetch HS screenshots if /tmp was cleared. (3) Implement in clean context with iterative screenshot loop (vite preview + Playwright at 2552×1364) per the proven pattern.",
+  "context_notes": "Long session — went through ~12 iterations of 3D scene tuning. User feedback was directional but visual judgement gradually converged. Hard-won learnings: (1) CSP must allow data:/blob:/wasm-unsafe-eval/worker-src blob: for R3F+drei+useGLTF. (2) Canvas frameloop='demand' in R3F v9+React 19 doesn't auto-paint on first commit — explicit invalidate() needed in onCreated. (3) drei distanceFactor formula is inverse of intuition. (4) Real GLB swaps need scale-and-offset both — uniform scale alone won't reach target Y. (5) Empirical screenshot loops via Playwright at user resolution (2552×1364) are 10× faster than text iteration."
+}
