@@ -107,7 +107,7 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
           at floor level (0,0,0). */}
       <primitive object={deskScene} position={[0, 0, 0]} scale={0.95} />
       <Monitor
-        position={[-0.45, 1.075, -0.05]}
+        position={[-0.45, 1.0225, -0.05]}
         rotation={[0, 0.18, 0]}
         monitorId="left"
         focused={focused}
@@ -118,7 +118,7 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
         </MonitorOverlay>
       </Monitor>
       <Monitor
-        position={[0, 1.075, -0.05]}
+        position={[0, 1.0225, -0.05]}
         rotation={[0, 0, 0]}
         monitorId="center"
         focused={focused}
@@ -129,7 +129,7 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
         </MonitorOverlay>
       </Monitor>
       <Monitor
-        position={[0.45, 1.075, -0.05]}
+        position={[0.45, 1.0225, -0.05]}
         rotation={[0, -0.18, 0]}
         monitorId="right"
         focused={focused}

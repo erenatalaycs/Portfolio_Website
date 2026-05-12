@@ -2,7 +2,9 @@
 //
 // The single component that wraps every monitor's DOM content with a
 // drei <Html transform occlude="blending"> projection. Owns:
-//   - 600x400 px outer DOM size (D-03 real-pixel-density)
+//   - 400x232 px outer DOM size (matches 22"-shrink monitor screen
+//     plane 0.385x0.224 m aspect 1.72:1; was 600x400 px = aspect 1.5
+//     designed for the original 24" 0.55x0.32 m screen)
 //   - distanceFactor calibration (cameraPoses.ts)
 //   - opaque bg-bg backplate (UI-SPEC anti-emissive-bleed)
 //   - role="region" + aria-label for screen-reader naming
@@ -32,7 +34,7 @@ export function MonitorOverlay({ children, ariaLabel }: MonitorOverlayProps) {
       occlude="blending"
       position={[0, 0, 0.026]}
       distanceFactor={DISTANCE_FACTOR}
-      style={{ width: '600px', height: '400px' }}
+      style={{ width: '400px', height: '232px' }}
       wrapperClass="monitor-overlay-wrapper"
     >
       {/*

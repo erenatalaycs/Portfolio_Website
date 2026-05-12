@@ -4,7 +4,10 @@
 // plane is the Phase 3 click-to-focus target; <MonitorOverlay> mounts
 // above it as `children` to project DOM content.
 //
-// 24" 16:9 ratio: 0.55 × 0.32 m screen; 0.58 × 0.35 × 0.04 m frame.
+// 22" 16:9-ish ratio: 0.385 × 0.224 m screen; 0.406 × 0.245 × 0.04 m frame.
+// (Scaled down from Phase 2's 24" original to feel proportional next to the
+// 1.9-m real desk — 3 monitors span 1.30 m vs 1.48 m original, 68% of desk
+// width vs 78%, with breathing room either side.)
 //
 // Phase 3 additions (Plan 03-02):
 //   - children?: ReactNode prop — UI-SPEC § Monitor refactor Option A
@@ -48,9 +51,9 @@ export function Monitor({
   const isFocused = focused === monitorId;
   return (
     <group position={position} rotation={rotation}>
-      {/* Frame/back */}
+      {/* Frame/back — 22" monitor proportions */}
       <mesh castShadow>
-        <boxGeometry args={[0.58, 0.35, 0.04]} />
+        <boxGeometry args={[0.406, 0.245, 0.04]} />
         <meshStandardMaterial color={SCENE_COLORS.bg} roughness={0.6} metalness={0.1} />
       </mesh>
       {/* Screen plane — interactive (Phase 3 click-to-focus). */}
@@ -61,7 +64,7 @@ export function Monitor({
           onFocusToggle(monitorId);
         }}
       >
-        <planeGeometry args={[0.55, 0.32]} />
+        <planeGeometry args={[0.385, 0.224]} />
         <meshStandardMaterial
           color={SCENE_COLORS.bg}
           emissive={SCENE_COLORS.accent}
@@ -71,8 +74,12 @@ export function Monitor({
       </mesh>
       {/* drei <Html transform occlude="blending"> overlay (Phase 3 — Plan 03-02). */}
       {children}
-      {/* Stand: cylinder from desk top to monitor bottom */}
-      <mesh position={[0, -0.25, 0]} castShadow>
+      {/* Stand: cylinder positioned so its top touches the frame bottom
+          (frame extends from y=−0.1225 to y=+0.1225; stand length 0.15
+          centred at y=−0.1975 → top at y=−0.1225, bottom at y=−0.2725).
+          Monitor.y in Workstation.tsx is set to 0.75 + 0.2725 = 1.0225
+          so the stand bottom rests on the new desk top (y=0.75). */}
+      <mesh position={[0, -0.1975, 0]} castShadow>
         <cylinderGeometry args={[0.04, 0.06, 0.15, 16]} />
         <meshStandardMaterial color={SCENE_COLORS.bg} roughness={0.6} metalness={0.1} />
       </mesh>

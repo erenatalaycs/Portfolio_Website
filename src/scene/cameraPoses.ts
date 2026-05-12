@@ -35,9 +35,9 @@ export interface CameraPose {
 }
 
 export const MONITOR_FOCUS_POSES: Record<FocusId, CameraPose> = {
-  left: { position: [-0.45, 1.15, 0.7], target: [-0.45, 1.075, -0.05] },
-  center: { position: [0, 1.18, 0.65], target: [0, 1.075, -0.05] },
-  right: { position: [0.45, 1.15, 0.7], target: [0.45, 1.075, -0.05] },
+  left: { position: [-0.45, 1.1, 0.7], target: [-0.45, 1.0225, -0.05] },
+  center: { position: [0, 1.13, 0.65], target: [0, 1.0225, -0.05] },
+  right: { position: [0.45, 1.1, 0.7], target: [0.45, 1.0225, -0.05] },
 };
 
 export const DEFAULT_ORBIT_POSE: CameraPose = {
@@ -45,7 +45,9 @@ export const DEFAULT_ORBIT_POSE: CameraPose = {
   target: [0, 0.9, 0],
 };
 
-// Calibrated empirically per Pattern 12. Tune at first dev render if
-// 600x400 DOM doesn't fill the 0.55x0.32 m screen plane cleanly OR
-// if 14 px text is unreadable at default orbit pose.
-export const DISTANCE_FACTOR = 1.8;
+// Calibrated empirically per Pattern 12. Tuned for the Plan 04-06
+// 22"-shrink monitor (screen plane 0.385x0.224 m): 600 CSS px → 0.385 m
+// scene width gives DF ≈ 2.57; rounded to 2.6 for a small horizontal
+// margin and slight vertical overflow (HTML internal overflow-y-auto
+// keeps content readable).
+export const DISTANCE_FACTOR = 2.6;
