@@ -24,14 +24,14 @@ clean Chrome profile (incognito, no extensions, throttled to Slow-4G).
 Median across runs is the score of record.
 
 - [ ] Lighthouse on deployed text shell — Performance ≥80, Accessibility ≥90, Best Practices ≥90, SEO ≥90 — runs documented (3 runs, median):
-  - URL: `https://eren-atalay.github.io/Portfolio_Website/?view=text`
+  - URL: `https://erenatalaycs.github.io/Portfolio_Website/?view=text`
   - Run 1: Perf=__, A11y=__, BP=__, SEO=__
   - Run 2: Perf=__, A11y=__, BP=__, SEO=__
   - Run 3: Perf=__, A11y=__, BP=__, SEO=__
   - Median: Perf=__, A11y=__, BP=__, SEO=__
   - Verdict: PASS / FAIL
 - [ ] Lighthouse on deployed 3D shell (advisory — see CONTEXT D-17) — no error / no blank page; numbers documented:
-  - URL: `https://eren-atalay.github.io/Portfolio_Website/?view=3d`
+  - URL: `https://erenatalaycs.github.io/Portfolio_Website/?view=3d`
   - Run 1: Perf=__, A11y=__, BP=__, SEO=__
   - Run 2: Perf=__, A11y=__, BP=__, SEO=__
   - Run 3: Perf=__, A11y=__, BP=__, SEO=__
@@ -63,7 +63,7 @@ Median across runs is the score of record.
 
 - [ ] OG image (1200×630) verified — opens in browser at the deployed URL, dimensions correct, no GH-Pages-base-path 404:
   ```bash
-  curl -I https://eren-atalay.github.io/Portfolio_Website/assets/og-image.png
+  curl -I https://erenatalaycs.github.io/Portfolio_Website/assets/og-image.png
   # Expect 200 OK, content-type: image/png
   ```
 - [ ] OG card preview verified by pasting deployed URL into LinkedIn DM compose AND Slack DM compose (manual visual check — preview renders with title, description, and image).
@@ -72,7 +72,7 @@ Median across runs is the score of record.
 - [ ] JSON-LD Person schema validates on https://validator.schema.org/ — no errors, no warnings on required fields.
 - [ ] `<title>` is `Eren Atalay — Junior Cybersecurity Analyst (UK)` (UI-SPEC verbatim).
 - [ ] `<meta name="description">` is `Junior cybersecurity analyst from the UK — CV, projects, CTF write-ups, and a 3D hacker workstation portfolio.` (UI-SPEC verbatim, ≤155 chars).
-- [ ] Canonical link tag points to `https://eren-atalay.github.io/Portfolio_Website/` (post-Plan-04-04 host).
+- [ ] Canonical link tag points to `https://erenatalaycs.github.io/Portfolio_Website/` (post-Plan-04-04 host).
 
 ## Sitemap + Robots
 
@@ -84,7 +84,7 @@ Median across runs is the score of record.
 
 - [ ] Web3Forms account created; access key set in repo Variables (Settings → Secrets and variables → Actions → Variables → `VITE_WEB3FORMS_KEY`) — key matches `f2193ff4-…` per STATE.md Phase 4 D-4a.
 - [ ] Web3Forms notification email set to `eren.atalay.cs@gmail.com` in the Web3Forms dashboard (STATE.md Phase 4 D-4b — cyber-specific address, NOT `pyramidledger`).
-- [ ] Web3Forms domain restriction set to `eren-atalay.github.io` (STATE.md Phase 4 D-4c — domain-locked rate-limit guard).
+- [ ] Web3Forms domain restriction set to `erenatalaycs.github.io` (STATE.md Phase 4 D-4c — domain-locked rate-limit guard).
 - [ ] Real submission tested end-to-end → arrived in **Gmail** inbox, NOT spam:
   - Date/time: __
   - Inbox / Spam: __

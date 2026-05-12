@@ -2,8 +2,8 @@
   "ci": {
     "collect": {
       "url": [
-        "https://eren-atalay.github.io/Portfolio_Website/?view=text",
-        "https://eren-atalay.github.io/Portfolio_Website/?view=3d"
+        "https://erenatalaycs.github.io/Portfolio_Website/?view=text",
+        "https://erenatalaycs.github.io/Portfolio_Website/?view=3d"
       ],
       "numberOfRuns": 3
     },

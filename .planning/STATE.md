@@ -48,7 +48,7 @@ Progress: [█████████▓] 93%
 
 | # | Decision | Value |
 |---|----------|-------|
-| D-17 final | Canonical GH-Pages host | `eren-atalay.github.io` (overrides existing `erenatalaycs.github.io` in index.html + sitemap.xml — Plan 04-04 propagates) |
+| D-17 revised 2026-05-12 | Canonical GH-Pages host | `erenatalaycs.github.io` (Plan 04-04's `eren-atalay.github.io` rollback — kept original GitHub username; Eren chose option B over GitHub-rename. Reverted in index.html / sitemap.xml / robots.txt / lighthouserc.json / CHECKLIST-LAUNCH.md.) |
 | 2a | GLB asset path | Poly Haven composite (D-04 option-a, recommended) |
 | 2b | GLB integration timebox | 2026-05-09 → 2026-05-16 (7 days). If not working by 2026-05-16, fall back to procedural primitives, ship v1.0, GLB → v1.1 |
 | 2c | Texture format | WebP confirmed (overrides CONTEXT D-02 KTX2 — gltfjsx default; KTX2 unreachable per CLAUDE.md) |
@@ -56,7 +56,7 @@ Progress: [█████████▓] 93%
 | 3b | HackTheBox handle | `volvoxkill` (user 1704641) — https://app.hackthebox.com/users/1704641 |
 | 4a | Web3Forms access key | `f2193ff4-b5d3-4bc5-83a1-012498c5a7b7` (lives in `.env.local` as `VITE_WEB3FORMS_KEY`; public-safe — domain-locked + rate-limited) |
 | 4b | Web3Forms notification email | eren.atalay.cs@gmail.com (cyber-specific, NOT pyramidledger) |
-| 4c | Web3Forms domain | `eren-atalay.github.io` |
+| 4c | Web3Forms domain | `erenatalaycs.github.io` (revised 2026-05-12 — Eren must update Web3Forms dashboard domain restriction) |
 
 ## Performance Metrics
 
