@@ -111,6 +111,8 @@ jobs:
 
       - name: Build (Vite)
         run: npm run build
+        env:
+          VITE_WEB3FORMS_KEY: ${{ vars.VITE_WEB3FORMS_KEY }}
 
       # Phase 2 OPS-02: enforce three byte budgets via size-limit.
       # The config lives in package.json's "size-limit" field. This step
