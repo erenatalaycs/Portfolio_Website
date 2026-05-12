@@ -100,12 +100,14 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
   return (
     <>
       <Floor />
-      {/* Desk: real-world 2.0 × 0.95 × 0.79 m → scaled 0.6 to fit Phase 2's
-          1.2 m procedural envelope (1m=1unit). The asset's origin is at
-          floor level (0,0,0). */}
-      <primitive object={deskScene} position={[0, 0, 0]} scale={0.6} />
+      {/* Desk: real-world 2.0 × 0.95 × 0.79 m → scaled 0.95 so the top
+          surface sits at y≈0.75 m (real-world ergonomic desk height).
+          Width becomes 1.9 m (wider than Phase 2's 1.2 m procedural
+          envelope) — camera framing is widened to match. Asset origin
+          at floor level (0,0,0). */}
+      <primitive object={deskScene} position={[0, 0, 0]} scale={0.95} />
       <Monitor
-        position={[-0.45, 0.95, -0.05]}
+        position={[-0.45, 1.075, -0.05]}
         rotation={[0, 0.18, 0]}
         monitorId="left"
         focused={focused}
@@ -116,7 +118,7 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
         </MonitorOverlay>
       </Monitor>
       <Monitor
-        position={[0, 0.95, -0.05]}
+        position={[0, 1.075, -0.05]}
         rotation={[0, 0, 0]}
         monitorId="center"
         focused={focused}
@@ -127,7 +129,7 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
         </MonitorOverlay>
       </Monitor>
       <Monitor
-        position={[0.45, 0.95, -0.05]}
+        position={[0.45, 1.075, -0.05]}
         rotation={[0, -0.18, 0]}
         monitorId="right"
         focused={focused}
@@ -137,13 +139,14 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
           <WriteupsMonitor />
         </MonitorOverlay>
       </Monitor>
-      {/* Lamp: real-world 0.62 × 0.88 × 0.41 m → scale 0.5 fits the desk
-          corner. Position matches Phase 2 procedural anchor. */}
-      <primitive object={lampScene} position={[-0.5, 0.78, 0]} scale={0.5} />
-      {/* Bookshelf: real-world 1.37 × 2.06 × 0.58 m → scale 0.7 fits the
-          back-of-desk envelope (Phase 2 procedural was 1.0 × 1.5). Anchored
-          0.6 m behind the desk centre, ground level. */}
-      <primitive object={bookshelfScene} position={[0, 0, -0.6]} scale={0.7} />
+      {/* Lamp: real-world 0.62 × 0.41 × 0.88 m (W × D × H) → scale 0.5
+          gives 0.31 × 0.205 × 0.44 m. Base sits ON the new desk top
+          (y=0.75 m), not above it. */}
+      <primitive object={lampScene} position={[-0.5, 0.75, 0]} scale={0.5} />
+      {/* Bookshelf: real-world 1.37 × 0.58 × 2.06 m → scale 0.85 fits the
+          new desk envelope (1.165 × 0.493 × 1.751 m — real bookshelf height).
+          Anchored 0.6 m behind the desk centre, ground level. */}
+      <primitive object={bookshelfScene} position={[0, 0, -0.6]} scale={0.85} />
     </>
   );
 }

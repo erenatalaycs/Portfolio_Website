@@ -5,14 +5,19 @@
 //   - <MonitorOverlay>      (DISTANCE_FACTOR)
 //   - <FocusController>     (MONITOR_FOCUS_POSES + DEFAULT_ORBIT_POSE) — Plan 03
 //
-// Per-monitor focus poses match Phase 2 Workstation.tsx monitor positions:
-//   left:   [-0.45, 0.95, -0.05]  rotation [0,  0.18, 0]
-//   center: [0,     0.95, -0.05]  rotation [0,  0,    0]
-//   right:  [0.45,  0.95, -0.05]  rotation [0, -0.18, 0]
+// Per-monitor focus poses match Plan 04-06 Workstation.tsx monitor positions
+// (raised from y=0.95 → y=1.075 to sit on the real GLB desk top at y=0.75 m):
+//   left:   [-0.45, 1.075, -0.05]  rotation [0,  0.18, 0]
+//   center: [0,     1.075, -0.05]  rotation [0,  0,    0]
+//   right:  [0.45,  1.075, -0.05]  rotation [0, -0.18, 0]
 //
 // The +0.05/+0.10 y-offset on the focus position gives a slight head-down
 // angle — natural eye level for a seated user. The +0.65/+0.7 z-offset
 // places the camera ~70 cm in front of the screen plane (D-08).
+//
+// DEFAULT_ORBIT_POSE: pulled back to [3.0, 1.7, 3.0] and target raised to
+// [0, 0.9, 0] to frame the wider real-desk envelope (1.9 m wide vs 1.2 m
+// procedural). target.y=0.9 lines up with the monitor mid-band.
 //
 // DISTANCE_FACTOR is the empirical calibration (Pattern 12) that scales
 // the 600x400 px DOM onto the 0.55x0.32 m screen plane such that 14 px
@@ -30,14 +35,14 @@ export interface CameraPose {
 }
 
 export const MONITOR_FOCUS_POSES: Record<FocusId, CameraPose> = {
-  left: { position: [-0.45, 1.0, 0.7], target: [-0.45, 0.95, -0.05] },
-  center: { position: [0, 1.05, 0.65], target: [0, 0.95, -0.05] },
-  right: { position: [0.45, 1.0, 0.7], target: [0.45, 0.95, -0.05] },
+  left: { position: [-0.45, 1.15, 0.7], target: [-0.45, 1.075, -0.05] },
+  center: { position: [0, 1.18, 0.65], target: [0, 1.075, -0.05] },
+  right: { position: [0.45, 1.15, 0.7], target: [0.45, 1.075, -0.05] },
 };
 
 export const DEFAULT_ORBIT_POSE: CameraPose = {
-  position: [2.4, 1.4, 2.4],
-  target: [0, 0.6, 0],
+  position: [3.0, 1.7, 3.0],
+  target: [0, 0.9, 0],
 };
 
 // Calibrated empirically per Pattern 12. Tune at first dev render if
