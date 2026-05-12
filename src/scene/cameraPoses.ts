@@ -41,13 +41,13 @@ export const MONITOR_FOCUS_POSES: Record<FocusId, CameraPose> = {
 };
 
 export const DEFAULT_ORBIT_POSE: CameraPose = {
-  position: [4.2, 2.2, 4.2],
+  position: [3.6, 1.9, 3.6],
   target: [0, 1.25, 0],
 };
 
-// Calibrated empirically per Pattern 12. Tuned for the Plan 04-06
-// 22"-shrink monitor (screen plane 0.385x0.224 m): 600 CSS px → 0.385 m
-// scene width gives DF ≈ 2.57; rounded to 2.6 for a small horizontal
-// margin and slight vertical overflow (HTML internal overflow-y-auto
-// keeps content readable).
-export const DISTANCE_FACTOR = 2.6;
+// drei <Html transform distanceFactor>: matrix elements multiplied by
+// DF/400. Higher DF → BIGGER HTML in world (the docs are misleading;
+// empirical: DF=2.6 → HTML bigger than monitor; DF=8 → way bigger;
+// DF=1.3 ≈ proportional to Phase 2's DF=1.8 calibration scaled by the
+// new screen plane ratio (0.385/0.55 = 0.7)).
+export const DISTANCE_FACTOR = 1.3;
