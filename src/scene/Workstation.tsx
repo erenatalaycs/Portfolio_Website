@@ -44,6 +44,13 @@ import { CenterMonitorContent } from '../ui/CenterMonitorContent';
 import { WriteupsMonitor } from '../ui/WriteupsMonitor';
 import { assetUrl } from '../lib/baseUrl';
 
+// Draco decoder self-hosted at public/draco/ — CSP `script-src 'self'`
+// blocks the default `https://www.gstatic.com/draco/...` CDN path that
+// drei configures by default. Self-hosting eliminates the third-party
+// runtime dep + CSP escape hatch. setDecoderPath MUST run before any
+// useGLTF call below.
+useGLTF.setDecoderPath(assetUrl('draco/'));
+
 // Preload at module scope so the GLB fetch starts before <Workstation />
 // mounts; the lazy 3D chunk is already a Suspense boundary in <App />.
 useGLTF.preload(assetUrl('workstation/desk.glb'));
