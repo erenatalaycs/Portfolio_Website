@@ -32,8 +32,7 @@ import { Workstation } from '../scene/Workstation';
 import { Lighting } from '../scene/Lighting';
 import { Controls } from '../scene/Controls';
 import { FocusController } from '../scene/FocusController';
-// TEMP DIAG: ScenePostprocessing import removed while diagnosing black-scene bug.
-// import { ScenePostprocessing } from '../3d/ScenePostprocessing';
+import { ScenePostprocessing } from '../3d/ScenePostprocessing';
 import type { FocusId } from '../scene/cameraPoses';
 import { setQueryParams } from '../lib/useQueryParams';
 import { BracketLink } from '../ui/BracketLink';
@@ -100,10 +99,7 @@ export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
           <Workstation focused={focused} onFocusToggle={onFocusToggle} />
           <Controls cameraMode={cameraMode} ref={controlsRef} />
           <FocusController controlsRef={controlsRef} focused={focused} setFocused={setFocused} />
-          {/* TEMP DIAG: PostFX disabled to isolate black-scene bug (CSP/draco
-              fix landed, scene mounts but renders black). Re-enable after
-              identifying root cause. */}
-          {/* <ScenePostprocessing /> */}
+          <ScenePostprocessing />
         </Canvas>
       </main>
       <footer
