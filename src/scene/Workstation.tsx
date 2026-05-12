@@ -40,7 +40,7 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
       <Floor />
       <Desk />
       <Monitor
-        position={[-0.45, 0.95, -0.05]}
+        position={[-0.4, 0.95, -0.05]}
         rotation={[0, 0.18, 0]}
         monitorId="left"
         focused={focused}
@@ -62,7 +62,7 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
         </MonitorOverlay>
       </Monitor>
       <Monitor
-        position={[0.45, 0.95, -0.05]}
+        position={[0.4, 0.95, -0.05]}
         rotation={[0, -0.18, 0]}
         monitorId="right"
         focused={focused}

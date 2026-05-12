@@ -4,11 +4,11 @@
 // plane is the Phase 3 click-to-focus target; <MonitorOverlay> mounts
 // above it as `children` to project DOM content.
 //
-// 24" 16:9 ratio: 0.55 × 0.32 m screen; 0.58 × 0.35 × 0.04 m frame
-// (Phase 2 spec — 02-UI-SPEC.md § Procedural workstation primitives;
-//  Phase 4 04-UI-SPEC § Real GLB swap visual contract: "Camera poses
-//  unchanged from Phase 2 D-04 / Phase 3 D-08" — monitor sizing is
-//  part of that contract).
+// 15" compact-monitor proportions: 0.34 × 0.19 m screen; 0.36 × 0.21
+// × 0.04 m frame. Shrunk from Phase 2's 24" original (0.58 × 0.35) so
+// three monitors don't overlap on the 1.2-m procedural desk top.
+// At spacing 0.4 m the three frames span 1.08 m with 4 cm gaps between
+// them — visually distinct rectangles, all on desk.
 //
 // Phase 3 additions (Plan 03-02):
 //   - children?: ReactNode prop — UI-SPEC § Monitor refactor Option A
@@ -54,7 +54,7 @@ export function Monitor({
     <group position={position} rotation={rotation}>
       {/* Frame/back */}
       <mesh castShadow>
-        <boxGeometry args={[0.58, 0.35, 0.04]} />
+        <boxGeometry args={[0.36, 0.21, 0.04]} />
         <meshStandardMaterial color={SCENE_COLORS.bg} roughness={0.6} metalness={0.1} />
       </mesh>
       {/* Screen plane — interactive (Phase 3 click-to-focus). */}
@@ -65,7 +65,7 @@ export function Monitor({
           onFocusToggle(monitorId);
         }}
       >
-        <planeGeometry args={[0.55, 0.32]} />
+        <planeGeometry args={[0.34, 0.19]} />
         <meshStandardMaterial
           color={SCENE_COLORS.bg}
           emissive={SCENE_COLORS.accent}

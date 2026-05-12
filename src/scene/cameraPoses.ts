@@ -35,9 +35,9 @@ export interface CameraPose {
 }
 
 export const MONITOR_FOCUS_POSES: Record<FocusId, CameraPose> = {
-  left: { position: [-0.45, 1.0, 0.7], target: [-0.45, 0.95, -0.05] },
+  left: { position: [-0.4, 1.0, 0.7], target: [-0.4, 0.95, -0.05] },
   center: { position: [0, 1.05, 0.65], target: [0, 0.95, -0.05] },
-  right: { position: [0.45, 1.0, 0.7], target: [0.45, 0.95, -0.05] },
+  right: { position: [0.4, 1.0, 0.7], target: [0.4, 0.95, -0.05] },
 };
 
 export const DEFAULT_ORBIT_POSE: CameraPose = {
@@ -50,4 +50,4 @@ export const DEFAULT_ORBIT_POSE: CameraPose = {
 // monitor screen → DF = 0.55 × 400/600 ≈ 0.37. Phase 2/3 spec value
 // 1.8 was theoretical, never verified at production deploy; empirically
 // produces HTML ~4× the monitor frame width.
-export const DISTANCE_FACTOR = 0.4;
+export const DISTANCE_FACTOR = 0.34;
