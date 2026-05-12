@@ -70,7 +70,8 @@ export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
       />
       <main id="main" tabIndex={-1} className="flex-1 min-h-0 relative font-mono">
         <Canvas
-          className="absolute inset-0 block"
+          className="block"
+          style={{ position: 'absolute', inset: 0 }}
           camera={{ position: [2.4, 1.4, 2.4], fov: 50, near: 0.1, far: 50 }}
           dpr={[1, 1.5]}
           frameloop="demand"
