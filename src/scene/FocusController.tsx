@@ -46,7 +46,11 @@ function parseFocusFromUrl(params: URLSearchParams): FocusId | null {
 }
 
 export function FocusController({ controlsRef, focused, setFocused }: FocusControllerProps) {
-  const { camera } = useThree();
+  // `invalidate` is required because <Canvas frameloop="demand"> only paints
+  // when explicitly requested. controls.update() syncs OrbitControls' internal
+  // state but does NOT request a paint — without invalidate() the camera moves
+  // and the GSAP timeline ticks, but the scene is never re-rendered.
+  const { camera, invalidate } = useThree();
   const reduced = useReducedMotion();
   const params = useQueryParams();
   const isFirstMount = useRef(true);
@@ -79,6 +83,7 @@ export function FocusController({ controlsRef, focused, setFocused }: FocusContr
         controls.update();
         controls.enabled = focused === null;
         isFirstMount.current = false;
+        invalidate();
         return;
       }
 
@@ -87,7 +92,10 @@ export function FocusController({ controlsRef, focused, setFocused }: FocusContr
       // parallel gsap.to() which would race).
       controls.enabled = false;
       const tl = gsap.timeline({
-        onUpdate: () => controls.update(),
+        onUpdate: () => {
+          controls.update();
+          invalidate();
+        },
         onComplete: () => {
           // Re-enable AFTER animation, ONLY when returning to null orbit
           // pose (D-09 + Claude's-discretion lock).

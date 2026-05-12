@@ -76,7 +76,7 @@ export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
           frameloop="demand"
           shadows
           gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
-          onCreated={({ gl }) => {
+          onCreated={({ gl, invalidate }) => {
             const handler = (event: Event) => {
               event.preventDefault();
               onContextLost();
@@ -87,6 +87,10 @@ export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
               'Interactive 3D workstation scene. Three monitors render projects, identity, and write-ups. Drag to look around. Click a monitor to focus, press Escape to return.',
             );
             gl.domElement.style.touchAction = 'pan-y';
+            // First-paint trigger: with frameloop="demand" R3F v9 + React 19
+            // no longer guarantees an initial render on scene-tree commit;
+            // without this the canvas stays black until user input invalidates.
+            invalidate();
           }}
           onPointerMissed={() => {
             if (focused !== null) {

@@ -37,22 +37,12 @@ import {
 } from '@react-three/postprocessing';
 
 export function PostFX() {
-  // TEMP DIAG (2026-05-12): rendering null to isolate black-scene bug after
-  // draco + CSP fixes landed. The EffectComposer + ACES toneMapping stack
-  // may be consuming the scene to black. If 3D appears with this no-op,
-  // re-author Bloom thresholds / toneMapping mode. Imports kept so the
-  // lazy chunk still ships (size-limit budget entry depends on the file).
-  // Original effect tree:
-  //   <EffectComposer multisampling={0}>
-  //     <Bloom luminanceThreshold={0.6} luminanceSmoothing={0.025} intensity={0.6} mipmapBlur />
-  //     <Scanline density={1.25} opacity={0.15} />
-  //     <ChromaticAberration offset={[0.0008, 0.0008]} />
-  //     <Noise opacity={0.04} />
-  //   </EffectComposer>
-  void EffectComposer;
-  void Bloom;
-  void Scanline;
-  void ChromaticAberration;
-  void Noise;
-  return null;
+  return (
+    <EffectComposer multisampling={0}>
+      <Bloom luminanceThreshold={0.6} luminanceSmoothing={0.025} intensity={0.6} mipmapBlur />
+      <Scanline density={1.25} opacity={0.15} />
+      <ChromaticAberration offset={[0.0008, 0.0008]} />
+      <Noise opacity={0.04} />
+    </EffectComposer>
+  );
 }
