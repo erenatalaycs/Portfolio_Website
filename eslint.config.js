@@ -10,7 +10,7 @@ import globals from 'globals';
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'coverage/**', 'node_modules/**'],
+    ignores: ['dist/**', 'coverage/**', 'node_modules/**', 'public/draco/**'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
