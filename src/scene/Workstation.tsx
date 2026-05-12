@@ -1,113 +1,44 @@
 // src/scene/Workstation.tsx
 //
-// Phase 4 (Plan 04-06): CC0 Poly Haven composite — desk, lamp, bookshelf
-// ship as Draco-compressed GLBs (`public/assets/workstation/*.glb`). The
-// `<Monitor>` wrappers retain their procedural geometry because Poly Haven
-// has no CC0 monitor model (API search 2026-05-11 returned only
-// `chinese_screen_panels`, a folding privacy screen). See
-// `public/assets/workstation/LICENSE.txt` for full provenance.
+// Pure composition: Floor + Desk + 3 Monitors (each with a <MonitorOverlay>
+// child holding section content) + Lamp + Bookshelf. The 3 monitors now
+// accept focus state + click toggle (passed down from <ThreeDShell> via
+// Plan 03's <FocusController>).
 //
-// Monitor → content mapping (Phase 3 D-01):
+// Monitor → content mapping (D-01):
 //   Left   = <Projects />                      — projects.ts (CNT-03)
-//   Center = <CenterMonitorContent />          — Whoami + About + Skills + Contact
-//   Right  = <WriteupsMonitor />               — list/view
+//   Center = <CenterMonitorContent />          — Whoami (Plan 04) + About + Skills
+//   Right  = <WriteupsMonitor />               — list/view (Plan 05)
 //
-// The three procedural `<Monitor>` wrappers stay — they own the click
-// handler, focus state, and the screen plane that drei <Html transform>
-// projects DOM content onto (Phase 3 D-03 contract; UI-SPEC § Real GLB
-// swap visual contract).
+// Single source of truth: the same <Projects /> and <About />/<Skills />
+// and <Writeups /> components render in BOTH shells. Adding a new entry
+// in src/content/* updates both shells automatically.
 //
-// Scaling + positioning: each GLB is scaled with a single uniform factor
-// tuned so the asset's bounding box approximates the Phase 2 procedural
-// envelope (D-04: 1 unit = 1 metre). Camera poses (Phase 2 D-04 + Phase 3
-// D-08) are unchanged per CONTEXT D-03.
-//
-// Emissive override: lamp's `desk_lamp_arm_01_light` material is
-// reauthored at scene-mount time to use --color-warn (#e3b341), per
-// UI-SPEC § Real GLB swap visual contract option (b). The desk and
-// bookshelf carry no emissive (their CC0 textures are diffuse).
-//
-// Source: 04-06-PLAN.md §<tasks>, 04-CONTEXT.md D-01..D-04,
-//         04-UI-SPEC.md § Real GLB swap visual contract,
-//         04-RESEARCH.md Pattern 1 + Pattern 2
+// Source: 02-UI-SPEC.md § Procedural workstation primitives;
+//         03-CONTEXT.md D-01; 03-UI-SPEC.md § Monitor → content mapping;
+//         03-RESEARCH.md Example 3
 
-import { useEffect, useMemo } from 'react';
-import { useGLTF } from '@react-three/drei';
-import * as THREE from 'three';
 import { Floor } from './Floor';
+import { Desk } from './Desk';
 import { Monitor } from './Monitor';
+import { Lamp } from './Lamp';
+import { Bookshelf } from './Bookshelf';
 import { MonitorOverlay } from './MonitorOverlay';
-import { SCENE_COLORS } from './colors';
 import type { FocusId } from './cameraPoses';
 import { Projects } from '../sections/Projects';
 import { CenterMonitorContent } from '../ui/CenterMonitorContent';
 import { WriteupsMonitor } from '../ui/WriteupsMonitor';
-import { BASE, assetUrl } from '../lib/baseUrl';
-
-// Draco decoder self-hosted at public/draco/ — CSP `script-src 'self'`
-// blocks drei's default `https://www.gstatic.com/draco/...` CDN. setDecoderPath
-// MUST run before any useGLTF call below. NOTE: cannot use assetUrl() here —
-// that helper hardcodes the `assets/` subpath; draco lives at the project
-// root next to assets/, not under it. Compose from BASE directly.
-useGLTF.setDecoderPath(`${BASE}draco/`);
-
-// Preload at module scope so the GLB fetch starts before <Workstation />
-// mounts; the lazy 3D chunk is already a Suspense boundary in <App />.
-useGLTF.preload(assetUrl('workstation/desk.glb'));
-useGLTF.preload(assetUrl('workstation/lamp.glb'));
-useGLTF.preload(assetUrl('workstation/bookshelf.glb'));
 
 interface WorkstationProps {
   focused: FocusId | null;
   onFocusToggle: (id: FocusId) => void;
 }
 
-// Hex-string → integer for THREE.Color.setHex(). SCENE_COLORS values are
-// `#rrggbb`; the leading `#` must be stripped.
-const hexToInt = (hex: string): number => parseInt(hex.replace('#', ''), 16);
-
 export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
-  const desk = useGLTF(assetUrl('workstation/desk.glb'));
-  const lamp = useGLTF(assetUrl('workstation/lamp.glb'));
-  const bookshelf = useGLTF(assetUrl('workstation/bookshelf.glb'));
-
-  // Clone each scene so we can mount it without mutating the cached source
-  // returned by useGLTF (drei's cache lives across remounts). Without this
-  // clone the emissive override would persist if the scene unmounts/remounts.
-  const deskScene = useMemo(() => desk.scene.clone(true), [desk.scene]);
-  const lampScene = useMemo(() => lamp.scene.clone(true), [lamp.scene]);
-  const bookshelfScene = useMemo(() => bookshelf.scene.clone(true), [bookshelf.scene]);
-
-  // Lamp bulb emissive override (UI-SPEC § Real GLB swap visual contract
-  // option b). The material name `desk_lamp_arm_01_light` was confirmed by
-  // running `gltfjsx --types --console` against the source asset on
-  // 2026-05-11; see SUMMARY for inspection notes.
-  useEffect(() => {
-    lampScene.traverse((child) => {
-      if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
-        if (child.material.name === 'desk_lamp_arm_01_light') {
-          // Clone the material so the cached source isn't mutated.
-          const cloned = child.material.clone();
-          cloned.emissive = new THREE.Color(hexToInt(SCENE_COLORS.warn));
-          cloned.emissiveIntensity = 2.0;
-          cloned.toneMapped = false;
-          child.material = cloned;
-        }
-      }
-    });
-  }, [lampScene]);
-
   return (
     <>
       <Floor />
-      {/* Desk: real-world 2.0 × 0.95 × 0.79 m → scale 0.95 puts the
-          top surface at y≈0.75 m matching Phase 2's procedural envelope
-          (02-UI-SPEC desk at y=0.75). Width becomes 1.9 m vs procedural
-          1.2 m — the irreducible delta of swapping a real CC0 asset
-          into a contract calibrated for procedural geometry. Camera
-          poses and monitor positions stay on the Phase 2/3 spec values
-          per 04-UI-SPEC § Real GLB swap visual contract. */}
-      <primitive object={deskScene} position={[0, 0, 0]} scale={0.95} />
+      <Desk />
       <Monitor
         position={[-0.45, 0.95, -0.05]}
         rotation={[0, 0.18, 0]}
@@ -141,12 +72,8 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
           <WriteupsMonitor />
         </MonitorOverlay>
       </Monitor>
-      {/* Lamp: scale 0.5, base y=0.78 per Phase 2 spec (sits flush on
-          the desk-top surface at y≈0.77). */}
-      <primitive object={lampScene} position={[-0.5, 0.78, 0]} scale={0.5} />
-      {/* Bookshelf: scale 0.85 → 1.165 × 0.493 × 1.751 m. Position
-          Z=-0.6 per Phase 2 spec (60 cm behind desk centre). */}
-      <primitive object={bookshelfScene} position={[0, 0, -0.6]} scale={0.85} />
+      <Lamp position={[-0.5, 0.78, 0]} />
+      <Bookshelf />
     </>
   );
 }

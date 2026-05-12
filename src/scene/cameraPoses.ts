@@ -41,8 +41,8 @@ export const MONITOR_FOCUS_POSES: Record<FocusId, CameraPose> = {
 };
 
 export const DEFAULT_ORBIT_POSE: CameraPose = {
-  position: [2.4, 1.4, 2.4],
-  target: [0, 0.6, 0],
+  position: [1.3, 1.5, 1.3],
+  target: [0, 0.85, 0],
 };
 
 // drei <Html transform>: matrix elements (basis vectors) multiplied by
@@ -50,4 +50,4 @@ export const DEFAULT_ORBIT_POSE: CameraPose = {
 // monitor screen → DF = 0.55 × 400/600 ≈ 0.37. Phase 2/3 spec value
 // 1.8 was theoretical, never verified at production deploy; empirically
 // produces HTML ~4× the monitor frame width.
-export const DISTANCE_FACTOR = 0.5;
+export const DISTANCE_FACTOR = 0.4;

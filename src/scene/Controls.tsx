@@ -48,7 +48,7 @@ export const Controls = forwardRef<OrbitControlsImpl, ControlsProps>(function Co
     <OrbitControls
       ref={ref}
       makeDefault
-      target={[0, 0.6, 0]}
+      target={[0, 0.85, 0]}
       enablePan={false}
       enableDamping={!reduced}
       dampingFactor={0.08}

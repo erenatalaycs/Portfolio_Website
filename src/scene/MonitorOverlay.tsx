@@ -47,7 +47,7 @@ export function MonitorOverlay({ children, ariaLabel }: MonitorOverlayProps) {
       <div
         role="region"
         aria-label={ariaLabel}
-        className="w-full h-full bg-bg text-fg font-mono p-4 overflow-y-auto"
+        className="w-full h-full bg-bg text-fg font-mono p-4 overflow-auto"
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
