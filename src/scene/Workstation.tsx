@@ -5,18 +5,15 @@
 // accept focus state + click toggle (passed down from <ThreeDShell> via
 // Plan 03's <FocusController>).
 //
-// Monitor → content mapping (D-01):
-//   Left   = <Projects />                      — projects.ts (CNT-03)
-//   Center = <CenterMonitorContent />          — Whoami (Plan 04) + About + Skills
-//   Right  = <WriteupsMonitor />               — list/view (Plan 05)
-//
-// Single source of truth: the same <Projects /> and <About />/<Skills />
-// and <Writeups /> components render in BOTH shells. Adding a new entry
-// in src/content/* updates both shells automatically.
+// Task 1 (HS redesign — interim state): the center monitor's content is
+// now a 5-tab surface (<MonitorTabs />). Left/right monitors still hold
+// Projects + WriteupsMonitor as in Phase 3 — those will be removed in
+// Task 2 when the scene collapses to a single ultrawide monitor.
 //
 // Source: 02-UI-SPEC.md § Procedural workstation primitives;
 //         03-CONTEXT.md D-01; 03-UI-SPEC.md § Monitor → content mapping;
-//         03-RESEARCH.md Example 3
+//         03-RESEARCH.md Example 3;
+//         ~/.claude/plans/neon-tabbing-workstation.md — Task 1 + Task 2.
 
 import { Floor } from './Floor';
 import { Desk } from './Desk';
@@ -26,7 +23,7 @@ import { Bookshelf } from './Bookshelf';
 import { MonitorOverlay } from './MonitorOverlay';
 import type { FocusId } from './cameraPoses';
 import { Projects } from '../sections/Projects';
-import { CenterMonitorContent } from '../ui/CenterMonitorContent';
+import { MonitorTabs } from '../ui/MonitorTabs';
 import { WriteupsMonitor } from '../ui/WriteupsMonitor';
 
 interface WorkstationProps {
@@ -57,8 +54,8 @@ export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
         focused={focused}
         onFocusToggle={onFocusToggle}
       >
-        <MonitorOverlay ariaLabel="Center monitor: identity, about, and skills">
-          <CenterMonitorContent />
+        <MonitorOverlay ariaLabel="Center monitor: tabbed content (whoami, projects, writeups, certs, contact)">
+          <MonitorTabs />
         </MonitorOverlay>
       </Monitor>
       <Monitor

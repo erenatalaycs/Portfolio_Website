@@ -168,8 +168,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-11T15:08:00.000Z
-Stopped at: Plan 04-06 (real CC0 GLB workstation) done in worktree-agent-a6241fad4b7054f01; 2 commits (f256faa + 7019d08) awaiting merge by orchestrator. Plan 04-05 already merged in parallel by another agent.
-Next dispatch: 04-07 CHECKLIST+CI gates (depends 04-05, 04-06, 04-01..04 — all need to be on main first). 04-08 stays last (human sign-off only). Orchestrator merges this worktree branch + the parallel 04-05 branch before dispatching 04-07.
-Outstanding deferred: GitHub username discrepancy — JSON-LD `sameAs` still points to `github.com/erenatalaycs` while GH-Pages host is `eren-atalay.github.io`. Tracked in .planning/phases/04-real-asset-postprocessing-polish-pre-launch-qa/deferred-items.md for Plan 04-07/04-08 sweep — decide whether to rename the GitHub account or leave the mismatch.
-Resume file: (none — HANDOFF.json + .continue-here.md cleared on resume per workflow)
+Last session: 2026-05-13T15:01:15.856Z
+Stopped at: Session resumed (post-pause from 2026-05-12 HS redesign planning checkpoint). HANDOFF.json + .continue-here.md intact; plan at ~/.claude/plans/neon-tabbing-workstation.md (8 tasks). Two gating questions pending from user: (1) plan approval, (2) execution cadence. No source code changes this session.
+Outstanding deferred: GitHub username discrepancy — JSON-LD `sameAs` and GH-Pages host both standardized on `erenatalaycs.github.io` (D-17 revised 2026-05-12). Discrepancy now between `github.com/erenatalaycs` GH account and the LinkedIn `eren-atalay` handle — defer to v1.1 or rename decision. Tracked in .planning/phases/04-*/deferred-items.md.
+Resume file: .planning/HANDOFF.json + .planning/phases/04-real-asset-postprocessing-polish-pre-launch-qa/.continue-here.md (kept — not yet executed)
