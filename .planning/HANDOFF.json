@@ -1,38 +1,49 @@
 {
   "version": "1.0",
-  "timestamp": "2026-05-12T16:04:57.394Z",
+  "timestamp": "2026-05-13T15:01:15.856Z",
   "phase": "4",
-  "phase_name": "Real Asset, Postprocessing, Polish, Pre-Launch QA",
+  "phase_name": "Real Asset, Postprocessing, Polish, Pre-Launch QA (post-04-08 — HS redesign)",
   "phase_dir": ".planning/phases/04-real-asset-postprocessing-polish-pre-launch-qa",
-  "plan": "post-04-08",
+  "plan": "post-04-08-hs-redesign",
+  "plan_path": "/Users/erenatalay/.claude/plans/neon-tabbing-workstation.md",
   "task": 0,
-  "total_tasks": 1,
+  "total_tasks": 8,
   "status": "paused",
   "completed_tasks": [
-    {"id": "v1.0-deploy", "name": "v1.0 live deploy at erenatalaycs.github.io", "status": "done", "commit": "6b94678"},
-    {"id": "csp-fixes", "name": "CSP allowlist (data:, blob:, wasm-unsafe-eval, worker-src) for fonts + Draco workers + GLB textures", "status": "done", "commits": ["834e9a7", "d53c525"]},
-    {"id": "draco-selfhost", "name": "Self-hosted Draco decoder at public/draco/ (gstatic CDN blocked)", "status": "done", "commit": "8496420"},
-    {"id": "invalidate-fix", "name": "Canvas frameloop='demand' first-paint via onCreated invalidate() + FocusController invalidate calls", "status": "done", "commit": "d16e508"},
-    {"id": "scene-revert-procedural", "name": "Reverted Workstation.tsx from real GLB (Plan 04-06) to Phase 2 procedural geometry — GLB scaling couldn't satisfy spec envelope", "status": "done", "commit": "342d2e7"},
-    {"id": "monitor-spread", "name": "Iter 10: shrunk monitors to 15\" (0.36×0.21) + spaced at x=±0.4 to eliminate overlap; DF=0.34 empirical (spec's 1.8 produces HTML 4× monitor)", "status": "done", "commit": "6b94678"},
-    {"id": "fallback-tag", "name": "Git tag iter10-3-monitors-baseline for rollback", "status": "done"}
+    {"id": "scope-s1", "name": "Scope S1: monitor content layout — tabs (i) chosen over scrollable doc / OS windows", "status": "done"},
+    {"id": "scope-s2", "name": "Scope S2: camera — two poses (ii) chosen over drop-focus / per-tab poses", "status": "done"},
+    {"id": "scope-s3", "name": "Scope S3: decor assets — all procedural (i) chosen over GLB / hybrid", "status": "done"},
+    {"id": "plan-written", "name": "Plan written to ~/.claude/plans/neon-tabbing-workstation.md (8 tasks, ~1.5–2h budget, rollback strategy, anti-patterns)", "status": "done"},
+    {"id": "language-pref", "name": "Conversation language switched to Turkish; feedback memory saved at memory/feedback_conversation_language_turkish.md", "status": "done"}
   ],
   "remaining_tasks": [
-    {"id": "hs-redesign", "name": "Hacker Simulator-style 3D scene redesign — major scope: 1 ultrawide monitor instead of 3, keyboard + mouse + mug on desk, tower PC beside, neon strip behind monitor, wall poster/sign, chair, cyan/teal ambient accent. Spec deviation: 3-monitor content structure → tabbed/scrollable single-monitor presentation. Reference: https://store.steampowered.com/app/1754840/Hacker_Simulator/ — screenshots saved at /tmp/hs1.jpg /tmp/hs2.jpg /tmp/hs3.jpg (may be deleted on reboot — re-download from steamstatic if needed).", "status": "not_started"}
+    {"id": "plan-approval", "name": "User approval of plan at ~/.claude/plans/neon-tabbing-workstation.md — confirm tasks as written OR request edits", "status": "not_started"},
+    {"id": "exec-cadence", "name": "Confirm execution cadence — task-by-task with screenshot checkpoint after each, OR batch tasks 1–3 then first visual checkpoint", "status": "not_started"},
+    {"id": "t1-tabs", "name": "Task 1: MonitorTabs.tsx + zustand store; 5 tabs (whoami/projects/writeups/certs/contact); BracketLink button branch reused for tab triggers", "status": "not_started"},
+    {"id": "t2-ultrawide", "name": "Task 2: single ultrawide monitor geometry (1.10m × 0.46m frame, 1.04m × 0.40m screen); empirical distanceFactor — VERIFY via Playwright 2552×1364 before commit", "status": "not_started"},
+    {"id": "t3-two-pose", "name": "Task 3: two-pose camera (overview + focused); single isFocused boolean; reuse Phase 3 D-08 GSAP timeline + invalidate() in onUpdate", "status": "not_started"},
+    {"id": "t4-desk-decor", "name": "Task 4: procedural keyboard + mouse + mug + tower PC (with LED emissive); new DeskDecor.tsx", "status": "not_started"},
+    {"id": "t5-wall-decor", "name": "Task 5: procedural neon strip (emissive plane) + wall poster (canvas-generated texture, same-origin so no CSP issue)", "status": "not_started"},
+    {"id": "t6-chair", "name": "Task 6: procedural chair (seat + backrest + 4 cylinder legs); new Chair.tsx", "status": "not_started"},
+    {"id": "t7-lighting", "name": "Task 7: HS-style lighting (lower key, add cyan/teal point light behind monitor, cool ambient nudge); compare against /tmp/hs*.jpg", "status": "not_started"},
+    {"id": "t8-deploy-verify", "name": "Task 8: push to main, wait for GH Actions deploy + 5 OPS-05 gates, fetch live in fresh Playwright context to detect CDN cache divergence", "status": "not_started"}
   ],
   "blockers": [
-    {"description": "User has 8 external prerequisites for 04-08 ship sign-off (Web3Forms account, OG image screenshot, 2 real devices for QA, peer reviewers). Independent of HS redesign.", "type": "human_action", "workaround": "Track separately in CHECKLIST-LAUNCH.md"}
+    {"description": "Plan approval pending — user needs to OK ~/.claude/plans/neon-tabbing-workstation.md as written (or request edits) before any source code changes", "type": "human_action", "workaround": "On resume, surface the plan summary table + open questions, wait for ack"},
+    {"description": "04-08 human sign-off (Track B) still has 6 items (OG image swap, Lighthouse median-of-3, Web3Forms Gmail+Outlook delivery test, real-device QA iOS+Android, peer reviews ×2, GitHub username discrepancy decision). Independent of HS redesign; tracked in .planning/CHECKLIST-LAUNCH.md", "type": "human_action", "workaround": "Can run in parallel; HS redesign does not block sign-off and vice versa"}
   ],
   "human_actions_pending": [
-    {"action": "Decide scope of HS redesign: 1 ultrawide monitor (spec deviation) vs 2 monitors vs keep 3 with HS decor only", "context": "Plan 02 D-04 / Plan 03 D-01 lock 3 monitors mapped to 3 content sections (left=projects, center=identity, right=writeups). Reducing to 1 requires content restructure.", "blocking": true}
+    {"action": "Approve plan at ~/.claude/plans/neon-tabbing-workstation.md (or request edits)", "context": "Plan is 8 tasks, ~1.5–2h. Major scope: 1 ultrawide monitor + tab bar + 2 camera poses + procedural decor. Breaks Phase 2/3 D-04/D-01 3-monitor content mapping intentionally.", "blocking": true},
+    {"action": "Decide execution cadence: task-by-task (screenshot after each) vs batch tasks 1–3 then checkpoint", "context": "Tasks 2–3 are where the scene changes most visually; tasks 4–7 are decor dressing. Batch saves messaging overhead; per-task gives finer rollback granularity.", "blocking": true}
   ],
   "decisions": [
-    {"decision": "Tagged iter10-3-monitors-baseline before HS redesign for safe rollback", "rationale": "User explicitly asked to save current state in case redesign fails", "phase": "post-04"},
-    {"decision": "Pause session before HS redesign", "rationale": "Context at 65% in current session; many iterations made; fresh session needed for major rework", "phase": "post-04"},
-    {"decision": "drei <Html transform distanceFactor> empirical formula: world_size ≈ CSS_px × DF / 400", "rationale": "Spec range 1.5–2.5 is THEORETICAL and was never deploy-verified; empirically DF=1.8 with 600px CSS produces 2.7m HTML overlay vs 0.55m monitor screen (~5× overflow). Inverse of original mental model.", "phase": "4"},
-    {"decision": "Phase 2 procedural geometry > Plan 04-06 real GLB", "rationale": "Real Poly Haven GLB at any uniform scale fails to satisfy spec envelope (1.2m × 0.79m, ratio 1.52 vs GLB 2.0×0.79=2.53). Plan 04-06 Path A is fragile; procedural is coherent.", "phase": "post-04"}
+    {"decision": "S1: tab bar (i) — terminal-style row at top of monitor cycling whoami/projects/writeups/certs/contact", "rationale": "User answered S1=i. Cleanest of three options; preserves Phase 3 click-to-focus muscle as click-to-tab; reads as terminal/IDE without faking a desktop OS.", "phase": "post-04-08"},
+    {"decision": "S2: two camera poses (ii) — overview + focused, click monitor to focus, click background to overview", "rationale": "User answered S2=ii. Drops 3-pose Phase 3 cameraPoses.ts; keeps cinematic dolly muscle; simpler than per-tab pose.", "phase": "post-04-08"},
+    {"decision": "S3: all procedural decor (i) — keyboard, mouse, mug, tower PC, neon strip, wall poster, chair all built from primitives + emissive accents", "rationale": "User answered S3=i. Plan 04-06 burned a session on Poly Haven GLB scale; uniform scale can't satisfy per-asset envelopes without new contracts. Procedural is the known-good path. Hybrid GLB deferred to v1.1.", "phase": "post-04-08"},
+    {"decision": "Plan filed to ~/.claude/plans/neon-tabbing-workstation.md (NOT in .planning/ because this is post-v1.0 creative iteration, not a GSD-formal phase plan)", "rationale": ".continue-here.md from prior session explicitly directed this path. Lightweight plan-mode appropriate for ~1.5–2h visual iteration scoped to src/scene/* + src/ui/CenterMonitorContent.tsx. If scope grows, escalate to a formal Phase 5 via /gsd-phase.", "phase": "post-04-08"},
+    {"decision": "Conversation language switched to Turkish for this and future sessions; code/commits/plan files stay English", "rationale": "User said 'keep the conversation in turksih'. Feedback memory saved.", "phase": "all"}
   ],
   "uncommitted_files": [],
-  "next_action": "Start fresh session via /gsd-resume-work. The resume workflow will detect this HANDOFF.json + .continue-here.md. Then: (1) confirm with user whether HS redesign should retain 3 monitors with decor (low-risk) OR go to 1 ultrawide (spec deviation, content restructure). (2) Re-fetch HS screenshots if /tmp was cleared. (3) Implement in clean context with iterative screenshot loop (vite preview + Playwright at 2552×1364) per the proven pattern.",
-  "context_notes": "Long session — went through ~12 iterations of 3D scene tuning. User feedback was directional but visual judgement gradually converged. Hard-won learnings: (1) CSP must allow data:/blob:/wasm-unsafe-eval/worker-src blob: for R3F+drei+useGLTF. (2) Canvas frameloop='demand' in R3F v9+React 19 doesn't auto-paint on first commit — explicit invalidate() needed in onCreated. (3) drei distanceFactor formula is inverse of intuition. (4) Real GLB swaps need scale-and-offset both — uniform scale alone won't reach target Y. (5) Empirical screenshot loops via Playwright at user resolution (2552×1364) are 10× faster than text iteration."
+  "next_action": "Start fresh session via /gsd-resume-work. Resume workflow will read this JSON + .continue-here.md. First message to user: surface plan summary table + the two pending human-action questions (plan approval + cadence). Do NOT begin code changes until BOTH answered.",
+  "context_notes": "Short pre-execution session. Only artifact produced is the plan at ~/.claude/plans/neon-tabbing-workstation.md. No repo source files touched. Three scope decisions captured from user (S1=i, S2=ii, S3=i). All blocking constraints from previous session's .continue-here.md still apply: drei distanceFactor empirical (NOT spec), R3F demand-frame needs invalidate(), CSP must allow blob/data/wasm-unsafe-eval/worker-src blob, real GLB can't be uniformly scaled to spec envelope. Rollback safety: git tag iter10-3-monitors-baseline at 6b94678."
 }
