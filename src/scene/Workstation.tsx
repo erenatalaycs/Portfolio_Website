@@ -31,6 +31,7 @@ import { Bookshelf } from './Bookshelf';
 import { MonitorOverlay } from './MonitorOverlay';
 import { DeskDecor } from './DeskDecor';
 import { WallDecor } from './WallDecor';
+import { Chair } from './Chair';
 import { MonitorTabs } from '../ui/MonitorTabs';
 
 interface WorkstationProps {
@@ -59,6 +60,7 @@ export function Workstation({ focused, onMonitorClick }: WorkstationProps) {
       <Bookshelf />
       <DeskDecor />
       <WallDecor />
+      <Chair />
     </>
   );
 }
