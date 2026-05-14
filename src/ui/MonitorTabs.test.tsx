@@ -16,10 +16,10 @@ describe('<MonitorTabs />', () => {
     useTabStore.setState({ activeTab: 'whoami' });
   });
 
-  it('renders a tablist with 5 tab buttons', () => {
+  it('renders a labelled toggle-button group with 5 buttons', () => {
     render(<MonitorTabs />);
-    const tablist = screen.getByRole('tablist', { name: /monitor sections/i });
-    expect(tablist).toBeInTheDocument();
+    const group = screen.getByRole('group', { name: /monitor sections/i });
+    expect(group).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /show whoami tab/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /show projects tab/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /show writeups tab/i })).toBeInTheDocument();
@@ -37,7 +37,8 @@ describe('<MonitorTabs />', () => {
 
   it('renders the whoami panel by default', () => {
     render(<MonitorTabs />);
-    expect(screen.getByRole('tabpanel', { name: /whoami content/i })).toBeInTheDocument();
+    // Panel content is labelled by aria-label on a generic div (no role).
+    expect(screen.getByLabelText(/whoami content/i)).toBeInTheDocument();
   });
 
   it('clicking a different tab switches the panel and shifts aria-pressed', () => {
@@ -46,7 +47,7 @@ describe('<MonitorTabs />', () => {
     fireEvent.click(projectsBtn);
     expect(useTabStore.getState().activeTab).toBe('projects');
     expect(projectsBtn).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('tabpanel', { name: /projects content/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/projects content/i)).toBeInTheDocument();
   });
 
   it('each tab id is reachable via direct store mutation', () => {
@@ -54,9 +55,7 @@ describe('<MonitorTabs />', () => {
     for (const tab of ['whoami', 'projects', 'writeups', 'certs', 'contact'] as const) {
       useTabStore.setState({ activeTab: tab });
       rerender(<MonitorTabs />);
-      expect(
-        screen.getByRole('tabpanel', { name: new RegExp(`${tab} content`, 'i') }),
-      ).toBeInTheDocument();
+      expect(screen.getByLabelText(new RegExp(`${tab} content`, 'i'))).toBeInTheDocument();
     }
   });
 });

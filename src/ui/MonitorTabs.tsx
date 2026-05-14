@@ -75,8 +75,13 @@ export function MonitorTabs() {
 
   return (
     <div className="flex flex-col">
+      {/* Toggle-button group, NOT a true ARIA tablist — using role=tablist
+          would require role=tab children (the WAI-ARIA "required children"
+          constraint Lighthouse audits). We already give each <button> an
+          aria-pressed state via BracketLink, which is the correct toggle
+          pattern; role=group + aria-label is the parent contract. */}
       <div
-        role="tablist"
+        role="group"
         aria-label="Monitor sections"
         className="sticky top-0 bg-bg z-10 flex flex-wrap gap-x-2 gap-y-1 pb-2 border-b border-surface-1"
       >
@@ -93,7 +98,7 @@ export function MonitorTabs() {
           </BracketLink>
         ))}
       </div>
-      <div role="tabpanel" aria-label={`${TAB_LABELS[activeTab]} content`} className="mt-2">
+      <div aria-label={`${TAB_LABELS[activeTab]} content`} className="mt-2">
         <TabPanel tab={activeTab} />
       </div>
     </div>
