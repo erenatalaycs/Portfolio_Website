@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: awaiting_human
-stopped_at: Phase 4 Plan 04-07 merged — all autonomous Phase 4 work complete; 04-08 is human-only sign-off
-last_updated: "2026-05-11T16:30:00.000Z"
-last_activity: 2026-05-11 -- 04-07 CHECKLIST-LAUNCH + 5 CI gates + Lighthouse advisory merged; 7/8 plans on main
+stopped_at: HS redesign live at hs-redesign-v1 tag; 04-08 human-only sign-off remains
+last_updated: "2026-05-14T09:03:00.000Z"
+last_activity: 2026-05-14 -- HS-redesign 8-task pass complete; single ultrawide monitor + tabs + decor + HS lighting live
 progress:
   total_phases: 4
   completed_phases: 2
@@ -168,7 +168,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-13T15:01:15.856Z
-Stopped at: Session resumed (post-pause from 2026-05-12 HS redesign planning checkpoint). HANDOFF.json + .continue-here.md intact; plan at ~/.claude/plans/neon-tabbing-workstation.md (8 tasks). Two gating questions pending from user: (1) plan approval, (2) execution cadence. No source code changes this session.
-Outstanding deferred: GitHub username discrepancy — JSON-LD `sameAs` and GH-Pages host both standardized on `erenatalaycs.github.io` (D-17 revised 2026-05-12). Discrepancy now between `github.com/erenatalaycs` GH account and the LinkedIn `eren-atalay` handle — defer to v1.1 or rename decision. Tracked in .planning/phases/04-*/deferred-items.md.
-Resume file: .planning/HANDOFF.json + .planning/phases/04-real-asset-postprocessing-polish-pre-launch-qa/.continue-here.md (kept — not yet executed)
+Last session: 2026-05-14T09:03:00.000Z
+Stopped at: HS-redesign 8-task pass shipped autonomously — live at https://erenatalaycs.github.io/Portfolio_Website/. Tag `hs-redesign-v1` marks the new shipped state; `iter10-3-monitors-baseline` retained as fallback to procedural 3-monitor scene. Scene now: single ultrawide monitor with 5-tab MonitorTabs (whoami/projects/writeups/certs/contact), zustand tab store, 2-pose camera (overview ↔ focused), procedural decor (keyboard + mouse + mug + tower PC + neon strip + canvas-texture wall poster + chair), HS-tinted lighting (cool ambient + dim key + cyan accent point light + warm lamp point light). Two GH Actions iterations: first failed on Prettier check; fix-and-push deploy success. One follow-up commit dropped role=tablist → role=group for the Lighthouse aria-required-children audit.
+Outstanding deferred: 04-08 human sign-off (6 items in CHECKLIST-LAUNCH.md). GitHub username discrepancy still tracked in 04-*/deferred-items.md.
+Resume file: (none — HANDOFF.json + .continue-here.md cleared at task completion per workflow)
