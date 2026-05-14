@@ -59,7 +59,7 @@ function Keyboard() {
 function Mouse() {
   const w = 0.06;
   const h = 0.025;
-  const d = 0.10;
+  const d = 0.1;
   const y = DESK_TOP_Y + h / 2;
   return (
     <mesh position={[0.28, y, 0.15]} castShadow receiveShadow>
@@ -71,7 +71,7 @@ function Mouse() {
 
 function Mug() {
   const r = 0.04;
-  const h = 0.10;
+  const h = 0.1;
   const y = DESK_TOP_Y + h / 2;
   return (
     <group position={[0.46, y, 0.07]}>
@@ -89,7 +89,7 @@ function Mug() {
 }
 
 function TowerPC() {
-  const w = 0.20;
+  const w = 0.2;
   const h = 0.45;
   const d = 0.45;
   const y = h / 2; // floor at y=0; tower bottom at floor.

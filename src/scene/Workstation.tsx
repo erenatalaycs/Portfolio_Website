@@ -45,12 +45,12 @@ export function Workstation({ focused, onMonitorClick }: WorkstationProps) {
       <Floor />
       <Desk />
       <Monitor
-        position={[0, 1.10, -0.05]}
+        position={[0, 1.1, -0.05]}
         focused={focused}
         onClick={onMonitorClick}
-        frameSize={[1.10, 0.46, 0.04]}
-        screenSize={[1.04, 0.40]}
-        standHeight={0.10}
+        frameSize={[1.1, 0.46, 0.04]}
+        screenSize={[1.04, 0.4]}
+        standHeight={0.1}
       >
         <MonitorOverlay ariaLabel="Workstation monitor: tabbed content (whoami, projects, writeups, certs, contact)">
           <MonitorTabs />

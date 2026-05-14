@@ -37,9 +37,7 @@ describe('<MonitorTabs />', () => {
 
   it('renders the whoami panel by default', () => {
     render(<MonitorTabs />);
-    expect(
-      screen.getByRole('tabpanel', { name: /whoami content/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('tabpanel', { name: /whoami content/i })).toBeInTheDocument();
   });
 
   it('clicking a different tab switches the panel and shifts aria-pressed', () => {
@@ -48,9 +46,7 @@ describe('<MonitorTabs />', () => {
     fireEvent.click(projectsBtn);
     expect(useTabStore.getState().activeTab).toBe('projects');
     expect(projectsBtn).toHaveAttribute('aria-pressed', 'true');
-    expect(
-      screen.getByRole('tabpanel', { name: /projects content/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('tabpanel', { name: /projects content/i })).toBeInTheDocument();
   });
 
   it('each tab id is reachable via direct store mutation', () => {

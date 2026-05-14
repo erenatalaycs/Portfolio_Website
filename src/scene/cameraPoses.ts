@@ -29,8 +29,8 @@ export interface CameraPose {
 // Focused pose — camera ~0.85 m in front of the ultrawide monitor at
 // near-eye height; the screen fills the frustum.
 export const MONITOR_FOCUS_POSE: CameraPose = {
-  position: [0, 1.20, 0.85],
-  target: [0, 1.10, -0.05],
+  position: [0, 1.2, 0.85],
+  target: [0, 1.1, -0.05],
 };
 
 // Overview pose — room-scale. Slightly above standing eye height so the
