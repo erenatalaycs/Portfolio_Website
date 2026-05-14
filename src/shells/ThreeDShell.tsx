@@ -7,21 +7,17 @@
 // across reloads). Re-renders when toggled; <Controls> reads the prop and
 // swaps clamps without remounting.
 //
-// Phase 3 additions (Plan 03-03):
-//   - focused: FocusId | null state (URL ↔ state sync via FocusController)
-//   - controlsRef: forwarded to <Controls> so <FocusController> mutates
-//     OrbitControls.enabled + .target directly (Pattern 4)
-//   - onFocusToggle: handler called by <Monitor> screen-plane onClick
-//     (re-click on focused monitor → defocus; otherwise → focus that id)
-//   - <Canvas onPointerMissed>: outside-click defocus (D-10 #2)
-//   - Expanded canvas aria-label (UI-SPEC § ARIA contract Phase 3)
-//   - <FocusController> mounted inside <Canvas> (uses useThree)
+// HS redesign (Task 3): the Phase 3 three-monitor focus contract has
+// collapsed to a single boolean. Click the (single ultrawide) monitor
+// → focused; click background or Esc → overview. URL ?focus=<tab>
+// mirrors both the boolean and the activeTab (via FocusController).
 //
 // Source: 02-UI-SPEC.md § 3D shell DOM structure (3D-03);
 //         02-RESEARCH.md Pattern 3, Pattern 5;
 //         02-CONTEXT.md D-09, D-11, D-13, D-14;
 //         03-RESEARCH.md Example 2 + Pattern 5;
-//         03-UI-SPEC.md § Click-outside defocus + § ARIA contract
+//         03-UI-SPEC.md § Click-outside defocus + § ARIA contract;
+//         ~/.claude/plans/neon-tabbing-workstation.md Task 3.
 
 import { useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
@@ -33,31 +29,26 @@ import { Lighting } from '../scene/Lighting';
 import { Controls } from '../scene/Controls';
 import { FocusController } from '../scene/FocusController';
 import { ScenePostprocessing } from '../3d/ScenePostprocessing';
-import type { FocusId } from '../scene/cameraPoses';
 import { setQueryParams } from '../lib/useQueryParams';
 import { BracketLink } from '../ui/BracketLink';
 import { identity } from '../content/identity';
+import { useTabStore } from '../store/tabStore';
 
 interface ThreeDShellProps {
   onContextLost: () => void;
 }
 
-// FocusId → URL ?focus= value mapping (inverse of parseFocusFromUrl).
-const URL_VALUE_FOR: Record<FocusId, string> = {
-  left: 'projects',
-  center: 'about',
-  right: 'writeups',
-};
-
 export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
   const [cameraMode, setCameraMode] = useState<CameraMode>('orbit');
-  const [focused, setFocused] = useState<FocusId | null>(null);
+  const [focused, setFocused] = useState<boolean>(false);
+  const activeTab = useTabStore((s) => s.activeTab);
   const controlsRef = useRef<OrbitControlsImpl>(null);
 
-  const onFocusToggle = (id: FocusId) => {
-    const next: FocusId | null = focused === id ? null : id;
+  const onMonitorClick = () => {
+    const next = !focused;
     setFocused(next);
-    setQueryParams({ focus: next === null ? null : URL_VALUE_FOR[next] });
+    // URL mirrors state: ?focus=<tab> when focused, no ?focus= when overview.
+    setQueryParams({ focus: next ? activeTab : null });
   };
 
   return (
@@ -85,7 +76,7 @@ export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
             gl.domElement.addEventListener('webglcontextlost', handler);
             gl.domElement.setAttribute(
               'aria-label',
-              'Interactive 3D workstation scene. Three monitors render projects, identity, and write-ups. Drag to look around. Click a monitor to focus, press Escape to return.',
+              'Interactive 3D workstation scene. A single ultrawide monitor renders tabbed content (whoami, projects, writeups, certs, contact). Drag to look around. Click the monitor to focus, press Escape to return.',
             );
             gl.domElement.style.touchAction = 'pan-y';
             // First-paint trigger: with frameloop="demand" R3F v9 + React 19
@@ -94,14 +85,14 @@ export default function ThreeDShell({ onContextLost }: ThreeDShellProps) {
             invalidate();
           }}
           onPointerMissed={() => {
-            if (focused !== null) {
-              setFocused(null);
+            if (focused) {
+              setFocused(false);
               setQueryParams({ focus: null });
             }
           }}
         >
           <Lighting />
-          <Workstation focused={focused} onFocusToggle={onFocusToggle} />
+          <Workstation focused={focused} onMonitorClick={onMonitorClick} />
           <Controls cameraMode={cameraMode} ref={controlsRef} />
           <FocusController controlsRef={controlsRef} focused={focused} setFocused={setFocused} />
           <ScenePostprocessing />

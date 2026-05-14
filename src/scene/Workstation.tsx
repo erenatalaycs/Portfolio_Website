@@ -29,24 +29,22 @@ import { Monitor } from './Monitor';
 import { Lamp } from './Lamp';
 import { Bookshelf } from './Bookshelf';
 import { MonitorOverlay } from './MonitorOverlay';
-import type { FocusId } from './cameraPoses';
 import { MonitorTabs } from '../ui/MonitorTabs';
 
 interface WorkstationProps {
-  focused: FocusId | null;
-  onFocusToggle: (id: FocusId) => void;
+  focused: boolean;
+  onMonitorClick: () => void;
 }
 
-export function Workstation({ focused, onFocusToggle }: WorkstationProps) {
+export function Workstation({ focused, onMonitorClick }: WorkstationProps) {
   return (
     <>
       <Floor />
       <Desk />
       <Monitor
         position={[0, 1.10, -0.05]}
-        monitorId="center"
         focused={focused}
-        onFocusToggle={onFocusToggle}
+        onClick={onMonitorClick}
         frameSize={[1.10, 0.46, 0.04]}
         screenSize={[1.04, 0.40]}
         standHeight={0.10}

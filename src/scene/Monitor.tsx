@@ -11,12 +11,11 @@
 // place the stand bottom on the desk top exactly (no embedded-in-desk
 // volume).
 //
-// Click semantics (Pattern 5) — unchanged:
+// Click semantics (Pattern 5):
 //   - e.stopPropagation() prevents the click from also triggering
 //     <Canvas onPointerMissed> (which is the outside-click defocus trigger).
-//   - onFocusToggle is called with this monitor's id; <FocusController>
-//     (Plan 03) decides whether this is a focus or re-click defocus based
-//     on whether focused === monitorId.
+//   - onClick() fires the parent's monitor-click handler; <ThreeDShell>
+//     toggles its boolean `focused` state and mirrors to URL ?focus=<tab>.
 //
 // Source: 02-UI-SPEC.md § Procedural workstation primitives — Monitor rows;
 //         02-CONTEXT.md D-06; 02-RESEARCH.md Pattern 7;
@@ -26,14 +25,12 @@
 
 import type { ReactNode } from 'react';
 import { SCENE_COLORS } from './colors';
-import type { FocusId } from './cameraPoses';
 
 interface MonitorProps {
   position: [number, number, number];
   rotation?: [number, number, number];
-  monitorId: FocusId;
-  focused: FocusId | null;
-  onFocusToggle: (id: FocusId) => void;
+  focused: boolean;
+  onClick: () => void;
   children?: ReactNode;
   /** Frame outer dimensions [w, h, d] (meters). */
   frameSize?: [number, number, number];
@@ -47,15 +44,14 @@ interface MonitorProps {
 export function Monitor({
   position,
   rotation = [0, 0, 0],
-  monitorId,
   focused,
-  onFocusToggle,
+  onClick,
   children,
   frameSize = [0.36, 0.21, 0.04],
   screenSize = [0.34, 0.19],
   standHeight = 0.15,
 }: MonitorProps) {
-  const isFocused = focused === monitorId;
+  const isFocused = focused;
   const [, frameH, frameD] = frameSize;
   const [screenW, screenH] = screenSize;
   // Stand: top sits at frame bottom edge so the cylinder bridges desk → frame.
@@ -69,12 +65,12 @@ export function Monitor({
         <boxGeometry args={frameSize} />
         <meshStandardMaterial color={SCENE_COLORS.bg} roughness={0.6} metalness={0.1} />
       </mesh>
-      {/* Screen plane — interactive (Phase 3 click-to-focus). */}
+      {/* Screen plane — interactive (click toggles overview ↔ focused). */}
       <mesh
         position={[0, 0, screenZ]}
         onClick={(e) => {
           e.stopPropagation();
-          onFocusToggle(monitorId);
+          onClick();
         }}
       >
         <planeGeometry args={[screenW, screenH]} />

@@ -1,16 +1,14 @@
 // src/scene/cameraPoses.ts
 //
-// Single source of truth for camera poses + drei <Html> distanceFactor.
-// Consumed by:
+// Single source of truth for the two camera poses + drei <Html>
+// distanceFactor. Consumed by:
 //   - <MonitorOverlay>      (DISTANCE_FACTOR)
-//   - <FocusController>     (MONITOR_FOCUS_POSES + DEFAULT_ORBIT_POSE)
+//   - <FocusController>     (MONITOR_FOCUS_POSE + DEFAULT_ORBIT_POSE)
 //
-// HS redesign (Task 2): the scene now hosts a single ultrawide monitor
-// at world position [0, 1.10, -0.05]. The Phase 3 three-pose contract
-// (left / center / right) survives in the FocusId type for backward
-// compatibility with FocusController's URL parser, but only `center` is
-// actually targeted; `left` and `right` fall back to the same pose.
-// Task 3 will collapse FocusId to a 2-state boolean.
+// HS redesign (Task 3): the Phase 3 three-pose contract has been
+// collapsed to a 2-pose toggle (overview ↔ focused). FocusController
+// now owns a simple boolean `focused` state — no FocusId enum, no
+// per-monitor pose dictionary.
 //
 // DISTANCE_FACTOR — empirical, NOT spec. Formula: world_size = CSS_px ×
 // DF / 400. MonitorOverlay default is 1100×420 px; target ultrawide
@@ -21,33 +19,23 @@
 //
 // Source: 03-RESEARCH.md Pattern 12; 03-UI-SPEC.md § Per-monitor focus poses;
 //         03-CONTEXT.md D-08, D-11;
-//         ~/.claude/plans/neon-tabbing-workstation.md Task 2.
-
-export type FocusId = 'left' | 'center' | 'right';
+//         ~/.claude/plans/neon-tabbing-workstation.md Task 2-3.
 
 export interface CameraPose {
   position: [number, number, number];
   target: [number, number, number];
 }
 
-// Monitor frame center at [0, 1.10, -0.05] (Workstation.tsx). Focus pose
-// places camera ~0.85 m in front of the monitor at near-eye height — the
-// ultrawide screen fills the frustum at this distance.
-const MONITOR_FOCUS_POSE: CameraPose = {
+// Focused pose — camera ~0.85 m in front of the ultrawide monitor at
+// near-eye height; the screen fills the frustum.
+export const MONITOR_FOCUS_POSE: CameraPose = {
   position: [0, 1.20, 0.85],
   target: [0, 1.10, -0.05],
 };
 
-export const MONITOR_FOCUS_POSES: Record<FocusId, CameraPose> = {
-  left: MONITOR_FOCUS_POSE,
-  center: MONITOR_FOCUS_POSE,
-  right: MONITOR_FOCUS_POSE,
-};
-
-// Overview pose — the "room-scale" camera. Sits slightly above standing
-// eye height to show desk + decor (Task 4-6 procedural decor) from a
-// natural angle. Target the monitor mid-band (y=1.10) so the camera
-// always frames the screen.
+// Overview pose — room-scale. Slightly above standing eye height so the
+// desk + Task 4-6 procedural decor read naturally. Target the monitor
+// mid-band so overview never loses the screen.
 export const DEFAULT_ORBIT_POSE: CameraPose = {
   position: [1.4, 1.6, 1.6],
   target: [0, 1.05, 0],
