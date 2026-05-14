@@ -14,11 +14,15 @@ import { SCENE_COLORS } from './colors';
 
 interface LampProps {
   position: [number, number, number];
+  /** Optional y-rotation. [0, Math.PI, 0] mirrors the shade so it tilts
+   *  toward -x (away from desk center). HS redesign uses this to keep
+   *  the shade outside the monitor's x extent. */
+  rotation?: [number, number, number];
 }
 
-export function Lamp({ position }: LampProps) {
+export function Lamp({ position, rotation = [0, 0, 0] }: LampProps) {
   return (
-    <group position={position}>
+    <group position={position} rotation={rotation}>
       {/* Base disc: 7 cm radius, 2 cm tall */}
       <mesh castShadow>
         <cylinderGeometry args={[0.07, 0.07, 0.02, 24]} />

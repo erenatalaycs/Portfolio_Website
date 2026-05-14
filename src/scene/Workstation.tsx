@@ -56,7 +56,16 @@ export function Workstation({ focused, onMonitorClick }: WorkstationProps) {
           <MonitorTabs />
         </MonitorOverlay>
       </Monitor>
-      <Lamp position={[-0.5, 0.78, 0]} />
+      {/* Lamp at left-front corner of desk with a 180° y-rotation so the
+          shade tilts toward -x (away from monitor center) instead of
+          toward +x. Without this mirror, the shade's +0.05 local x-offset
+          + tilt push the shade INTO the monitor's x extent ([-0.55, +0.55])
+          even though the lamp base sits outside. With the rotation:
+          - Neck at world x=-0.58 → outside monitor x range
+          - Shade at world x ≈ -0.63 → clear of monitor frame entirely
+          The lamp base extends 0.05 m off the desk left edge (desk x_max
+          = -0.6, base radius = 0.07); minor visual cost. */}
+      <Lamp position={[-0.58, 0.78, 0.18]} rotation={[0, Math.PI, 0]} />
       <Bookshelf />
       <DeskDecor />
       <WallDecor />
