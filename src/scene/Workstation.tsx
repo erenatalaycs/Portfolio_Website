@@ -29,6 +29,7 @@ import { Monitor } from './Monitor';
 import { Lamp } from './Lamp';
 import { Bookshelf } from './Bookshelf';
 import { MonitorOverlay } from './MonitorOverlay';
+import { DeskDecor } from './DeskDecor';
 import { MonitorTabs } from '../ui/MonitorTabs';
 
 interface WorkstationProps {
@@ -55,6 +56,7 @@ export function Workstation({ focused, onMonitorClick }: WorkstationProps) {
       </Monitor>
       <Lamp position={[-0.5, 0.78, 0]} />
       <Bookshelf />
+      <DeskDecor />
     </>
   );
 }
