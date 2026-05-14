@@ -4,19 +4,14 @@
 // plane is the Phase 3 click-to-focus target; <MonitorOverlay> mounts
 // above it as `children` to project DOM content.
 //
-// 15" compact-monitor proportions: 0.34 × 0.19 m screen; 0.36 × 0.21
-// × 0.04 m frame. Shrunk from Phase 2's 24" original (0.58 × 0.35) so
-// three monitors don't overlap on the 1.2-m procedural desk top.
-// At spacing 0.4 m the three frames span 1.08 m with 4 cm gaps between
-// them — visually distinct rectangles, all on desk.
+// HS-redesign (Task 2): geometry is now parameterised so the same
+// component can render the single ultrawide (1.10 × 0.46 m frame /
+// 1.04 × 0.40 m screen) without the file having to change for any
+// future re-sizing. Stand height is computed by the caller so it can
+// place the stand bottom on the desk top exactly (no embedded-in-desk
+// volume).
 //
-// Phase 3 additions (Plan 03-02):
-//   - children?: ReactNode prop — UI-SPEC § Monitor refactor Option A
-//   - monitorId: FocusId prop — identifies which monitor for focus state
-//   - focused: FocusId | null prop — drives subtle emissive-intensity feedback
-//   - onFocusToggle: (id: FocusId) => void prop — fires on screen-plane click
-//
-// Click semantics (Pattern 5):
+// Click semantics (Pattern 5) — unchanged:
 //   - e.stopPropagation() prevents the click from also triggering
 //     <Canvas onPointerMissed> (which is the outside-click defocus trigger).
 //   - onFocusToggle is called with this monitor's id; <FocusController>
@@ -26,7 +21,8 @@
 // Source: 02-UI-SPEC.md § Procedural workstation primitives — Monitor rows;
 //         02-CONTEXT.md D-06; 02-RESEARCH.md Pattern 7;
 //         03-RESEARCH.md Pattern 3 + Pattern 5;
-//         03-UI-SPEC.md § Monitor refactor (Option A locked)
+//         03-UI-SPEC.md § Monitor refactor (Option A locked);
+//         ~/.claude/plans/neon-tabbing-workstation.md Task 2.
 
 import type { ReactNode } from 'react';
 import { SCENE_COLORS } from './colors';
@@ -39,6 +35,13 @@ interface MonitorProps {
   focused: FocusId | null;
   onFocusToggle: (id: FocusId) => void;
   children?: ReactNode;
+  /** Frame outer dimensions [w, h, d] (meters). */
+  frameSize?: [number, number, number];
+  /** Screen plane dimensions [w, h] (meters); should be slightly smaller than frame for bezel. */
+  screenSize?: [number, number];
+  /** Stand cylinder height (meters). Stand top sits at the frame's bottom edge,
+   *  so stand center is at y = -frameH/2 - standHeight/2 in group-local coords. */
+  standHeight?: number;
 }
 
 export function Monitor({
@@ -48,24 +51,33 @@ export function Monitor({
   focused,
   onFocusToggle,
   children,
+  frameSize = [0.36, 0.21, 0.04],
+  screenSize = [0.34, 0.19],
+  standHeight = 0.15,
 }: MonitorProps) {
   const isFocused = focused === monitorId;
+  const [, frameH, frameD] = frameSize;
+  const [screenW, screenH] = screenSize;
+  // Stand: top sits at frame bottom edge so the cylinder bridges desk → frame.
+  const standCenterY = -(frameH / 2) - standHeight / 2;
+  // Screen plane sits just in front of the frame's front face (frameD/2 + 0.005).
+  const screenZ = frameD / 2 + 0.005;
   return (
     <group position={position} rotation={rotation}>
       {/* Frame/back */}
       <mesh castShadow>
-        <boxGeometry args={[0.36, 0.21, 0.04]} />
+        <boxGeometry args={frameSize} />
         <meshStandardMaterial color={SCENE_COLORS.bg} roughness={0.6} metalness={0.1} />
       </mesh>
       {/* Screen plane — interactive (Phase 3 click-to-focus). */}
       <mesh
-        position={[0, 0, 0.025]}
+        position={[0, 0, screenZ]}
         onClick={(e) => {
           e.stopPropagation();
           onFocusToggle(monitorId);
         }}
       >
-        <planeGeometry args={[0.34, 0.19]} />
+        <planeGeometry args={[screenW, screenH]} />
         <meshStandardMaterial
           color={SCENE_COLORS.bg}
           emissive={SCENE_COLORS.accent}
@@ -75,9 +87,9 @@ export function Monitor({
       </mesh>
       {/* drei <Html transform occlude="blending"> overlay (Phase 3 — Plan 03-02). */}
       {children}
-      {/* Stand: cylinder from desk top to monitor bottom (spec) */}
-      <mesh position={[0, -0.25, 0]} castShadow>
-        <cylinderGeometry args={[0.04, 0.06, 0.15, 16]} />
+      {/* Stand: cylinder spans desk top → frame bottom. */}
+      <mesh position={[0, standCenterY, 0]} castShadow>
+        <cylinderGeometry args={[0.04, 0.06, standHeight, 16]} />
         <meshStandardMaterial color={SCENE_COLORS.bg} roughness={0.6} metalness={0.1} />
       </mesh>
     </group>
