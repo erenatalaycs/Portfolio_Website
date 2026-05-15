@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: awaiting_human
-stopped_at: HS redesign live at hs-redesign-v1 tag; 04-08 human-only sign-off remains
-last_updated: "2026-05-14T09:03:00.000Z"
-last_activity: 2026-05-14 -- HS-redesign 8-task pass complete; single ultrawide monitor + tabs + decor + HS lighting live
+status: Awaiting next milestone
+stopped_at: "HS-redesign 8-task pass shipped autonomously — live at https://erenatalaycs.github.io/Portfolio_Website/. Tag `hs-redesign-v1` marks the new shipped state; `iter10-3-monitors-baseline` retained as fallback to procedural 3-monitor scene. Scene now: single ultrawide monitor with 5-tab MonitorTabs (whoami/projects/writeups/certs/contact), zustand tab store, 2-pose camera (overview ↔ focused), procedural decor (keyboard + mouse + mug + tower PC + neon strip + canvas-texture wall poster + chair), HS-tinted lighting (cool ambient + dim key + cyan accent point light + warm lamp point light). Two GH Actions iterations: first failed on Prettier check; fix-and-push deploy success. One follow-up commit dropped role=tablist → role=group for the Lighthouse aria-required-children audit."
+last_updated: "2026-05-15T10:22:39.165Z"
+last_activity: 2026-05-15 — Milestone v1.0 completed and archived
 progress:
   total_phases: 4
   completed_phases: 2
@@ -18,20 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-06)
+See: .planning/PROJECT.md (updated 2026-05-15)
 
 **Core value:** Make a cyber recruiter or hiring manager think *"this person actually gets this field"* within seconds — without forcing recruiters to wait for a 3D scene before they can find the CV and contact details.
-**Current focus:** Phase 04 — real asset, postprocessing, polish, pre-launch QA (v1.0 ship phase)
+**Current focus:** v1.0 shipped 2026-05-15 — awaiting next milestone (v1.1 will close the 04-08 human sign-off track + author write-ups + revisit GLB workstation)
 
 ## Current Position
 
-Phase: 4 of 4
-Plans complete in Phase 4: 7 of 8 (04-01..04-07 — all autonomous work done)
-Plans remaining in Phase 4: 1 (04-08 — human-only sign-off, autonomous: false)
-Status: AWAITING ERREN — 04-08 is fundamentally human work. See .planning/CHECKLIST-LAUNCH.md for 14-item fillable structure. No more agents to dispatch.
-Last activity: 2026-05-11
-
-Progress: [█████████▓] 93%
+Phase: Milestone v1.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-05-15 — Milestone v1.0 completed and archived
 
 ## 04-08 Human-Only Tasks (cannot be agent-completed)
 
@@ -160,11 +157,17 @@ None yet.
 
 ## Deferred Items
 
-Items acknowledged and carried forward from previous milestone close:
+Items acknowledged and carried forward at v1.0 milestone close on 2026-05-15:
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| *(none — pre-v1)* | | | |
+| verification | Phase 1 (`01-VERIFICATION.md`) | human_needed | 2026-05-06 |
+| plan | Plan 03-06 — author 2-3 MDX CTF/lab write-ups (CNT-02/CNT-03) | autonomous:false, override accepted | 2026-05-08 |
+| plan | Plan 04-08 — pre-launch human sign-off (OG image, Lighthouse, Web3Forms delivery, real-device QA, peer reviews, OPS-03/04/05) | autonomous:false, in-progress | 2026-05-09 |
+| requirement | 3D-08 (GLB workstation half) | Plan 04-06 reverted to procedural in commit 342d2e7; promoted to v2 V2-3D-01 | 2026-05-15 |
+| requirement | CTC-01 (Gmail+Outlook delivery half) | code wired Plan 04-02; delivery test gated on Plan 04-08 | 2026-05-09 |
+
+Reasoning: All deferrals are by-design human-only work or explicit user overrides (no-fabricated-lab-evidence rule for write-ups; live-deploy precondition for OG image and Lighthouse). Substantive ship state is healthy — site is live at `https://erenatalaycs.github.io/Portfolio_Website/` (tag `hs-redesign-v1`). Full context in `.planning/v1.0-MILESTONE-AUDIT.md`.
 
 ## Session Continuity
 
@@ -172,3 +175,7 @@ Last session: 2026-05-14T09:03:00.000Z
 Stopped at: HS-redesign 8-task pass shipped autonomously — live at https://erenatalaycs.github.io/Portfolio_Website/. Tag `hs-redesign-v1` marks the new shipped state; `iter10-3-monitors-baseline` retained as fallback to procedural 3-monitor scene. Scene now: single ultrawide monitor with 5-tab MonitorTabs (whoami/projects/writeups/certs/contact), zustand tab store, 2-pose camera (overview ↔ focused), procedural decor (keyboard + mouse + mug + tower PC + neon strip + canvas-texture wall poster + chair), HS-tinted lighting (cool ambient + dim key + cyan accent point light + warm lamp point light). Two GH Actions iterations: first failed on Prettier check; fix-and-push deploy success. One follow-up commit dropped role=tablist → role=group for the Lighthouse aria-required-children audit.
 Outstanding deferred: 04-08 human sign-off (6 items in CHECKLIST-LAUNCH.md). GitHub username discrepancy still tracked in 04-*/deferred-items.md.
 Resume file: (none — HANDOFF.json + .continue-here.md cleared at task completion per workflow)
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone

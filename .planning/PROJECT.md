@@ -8,23 +8,56 @@ A 3D "hacker workstation" portfolio site for Eren Atalay, a junior cybersecurity
 
 The site must make a cybersecurity recruiter or hiring manager think *"this person actually gets this field"* within seconds — without forcing recruiters to wait for a 3D scene to load before they can find the CV and contact details.
 
+## Current State
+
+**Shipped: v1.0 MVP (2026-05-15)** — `https://erenatalaycs.github.io/Portfolio_Website/` (tag `hs-redesign-v1`)
+
+4 phases, 27 plans, ~5.8k LOC TS+TSX. Audit verdict `gaps_found` (25/32 REQs) — all gaps are by-design deferrals (no fabricated lab evidence; pre-launch human QA pending). Substantively healthy ship state.
+
+**Codebase signature:**
+- Vite 8 + React 19 + TS 5.9 + Tailwind v4, no React Router (query-param routing)
+- R3F 9.6 / drei 10.7 / three 0.184 lazy-loaded behind capability gating
+- HS-redesign final form: 1 ultrawide monitor + 5-tab `MonitorTabs` (zustand) instead of 3-monitor mapping
+- Web3Forms contact form; rot13+base64 email obfuscation; CSP w/ Web3Forms allowlist
+- GH Actions deploy with size-limit budgets + 5 blocking QA gates + advisory Lighthouse
+
 ## Requirements
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Vite + React 19 + TS + Tailwind v4 scaffold — v1.0 (FND-01)
+- ✓ GH Pages deploy via GitHub Actions, base path + 404.html — v1.0 (FND-02)
+- ✓ Query-param routing `?view=text|3d&focus=…` — v1.0 (FND-03)
+- ✓ Terminal-styled custom 404 — v1.0 (FND-04)
+- ✓ Typed content layer (`src/content/*.ts`) — v1.0 (CNT-01)
+- ✓ CV PDF in repo, EXIF stripped, downloadable from both shells — v1.0 (CNT-04)
+- ✓ SEO basics: OG tags, JSON-LD Person, real title, favicon — v1.0 (CNT-05)
+- ✓ Text shell ships in initial bundle (≤120 KB gz) with WCAG-AA contrast — v1.0 (TXT-01)
+- ✓ Name + role + UK + CV/email/GitHub/LinkedIn rendered at first paint — v1.0 (TXT-02)
+- ✓ Text-shell sections: About, Education, Certs (honest "in progress"), Skills (tag list), Projects, Write-ups, Contact — v1.0 (TXT-03)
+- ✓ Email obfuscation (rot13+base64, JS-decoded, no raw `mailto:`) — v1.0 (TXT-04)
+- ✓ `prefers-reduced-motion` site-wide; full keyboard navigation; semantic HTML — v1.0 (TXT-05)
+- ✓ Content parity between text shell and 3D shell (single-source-of-truth components) — v1.0 (TXT-06)
+- ✓ `<ThreeDShell />` lazy-loaded via `React.lazy` with Suspense — v1.0 (3D-01)
+- ✓ `detectCapability()` synchronous gate routes weak devices to text shell — v1.0 (3D-02)
+- ✓ Always-visible view-toggle DOM overlay — v1.0 (3D-03)
+- ✓ Composed scene — desk + monitor(s) + lamp + bookshelf (procedural; HS-redesign 1-monitor + decor) — v1.0 (3D-04)
+- ✓ drei `<Html transform occlude>` monitors render shared `src/ui/*` — v1.0 (3D-05)
+- ✓ Free-look + click navigation; GSAP camera focus per monitor — v1.0 (3D-06)
+- ✓ Animated `whoami` greeting on main monitor; skips on reduced-motion — v1.0 (3D-07)
+- ✓ Postprocessing pipeline (Bloom + Scanline + CA + Vignette) gated by PerformanceMonitor — v1.0 (3D-08 postprocessing half; GLB swap rolled back to procedural, promoted to v1.1)
+- ✓ `webglcontextlost` swaps to text shell gracefully — v1.0 (3D-09)
+- ✓ Web3Forms contact form wired code-side (delivery verification pending 04-08) — v1.0 (CTC-01 partial)
+- ✓ GitHub + LinkedIn link-outs from both shells — v1.0 (CTC-02)
+- ✓ TryHackMe + HackTheBox `volvoxkill` profile shortcuts surfaced — v1.0 (CTC-03)
+- ✓ OPSEC asset pipeline (`exiftool -all=` + manual full-resolution review) — v1.0 (OPS-01)
+- ✓ `size-limit` budgets enforced in CI — v1.0 (OPS-02)
 
-### Active
+### Active (v1.1 — Post-launch follow-through)
 
-- [ ] 3D hacker-workstation scene as the primary landing experience (desk, monitors, room atmosphere)
-- [ ] Free-look + click navigation: drag to look around the room, click monitors to engage with content
-- [ ] Animated terminal `whoami` greeting on the main monitor as the first thing the visitor sees
-- [ ] Section content surfaced through the workstation: CV/resume, cyber projects, CTF/lab write-ups, certifications, skills, education, contact
-- [ ] Terminal/hacker aesthetic applied consistently (monospace, dark palette, terminal motifs) across both 3D and 2D views
-- [ ] Fast 2D fallback view that recruiters can opt into (or that auto-serves on slow devices) — surfaces CV summary, links, and contact in under 5 seconds
-- [ ] Public-facing identity: real full name (Eren Atalay), email contact, GitHub link, LinkedIn link
-- [ ] Hosted on GitHub Pages as a static build, deployed from the repo
-- [ ] Responsive behaviour: usable on mobile (likely defaulting to 2D fallback) and on desktop
+- [ ] Finish Plan 04-08 human-only sign-off track (OG image swap, Lighthouse median-of-3, Web3Forms Gmail+Outlook delivery test, real-device QA, named peer reviews) — closes OPS-03 / OPS-04 / OPS-05 / CTC-01 (delivery half)
+- [ ] Author 2–3 MDX CTF/lab write-ups with real provenance (no fabrication rule) — closes CNT-02 / CNT-03
+- [ ] Real GLB workstation swap (V2-3D-01) — Plan 04-06 reverted to procedural in commit `342d2e7`; reattempt with iteration headroom
 
 ### Out of Scope
 
@@ -57,13 +90,17 @@ The site must make a cybersecurity recruiter or hiring manager think *"this pers
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| 3D direction is "hacker workstation" (desk + monitors), not network graph or server-room city | Natural surfaces (monitors) for content; on-brand for cyber; easier to execute well than abstract 3D | — Pending |
-| Interaction model: free-look + click | Most exploratory / impressive for technical visitors; click is still discoverable for non-3D-natives | — Pending |
-| Stack: React + React Three Fiber + Tailwind | R3F is the modern standard for 3D web in React; Tailwind keeps the terminal aesthetic fast to iterate on | — Pending |
-| Always ship a fast 2D fallback, not just optimise the 3D | Recruiter audience won't tolerate a slow 3D load; fallback de-risks the whole project | — Pending |
-| Host on GitHub Pages, no custom domain for v1 | Free; static-only constraint forces simplicity; domain can be added later without rework | — Pending |
-| Aesthetic: terminal/hacker (monospace, dark, command-line motifs) | Most on-brand for cyber; user picked it explicitly over glass/neon, deep-space, and cyberpunk variants | — Pending |
-| Public info: real name + email + GitHub + LinkedIn | User explicitly opted into all four — no anonymisation needed | — Pending |
+| 3D direction is "hacker workstation" (desk + monitors), not network graph or server-room city | Natural surfaces (monitors) for content; on-brand for cyber; easier to execute well than abstract 3D | ✓ v1.0 — shipped; HS-redesign final form trimmed to 1 ultrawide + 5-tab MonitorTabs |
+| Interaction model: free-look + click | Most exploratory / impressive for technical visitors; click is still discoverable for non-3D-natives | ✓ v1.0 — clamped OrbitControls + GSAP camera dolly to per-tab pose; click to focus, Esc to defocus |
+| Stack: React + React Three Fiber + Tailwind | R3F is the modern standard for 3D web in React; Tailwind keeps the terminal aesthetic fast to iterate on | ✓ v1.0 — Vite 8 + React 19 + R3F 9.6 + drei 10.7 + Tailwind v4; no surprises |
+| Always ship a fast 2D fallback, not just optimise the 3D | Recruiter audience won't tolerate a slow 3D load; fallback de-risks the whole project | ✓ v1.0 — text shell ≤120 KB gz, capability-gated default; recruiters get CV+contact at first paint |
+| Host on GitHub Pages, no custom domain for v1 | Free; static-only constraint forces simplicity; domain can be added later without rework | ✓ v1.0 — live at `erenatalaycs.github.io/Portfolio_Website/`; GH Actions deploy |
+| Aesthetic: terminal/hacker (monospace, dark, command-line motifs) | Most on-brand for cyber; user picked it explicitly over glass/neon, deep-space, and cyberpunk variants | ✓ v1.0 — off-black + softened green palette (WCAG AA); JetBrains Mono self-hosted |
+| Public info: real name + email + GitHub + LinkedIn | User explicitly opted into all four — no anonymisation needed | ✓ v1.0 — rot13+base64 email obfuscation prevents scrape; cyber-specific Gmail used (not work email) |
+| HS-redesign: 1 ultrawide monitor + 5-tab MonitorTabs over 3-monitor mapping | Late autonomous visual-tuning pass concluded a single focused surface read better than 3 distributed ones | ✓ v1.0 — shipped 2026-05-14 at tag `hs-redesign-v1`; zustand store; role=group/aria-pressed |
+| GLB workstation reverted to procedural geometry | Plan 04-06 Path A landed in 14 min but visual-tuning loop concluded procedural look read better | ⚠️ Revisit v1.1 — V2-3D-01; GLB files retained in `public/assets/workstation/` |
+| Canonical GH-Pages host = `erenatalaycs.github.io` | Plan 04-04 final reverted from `eren-atalay.github.io` after Eren chose "keep username" over "rename GitHub account" | ✓ v1.0 — all six SEO surfaces reconciled (canonical/og/JSON-LD/sitemap/robots/README) |
+| No write-up fabrication — author only after real labs | Honest junior framing > write-up count; fabrication is career-damaging in cyber | ✓ v1.0 — Plan 03-06 deferred to v1.1; MDX pipeline in place, drops `.mdx` into `src/content/writeups/` |
 
 ## Evolution
 
@@ -83,4 +120,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-06 after initialization*
+*Last updated: 2026-05-15 after v1.0 milestone close*
