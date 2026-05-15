@@ -13,6 +13,7 @@
   --color-muted:     #8b949e;
   --color-surface-1: #161b22;
   --color-focus:     #79c0ff;
+  --color-wall:      #0c0e12;
 
   --font-mono:       'JetBrains Mono', ui-monospace, 'SF Mono', 'Menlo', 'Consolas', monospace;
 }

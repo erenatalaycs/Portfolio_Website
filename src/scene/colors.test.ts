@@ -29,6 +29,7 @@ describe('SCENE_COLORS mirrors tokens.css', () => {
     ['surface', 'surface-1'],
     ['accent', 'accent'],
     ['warn', 'warn'],
+    ['wall', 'wall'],
   ])('SCENE_COLORS.%s matches --color-%s', (sceneKey, tokenName) => {
     expect(SCENE_COLORS[sceneKey as keyof typeof SCENE_COLORS].toLowerCase()).toBe(
       token(tokenName),
