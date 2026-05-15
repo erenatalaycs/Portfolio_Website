@@ -21,6 +21,27 @@ The site must make a cybersecurity recruiter or hiring manager think *"this pers
 - Web3Forms contact form; rot13+base64 email obfuscation; CSP w/ Web3Forms allowlist
 - GH Actions deploy with size-limit budgets + 5 blocking QA gates + advisory Lighthouse
 
+## Current Milestone: v1.1 Room Build-Out + Pre-Launch Close
+
+**Goal:** Expand the 3D scene from a "desk + monitor" island into a full hacker's room (walls, ceiling, window, server rack, whiteboard, bed, cat, secondary devices) AND close the v1.0-inherited human pre-launch sign-off + write-up + GLB items so v1.1 lands as one clean publish-ready release.
+
+**Target features (9 categories — all in scope):**
+- **A. Room shell** — left/right/back wall planes, ceiling, blinds-style window (foggy night-city), optional door, ceiling light
+- **B. Cyber detail** — mini server rack (switch + Pi-cluster blink-LEDs), cable bundle, external HDD tower
+- **C. Wall content** — whiteboard (MITRE ATT&CK matrix or kill chain via canvas-texture), analog wall clock, framed certificate/poster
+- **D. Warmth touches** — real book spines on bookshelf, small potted plant, screen bias-light, under-desk LED strip
+- **E. Bed corner** — single bed/couch fitting cyber-room aesthetic, nightstand, dim bedside lamp
+- **F. Cat** — static or breathing-animation procedural cat (primitives), on the bed or window ledge
+- **G. Secondary devices** (optional within v1.1) — open laptop screen on side, SDR/radio dongle, second monitor
+- **H. 04-08 human sign-off** (v1.0-inherited) — OG image swap, Lighthouse median-of-3, Web3Forms Gmail+Outlook delivery test, real-device QA (iOS + Android), named cyber + non-cyber usability peer reviews → closes OPS-03 / OPS-04 / OPS-05 / CTC-01 (delivery half)
+- **I. Write-ups + GLB** (v1.0-inherited) — 2–3 MDX CTF/lab write-ups with real provenance (closes CNT-02 / CNT-03); reattempt real GLB workstation (V2-3D-01), or formally promote to v1.2
+
+**Key context:**
+- Stack stable — no new deps expected for A–G; procedural primitives + drei `<Html>` + zustand already cover this
+- Phase numbering continues from v1.0 (next phase = 5)
+- "No fabricated lab evidence" rule still binds — write-ups (CNT-02/CNT-03) ship only after real labs are run
+- Bed + cat are user-personal additions ("yatak ve kedi"); approach is procedural-first, optional CC0 GLB swap later if needed
+
 ## Requirements
 
 ### Validated
