@@ -1,457 +1,512 @@
-# Pitfalls Research
+# Pitfalls Research — v1.1 Room Build-Out + Pre-Launch Close
 
-**Domain:** 3D hacker-workstation cybersecurity portfolio (React + R3F + Tailwind + GitHub Pages, solo junior dev, ~1 month)
-**Researched:** 2026-05-06
-**Confidence:** HIGH for R3F/Three.js technical pitfalls (Context7-class sources, official R3F docs); HIGH for GitHub Pages deployment (multiple confirming sources); MEDIUM for cyber-portfolio cliché traps (junior-dev advice is well-documented; cyber-specific advice mostly inferred from general OPSEC + recruiter sources)
+**Domain:** R3F portfolio scene expansion (procedural room) + cyber-domain content authoring + inherited human-only QA close-out
+**Researched:** 2026-05-15
+**Confidence:** HIGH (codebase signature + binding rules verified against current files; cyber-domain anti-pattern list verified against v1.0 REQUIREMENTS.md Out-of-Scope table; no-fabrication rule verified against feedback memory dated 2026-05-08)
 
-This research is **specific to the combination**: a junior cybersecurity analyst, with a 1-month solo timeline, building a fully 3D hacker-workstation site on a static-only host (GitHub Pages), where the audience is split 50/50 between recruiters who skim and hiring managers who explore. Generic 3D-web advice has been filtered out unless it directly hits this combo.
+> Supersedes the v1.0 pitfalls research at the same path (2026-05-06). v1.0 covered generic R3F + cyber-portfolio launch pitfalls; this revision is scoped to the **delta** of v1.1 — adding a room shell, server rack, whiteboard, bias-light/LED strip, bed/cat, secondary devices, and closing v1.0-inherited human sign-off / write-up / GLB items.
+
+This document covers pitfalls specific to **adding** the v1.1 categories on top of the shipped v1.0 codebase, plus pitfalls in closing the v1.0-inherited human sign-off / write-up / GLB items. Generic R3F warnings already covered in the prior v1.0 research (orbit clamp, capability gating, drei `<Html>` occlusion) are **not** repeated.
 
 ---
 
 ## Critical Pitfalls
 
-These are the ones that most plausibly sink the project (visitor leaves, recruiter never sees CV, site crashes on the device a hiring manager actually uses, or career-damage from OPSEC slips).
-
-### Pitfall 1: Recruiter cannot find CV/contact in 30 seconds because 3D scene gates everything
+### Pitfall 1: Visual-overload — "hacker mağarası" / cheesy gaming setup
 
 **What goes wrong:**
-Recruiter opens the site, sees a loading bar (or worse, a blank canvas), waits 4–8 seconds, then has to figure out that the "right monitor" is the CV. Closes the tab. Eren is filtered out before the portfolio is read.
+The shipped v1.0 scene already has: one cyan accent point light (intensity 3.5), one warm lamp point light (intensity 1.2), one emissive neon strip (emissiveIntensity 2.0, `toneMapped:false`), plus the monitor screen emissive surface, plus Bloom postprocessing (luminanceThreshold tuned for the existing emissives). Adding v1.1 emitters — server rack LED bank (8–24 blinking LEDs), screen bias-light (large emissive plane behind monitor), under-desk LED strip (long thin emissive plane), bedside lamp (point light), ceiling light (point/area light) — pushes the cumulative emissive load past Bloom's threshold-tuning. The scene reads as **gamer RGB battlestation**, not **professional cyber analyst**. Recruiters whose intuition this site is courting will read it as a 14-year-old's first PC build, not a workstation.
+
+The Out-of-Scope list in v1.0 REQUIREMENTS.md already names this trap obliquely — Matrix rain, hooded-hacker silhouettes, padlock/shield/glowing-binary motifs are explicitly excluded because they "signal 'doesn't get the field' to technical hiring managers." Multiplying neon emissives is the same failure mode dressed up as set-decoration.
 
 **Why it happens:**
-The aesthetic temptation is to make the 3D the front door — load the scene, then everything is "in" the scene. PROJECT.md already names this risk ("recruiter audience won't tolerate a slow 3D load") but the trap is subtle: even if the 2D fallback is built, it's easy to ship a default flow where the visitor must opt out of the 3D, see the loader, and only then get redirected. The fallback ends up "available" but not "immediate."
+Each new emitter feels like a small additive improvement in isolation ("just one LED strip"). The visual-tuning loop is per-feature, not cumulative. Bloom's `luminanceThreshold` was tuned in Plan 04-01 against the current emissive count; new emitters cross the threshold without any single one tripping a review.
 
 **How to avoid:**
-- Above-the-fold-in-DOM rule: the CV link, contact email, GitHub link, and LinkedIn link must exist as plain HTML/Tailwind text in the document at first paint, before any R3F code runs. They can be visually placed inside the "monitor frame" decoratively, but they're real `<a>` tags that exist before Canvas mounts.
-- Have a `?cv` or `/cv` route (hash-based for GitHub Pages, see Pitfall 12) that bypasses Canvas entirely and renders just the 2D fallback. Link to this from your CV PDF and email signature.
-- Time-budget the 3D path: if scene is not ready in N seconds (e.g. 4s on slow connection), auto-show the 2D fallback layer over the loader. Don't hide it behind an "I'm bored" button.
-- Test on a throttled "Slow 4G" Chrome profile before each milestone, not just localhost.
+- **Hard cap: ≤ 4 distinct emissive colours in the scene at any time.** Currently: cyan (neon strip + accent point light), green (terminal text on monitor + book spines), warm amber (lamp), off-white (monitor base illumination). New emitters must reuse one of these four — not add a fifth.
+- **Cumulative-bloom readability test:** after each emitter-adding plan, take a screenshot at the default `?focus=overview` pose AND the per-tab focus poses; if monitor text legibility drops vs. the v1.0 baseline screenshot (which must be checked in via the verification step), revert the emitter or lower its `emissiveIntensity`. Concretely: zoom screenshot to 200%, can you still read the `whoami` block? If no, blow-out has happened.
+- **One-blink-frequency rule:** if multiple LEDs blink, share a single phase clock OR fix at most 2 frequencies. Multiple uncorrelated frequencies look like Christmas-tree decoration, not server status.
+- **Audio cue test (mental):** if a recruiter took a screenshot and the screenshot would be captioned "guy who plays Valorant" vs. "junior SOC analyst's actual room", you've crossed the line. The whoami poster, ASCII-framed terminal output, and procedural geometry currently land on the right side; LED stacking is the most likely thing to push it across.
 
 **Warning signs:**
-- The 2D fallback only renders if you click a button
-- Lighthouse Largest Contentful Paint > 2.5s
-- The CV PDF is fetched from inside Canvas/Suspense rather than linked as plain `<a href>`
-- Your tab's `<title>` is generic ("Portfolio") instead of "Eren Atalay — CV / Cybersecurity"
+- More than 4 distinct hues visible in any screenshot.
+- Total emissive surface area (sum of plane areas with `emissive*` > 0) > 50% of monitor screen area.
+- Bloom looks "smeared" — discrete light sources blur into each other.
+- More than 3 simultaneous blink animations on screen at once.
+- Reviewers describe the scene with words like "RGB", "rave", "Christmas tree", "gaming setup" rather than "workstation", "office", "lab".
 
 **Phase to address:**
-Phase 1 (foundation/scaffolding) — set the rule before any 3D code is written. Verify in Phase 4+ (deployment / pre-launch).
+Phase D (warmth touches: bias-light + LED strip + plant + books) is the highest-risk concentration. Gate this phase on a side-by-side screenshot comparison against the v1.0 baseline. Phase B (server rack) is the second-highest risk because LEDs are conceptually justified for that prop. Add a `discuss-phase` question: **"How many distinct emissive colours does this phase add? If > 0, justify why an existing colour can't be reused."**
 
 ---
 
-### Pitfall 2: setState in useFrame, or scene-rebuilding state updates
+### Pitfall 2: Whiteboard / wall-content fabrication
 
 **What goes wrong:**
-Animation jank, sustained 100% CPU, fan-screaming laptops, occasional Safari crash. Looks fine on the dev machine, awful on the recruiter's 4-year-old MacBook.
+The whiteboard prop (category C) is canvas-texture authored — i.e. text rendered into a 2D canvas at runtime, same pattern as `WallDecor.tsx`'s existing whoami poster. The temptation is to populate it with content that **looks** like an analyst's working notes: fake CVE IDs ("CVE-2026-12345 — RCE in our perimeter"), fake IP addresses, fake incident tickets ("RED ALERT — APT-29 DETECTED 14:32 UTC"), fake Sigma rule fragments, fake YARA signatures. Every one of these is a fabrication and triggers the binding rule from `feedback_no_fabricated_lab_evidence.md`. The risk is *especially* high because canvas-rendered text is small, decorative, easily skimmed — it doesn't *feel* like a write-up, so it doesn't *feel* like fabrication. But a technical hiring manager who zooms in on the screenshot will notice "CVE-2026-12345 doesn't exist" or "10.0.0.0/8 is private — what's the threat model here?" and the credibility hit is permanent.
 
 **Why it happens:**
-It feels natural in React: "I want the camera to lerp toward the monitor when the user clicks, so I'll setState the target and let useFrame react to it." Or: "I'll store rotation in useState and update it 60fps." The official R3F docs explicitly say *"never setState inside useFrame"* — but every tutorial explains state in chapter one and refs in chapter five, so juniors miss the warning.
-
-There's a second, sneakier version: putting derived data in component state higher up (e.g. `selectedMonitor`) such that switching it remounts a chunk of the scene graph, triggering material re-compilation and texture re-uploads. That single click can stutter the page for 200ms because Three.js had to rebuild geometries.
+- Decorative content gets less scrutiny than write-up content. Authors think "it's just set dressing."
+- Cyber visual references (CTI tools, dashboards, threat-intel feeds) all use real CVEs / IPs / hashes, so the visual grammar of the genre is "specific numbers." Empty placeholders look wrong.
+- Time pressure during phase execution makes inventing a number feel faster than researching a real public reference.
 
 **How to avoid:**
-- **Hard rule:** `useFrame` may only mutate refs (`mesh.current.position.x = …`) or call methods on Three.js objects. It must not call `setState`, `useState` setters, or Zustand setters.
-- For "occasional updates" (which monitor is focused, terminal text, theme), state is fine — but the components consuming that state should be leaf components; `useState` should not live above the `<Canvas>` if its change re-renders the whole scene.
-- Use Zustand with selector subscriptions for cross-component reactive data (so only consumers re-render).
-- Memoize geometries and materials: `useMemo(() => new THREE.BoxGeometry(...), [])`, share materials across instances. The R3F docs are explicit: every material/light entered into the scene has to compile.
-- Add a dev-only FPS counter (Drei's `<Stats />` or `r3f-perf`) and *remove it from production* (Pitfall 13).
+
+**Acceptable whiteboard content** (all public domain frameworks, no fabrication required):
+- **MITRE ATT&CK matrix** — header row of tactics (Reconnaissance → Initial Access → … → Impact), one or two technique cells highlighted (e.g. T1078 Valid Accounts, T1190 Exploit Public-Facing Application). All technique IDs are public. Cite "MITRE ATT&CK" small in the corner.
+- **Lockheed Martin Cyber Kill Chain** — Recon → Weaponization → Delivery → Exploitation → Installation → C2 → Actions on Objectives. Public framework.
+- **NIST CSF function wheel** — Identify / Protect / Detect / Respond / Recover. Public framework.
+- **OWASP Top 10** — A01 Broken Access Control through A10 SSRF. Public list, version-dated (2021 is current).
+- **Generic todo-list of study topics, clearly labelled as such** — "Lab queue: [ ] PortSwigger JWT, [ ] Sigma vs Sysmon, [ ] MalwareBazaar triage." This matches the v1.0 honest-junior framing (write-ups in progress, not done).
+- **Hand-drawn-style ASCII network diagram of a generic three-tier app** (frontend / backend / DB). No real IPs; use RFC 5737 documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) if IPs must appear.
+
+**Unacceptable whiteboard content** (refuse outright, suggest the acceptable alternative):
+- Fake CVE IDs not corresponding to real public CVEs.
+- Real CVE IDs Eren has no demonstrated work on (implies he investigated them).
+- Fake IP addresses from real allocated ranges (anything not in RFC 5737 / RFC 1918 docs).
+- Fake company names / SIEM tenant names / customer references.
+- "RED ALERT" / "INCIDENT IN PROGRESS" / "BREACH DETECTED" — theatre, not analysis. Reads as the Hollywood-hacker cliché the v1.0 Out-of-Scope list specifically forbids.
+- Sigma rule fragments invented for the visual.
+- IOCs (hashes, domains, JA3) not from a real public source.
+- A whiteboard photo that's an actual SOC team's whiteboard (OPSEC violation even with redaction).
+
+**How to avoid (process):**
+- The phase that authors the whiteboard MUST cite the public framework source in the plan's CONTEXT.md ("Source: MITRE ATT&CK Enterprise v15, https://attack.mitre.org/").
+- `discuss-phase` forcing question: **"Name the public framework or source for every text element on this whiteboard. If you can't, refuse and pick an acceptable alternative."**
+- Comment in the canvas-texture component listing each text element's source URL.
+- Pre-launch QA (Phase H) re-reads the whiteboard once at full zoom and confirms every element traces to a public source.
 
 **Warning signs:**
-- Profile shows React rendering 60×/s during scene idle
-- Clicking a monitor causes a visible stall (>100ms) before camera moves
-- `console.log` placed in a component body fires constantly during animation
-- Memory grows when you click monitors back-and-forth (geometries not being GC'd)
+- Plan draft includes a specific CVE number with no Wikipedia/NVD link.
+- Plan draft includes specific IPs outside RFC 5737 / RFC 1918.
+- Author defends a piece of content with "it's just decorative" or "no one will look that close."
+- Whiteboard contains a date + status combination (e.g. "2026-05-12 14:32 — UNAUTH ACCESS DETECTED").
 
 **Phase to address:**
-Phase 2 or 3 (3D scene implementation). Add a CI/dev rule (custom ESLint rule or comment-based) flagging `setState`/setter calls inside `useFrame`. Verify with profiler before Phase 4 deployment.
-
-**Sources:** [R3F Performance Pitfalls](https://r3f.docs.pmnd.rs/advanced/pitfalls), [R3F Hooks](https://r3f.docs.pmnd.rs/api/hooks), [3 R3F Mistakes — Wawa Sensei](https://wawasensei.dev/tuto/3-react-three-fiber-mistakes)
+Phase C (wall content). Add `discuss-phase` forcing question above. Refuse the plan execution if the question isn't answered before VERIFICATION step.
 
 ---
 
-### Pitfall 3: Scene crashes / context-lost on mid-tier mobile, with no auto-fallback
+### Pitfall 3: Cat reads as alien / Cthulhu, not cat
 
 **What goes wrong:**
-Visitor on a 3-year-old Android or pre-M1 iPad gets a frozen/black canvas, "WebGL context lost" in console, sometimes a full Safari tab kill. They never see anything. PROJECT.md acknowledges "likely defaulting to 2D fallback" on mobile — the trap is that "likely" becomes "didn't get to it before launch."
+Procedural geometry primitives (spheres, capsules, cones, cylinders) compose to recognisable furniture (desk, monitor, lamp) because furniture *is* geometrically blocky and the brain accepts approximations of rigid forms. **Living creatures the brain has high-fidelity priors for** — cats, dogs, humans, hands — break this. A cat assembled from a sphere body, sphere head, two cone ears, four cylinder legs, one cone tail looks like neither a cat nor an abstract shape. It looks like an *unsuccessful* attempt at a cat, which is worse than no cat at all — the uncanny-valley effect on a low-fidelity creature reads as "the author thinks this is good enough" → "the author has poor judgment" → "I question their other judgments." That's the opposite of the cyber-credibility outcome the whole project is optimising for.
 
 **Why it happens:**
-- iOS Safari has aggressive WebGL memory limits and will drop the context with very little warning.
-- M1/M2 Macs and iPads can ironically be *worse* for some scenes because WebKit's heuristics differ.
-- A scene that ran at 60fps on the dev machine can OOM on a 3GB RAM Android with 4 textures loaded.
-- The dev forgets to handle `webglcontextlost` events at all, so when it fires the scene goes black with no recovery.
+- The author imagines the cat from memory ("body + head + ears + legs + tail") and assembles it from primitives matching that mental list. The result is technically all the parts of a cat but in proportions only the author recognises.
+- Procedural-first instinct from v1.0 (`PROJECT.md`: "approach is procedural-first, optional CC0 GLB swap later if needed") carried over without checking whether the v1.0 instinct generalises to organic forms.
+- The cat is a personal touch ("yatak ve kedi"), so author has emotional investment in shipping it; quality bar is sympathetic, not adversarial.
 
 **How to avoid:**
-- Detect mobile + low-power devices on first load and **default to 2D fallback** without even attempting Canvas. Use `navigator.userAgent` mobile heuristics + `navigator.deviceMemory < 4` + `navigator.hardwareConcurrency <= 4` as a triage. Offer an explicit "Try 3D anyway" button.
-- Listen for `webglcontextlost` on the renderer and fall back to 2D when it fires. Don't try to hot-recover — for a portfolio, a clean swap to 2D is better than a half-restored scene.
-- Cap pixel ratio: `<Canvas dpr={[1, 1.5]} />` instead of letting it default to retina (this alone halves GPU load on iPhones).
-- Cap target FPS on mobile: `frameloop="demand"` for the workstation scene if nothing's animating, so it doesn't burn battery rendering identical frames.
-- Test on at least one real iOS device and one mid-tier Android (BrowserStack or a friend's phone) before launch — emulators lie about WebGL.
+- **The 3-second silhouette test:** if a recruiter looking at the scene from the default `?focus=overview` pose can't identify "that shape is a cat" within 3 seconds, the cat fails. Test with someone who hasn't read the code.
+- **Hard fallback rule:** if first procedural attempt fails the 3-second test, switch immediately to a CC0 low-poly cat GLB (Poly Pizza, Sketchfab CC0 filter, Quaternius). Do not iterate procedurally — the failure mode here is the author's mental model of "what a cat looks like" diverging from the primitive composition, and more time doesn't fix that.
+- **Sleeping / curled-up pose preferred over standing.** A curled sleeping cat is a *blob with ears*, which primitive geometry can approximate convincingly (one squashed ellipsoid + two cones + a curled cylindrical tail). A standing cat requires four-legged proportions that are precisely the failure mode above.
+- **Place at far/scale-disadvantage position.** On the bed pillow at scene-back z, the cat is small in the frame; the brain forgives imprecise geometry at small angular size. Up close on the desk, every flaw shows.
+- **No cat animation other than gentle vertical breathing** (Y-scale or position lerp, ±2% amplitude, 0.5 Hz). No head rotation, no leg movement, no tail wag — these all expose rigging the procedural cat doesn't have and read as broken.
+- **Reduced-motion gating** — breathing animation off when `prefers-reduced-motion: reduce` (see Pitfall 12).
 
 **Warning signs:**
-- Console shows "WebGL context lost" on any device
-- Scene is fine for 30 seconds then goes black
-- Site warms the device up noticeably (battery drain >2%/min)
-- DevTools "CPU 4× slowdown" + "Slow 4G" still hits 60fps (your dev machine is hiding the problem)
+- Author iterates more than 2 times on cat proportions without showing it to a fresh viewer.
+- First-look reactions: "is that a sheep?" / "is that an alien?" / "wait what is that?" / "is that supposed to be...?"
+- The cat needs a label or tooltip to be recognised.
+- Anyone says "Cthulhu" or "Lovecraft" near the screen.
 
 **Phase to address:**
-Phase 3 (scene polish) for capability detection; Phase 5 (pre-launch) for real-device QA. Cannot be deferred — this is the primary risk on the audience's actual hardware.
-
-**Sources:** [Three.js context lost on iOS](https://discourse.threejs.org/t/how-to-fix-context-lost-android-iphone-ios/56829), [Three.js iOS 17 context lost](https://discourse.threejs.org/t/three-js-broken-on-ios-17-with-context-lost/58025), [WebGL context lost on M4 iPad](https://discourse.threejs.org/t/webgl-context-lost-on-m4-ipad-app-and-browsers/79845)
+Phase F (procedural cat). Build the 3-second silhouette test into the phase's VERIFICATION step explicitly. `discuss-phase` forcing question: **"If the procedural cat fails the 3-second silhouette test on first viewer reaction, do you commit to switching to a CC0 GLB rather than iterating procedurally?"** Pre-decide the swap so the visual-tuning loop doesn't waste the budget.
 
 ---
 
-### Pitfall 4: 2D fallback becomes a second-class citizen with less content than 3D
+### Pitfall 4: Lighting blowout — Bloom washes out monitor content
 
 **What goes wrong:**
-The recruiter who lands in 2D mode sees a stripped-down version: maybe just a CV link and three project cards. The hiring manager who explores the 3D scene sees CTF write-ups, certifications, education timeline, contact form, GitHub pinned repos, etc. The recruiter — who is the gatekeeper — sees less and rejects on incomplete-looking content.
+Bloom in `@react-three/postprocessing` works on luminance: any pixel above `luminanceThreshold` contributes to the glow buffer. v1.0's threshold was tuned in Plan 04-01 against the current emissive set (monitor screen, neon strip emissive, accent point lights). Adding new high-luminance sources — server rack LEDs at `emissiveIntensity` similar to the neon strip, screen bias-light covering a large plane area, under-desk LED strip, bedside lamp emissive bulb — increases the **total bloom contribution** super-linearly because the gaussian blur passes spread the glow into neighbouring pixels. At a high enough cumulative contribution, the monitor content (whose text glyphs are the readable part of the entire site) is overwhelmed by surrounding bloom and becomes unreadable. **This defeats the entire purpose of the 3D scene** — the monitor is the content surface; if you can't read what's on it, the scene is decoration only.
+
+The PerformanceMonitor 2-tier gating (high = postprocessing on, low = postprocessing off) does NOT help here — the readability failure occurs precisely in the **high** tier where Bloom is enabled.
 
 **Why it happens:**
-2D fallback is built last, as a "minimum to satisfy the requirement." The dev mentally treats 3D as the "real" portfolio and 2D as the consolation prize. It shows.
+- Each new emitter is added in a scene context where the monitor is off-screen or out of focus, so the readability impact isn't seen.
+- `emissiveIntensity` values aren't centrally managed — there's no single config file capping the total.
+- Bloom looks impressive in screenshots; the natural visual-tuning instinct is to push it further, not pull back.
+- The shipped v1.0 has `toneMapped={false}` on the neon strip material (line 38 of `WallDecor.tsx`), which means that surface contributes to bloom *without* tone-mapping clamping it. Replicating this pattern on every new emitter compounds the problem.
 
 **How to avoid:**
-- **Content-source-of-truth principle:** all content (CV summary, projects, write-ups, certs, skills, education, contact) lives in plain markdown/MDX or JSON. The 3D scene and 2D fallback are *both* views over the same data. Neither view should be missing a section the other has.
-- Build the 2D fallback **first** as the actual content layout (Phase 1–2). Then build 3D over it. This inverts the usual order and forces parity.
-- Enumerate every content section as a checklist and verify both views render every item before launch.
-- The 2D view should not be ugly. Apply the same terminal/monospace aesthetic. It's not "the boring version" — it's "the fast version."
+- **Centralise emissive intensity in a config file.** Create `src/scene/emissiveBudget.ts` with named constants (`NEON_STRIP`, `RACK_LED`, `BIAS_LIGHT`, `LED_STRIP`, `LAMP_BULB`, `BEDSIDE_LAMP`, `MONITOR_SCREEN`). Reference these in every component. PRs adding new emissives must add to this file, making the cumulative count visible at code-review time.
+- **Total emissive-intensity-times-area budget.** Sum `emissiveIntensity × planeArea` across all emitters; cap it at, e.g., 1.5× the v1.0 baseline. Track in a comment in `emissiveBudget.ts`.
+- **`toneMapped={false}` is a privilege, not a default.** Only the existing neon strip keeps this. All v1.1 emitters use the default tone-mapping unless there's a specific reason and a comment explaining it.
+- **Per-phase monitor-readability test.** After each phase touching emissives, take a screenshot at each of the 5 tab focus poses; perform OCR or eyeballed legibility check on the monitor content. A small text-recognition assertion in the manual QA list ("can you read every line of the whoami tab without effort?") catches this cheaply.
+- **Bloom config gates a Lighthouse-style review.** If the answer is "I need to lower Bloom because the scene has too many emissives," that means the scene has too many emissives — fix the emissive count, don't fix the Bloom.
+- **PerformanceMonitor low-tier preservation.** On low tier, postprocessing is already off — confirm the scene without postprocessing still reads correctly. If it doesn't (e.g., LEDs only "look like LEDs" because of bloom), the prop fundamentally needs to be redesigned with a non-emissive cue.
 
 **Warning signs:**
-- A new content item is added in 3D (e.g. a new CTF write-up appears on a monitor) and the 2D view doesn't get it automatically
-- The 2D fallback has no "Contact" CTA when 3D does
-- The 2D view loads in 1s but looks unstyled or generic
-- You catch yourself thinking "the 2D fallback is just for old phones, recruiters won't see it"
+- Reviewer comment: "Looks pretty, but I can't read the monitor."
+- Bloom config knob (`intensity`, `luminanceThreshold`) gets touched in a non-Plan-04-01 PR.
+- New emissive material added with `toneMapped={false}`.
+- `emissiveIntensity` > 3.0 on any new material (existing baseline: 2.0 on neon strip is the high end).
+- The scene "looks washed out" or "hazy" without anyone being able to point at one cause.
 
 **Phase to address:**
-Phase 1 — establish content-as-data architecture. Phase 2 — build 2D first. Verify content parity in Phase 5 pre-launch.
+Phase B (server rack LEDs — first new emitter cluster) and Phase D (bias-light + LED strip — largest emissive area) are highest-risk. Phase B should create `src/scene/emissiveBudget.ts` proactively even if Phase B only uses 2 of the constants — it sets the precedent for Phase D. Both phases include the per-tab readability screenshot test in VERIFICATION.
 
 ---
 
-### Pitfall 5: OPSEC slip — leaking address, employer details, home-lab IPs, or live CTF flags
+### Pitfall 5: Window-with-blinds OPSEC leak
 
 **What goes wrong:**
-- A screenshot of a home-lab dashboard reveals `192.168.x.y` along with a router model and ISP-issued hostname.
-- A CTF write-up screenshot shows the flag still on screen for a CTF that's still running.
-- Image EXIF includes GPS coords from a phone-taken photo.
-- A "current role" mention names the QA/Test Fin-On employer in a way that violates an NDA or just embarrasses a client.
-- A CV PDF includes a home address (UK postcode), full DOB, or a personal phone.
+The room shell (category A) includes "blinds-style window (foggy night-city)" — a 2D image or rendered backdrop visible through the window slats. If the backdrop is a real photograph of Eren's actual neighbourhood, or any identifiable skyline / building / signage / road sign / pub name, it reveals his location to anyone who reverse-image-searches the screenshot. This violates the v1.0 Out-of-Scope rule ("Home address / personal phone / full DOB on the public site") — city-level (UK) was the agreed disclosure, not neighbourhood-level. Cyber community in particular includes people who casually do OSINT for sport; a "where is this skyline?" thread happens.
+
+This is the same family of risk as the OPSEC pipeline already wired in OPS-01 (`exiftool -all=` on screenshots) — the existing pipeline strips EXIF GPS but doesn't help if the photographic content itself is identifying.
 
 **Why it happens:**
-This is the *exact* domain Eren is applying to work in. A leak here is doubly damaging: it suggests he doesn't practise the field. And it's invisible from inside Eren's own browser — he sees the page as the author, not as a hostile reader running exiftool.
+- "Foggy night-city" sounds atmospheric and there are good photos available; the easy path is to pick one.
+- Author doesn't connect "decorative backdrop" with "OPSEC artifact."
+- A photo taken from Eren's actual window looks the most "authentic."
 
 **How to avoid:**
-- **Pre-publish OPSEC checklist** — gate every release behind it:
-  - All screenshots stripped of EXIF (`exiftool -all= image.png` or build-time pipeline equivalent like `sharp` re-encoding without metadata)
-  - All screenshots manually reviewed at full size for: visible IPs, hostnames, browser tab titles, password-manager popups, internal Slack/Teams snippets, file paths revealing real name folders (`/Users/erenatalay/...`)
-  - CTF write-ups only published *after* the CTF event is closed and the platform allows write-ups (TryHackMe/HTB rules vary; some require waiting for the box to be retired)
-  - Flags redacted from screenshots (black box, not blur — blur can be reversed)
-  - No employer NDA-covered details in any project description
-  - CV PDF strips: home address (use city/region), DOB, personal phone if not desired publicly
-- Add a contact email obfuscation layer: don't ship `mailto:eren@…` as plain text in HTML — use a JS-rendered version, or use a contact form with a static handler (Formspree, Web3Forms) that never exposes the address in the source.
-- Run a final "view-source + view-network + exiftool image dump" pass before launch.
-- For UK-based job hunt: the email and city are reasonable to publish; the home address is not.
+- **Hard rule: no real photographs of identifiable real places.** Including stock photos of identifiable real places (Big Ben, Shard, Manchester wheel) — these are not Eren's neighbourhood but they imply a location, which still narrows the OSINT picture.
+- **Acceptable options, in preference order:**
+  1. **Pure procedural / shader-driven generic city-lights pattern** — a plane behind the blinds with a fragment shader producing scattered warm/cool dot patterns (the "city at night from above" abstraction). Zero identifying content. Fits the procedural-first project aesthetic.
+  2. **Solid dark gradient with subtle noise** — fogged-out window, no city implied. Simplest, lowest risk.
+  3. **CC0 stylised illustration** (vector, low-detail) of a generic urban skyline silhouette with no recognisable landmarks. CC0 license must be documented in the plan.
+  4. **AI-generated abstract cityscape** — only if Eren is OK declaring "this is AI-generated" if asked. (Cyber audience may judge AI-generated assets; weigh tradeoff.)
+- **No real photos of Eren's room either** — applies to bookshelf book spines, posters on the wall, anything reflective in the scene that could reveal background detail.
+- **Verification in the OPSEC checklist (CHECKLIST-OPSEC.md).** Add row: "Window backdrop: synthetic / abstract only — confirm no real-place imagery."
 
 **Warning signs:**
-- You don't have an EXIF-stripping step in your build/asset pipeline
-- Screenshots in `/public/images/` were dragged in from desktop without inspection
-- Your CV PDF has metadata showing "Author: Eren Atalay, Created: …, Modified by: …" with software/path traces
-- You're unsure whether a CTF you're writing about is still live
+- Plan references a specific photo source for the window.
+- Window content includes any recognisable building shape.
+- Plan author describes the cityscape with specifics ("the bridge", "the tower") rather than abstractly.
+- An image search of a screenshot returns "places similar to this image."
 
 **Phase to address:**
-Phase 1 — establish asset pipeline + checklist. Every content phase — apply checklist. Phase 5 — final OPSEC audit before deploy.
-
-**Sources:** [CTF metadata forensics](https://ctf101.org/forensics/what-is-metadata/), [OPSEC handbook](https://medium.com/@varppi/opsec-privacy-handbook-5e0a012c58f6), [OPSEC in OSINT](https://sosintel.co.uk/opsec-in-osint-protecting-yourself-while-investigating/)
+Phase A (room shell — window-with-blinds). Add this rule to CHECKLIST-OPSEC.md as part of the same phase. `discuss-phase` forcing question: **"What is the source of the window backdrop content? If it's a real photograph, refuse and pick a procedural / abstract option."**
 
 ---
 
-### Pitfall 6: Cybersecurity-portfolio clichés that signal "I don't actually work in this field"
+### Pitfall 6: Bed + cat = "personal life overshare" framing
 
 **What goes wrong:**
-The site uses Matrix code rain, a glitchy "I'm in" screen, glowing green-on-black "ACCESS GRANTED" buttons, and a stick-figure hooded hacker silhouette. Real cyber hiring managers — many of whom mock these in private — register the site as "junior who consumed Mr Robot, not someone who's done the work."
+A single bed and a cat in the recruiter-facing view of a cyber analyst's portfolio is *personal* in a way the v1.0 scene (desk + monitor + bookshelf) is not. The audience is split 50/50 between recruiters (30-second skim, want to file Eren as a hire-able junior) and hiring managers (read the write-ups, will engage with 3D). The risk:
+
+- **Recruiter side:** the recruiter sees the bed and cat in a screenshot, files the candidate mentally as "lives in a small/studio flat" → "junior" → "salary-bracket-adjusted" before they even read the CV. Or files as "weird vibe, skip" without articulating why.
+- **Hiring manager side:** ambivalent. Some hiring managers find the humanising touch positive ("authentic, has a personality, knows the cyber-room genre"). Others find it unprofessional ("why am I looking at this guy's bedroom?").
+- **Bias considerations:** "Hacker living in their bedroom" is a stereotype carrying baggage in cyber hiring — sometimes positive (matches the genre), sometimes negative (unprofessional, hobbyist-not-serious). The asymmetry of risk: a recruiter who downgrades you doesn't tell you. You can't recover from the unspoken negative judgement.
+
+The v1.0 PROJECT.md positions Eren as "a credible junior" — the bed + cat is a *style* choice that doesn't strengthen credibility and may weaken it for some viewers. It's adjacent to (not in) the v1.0 Out-of-Scope rule about "Home address / personal phone / full DOB" — the spirit of that rule is "less personal exposure is safer."
 
 **Why it happens:**
-The aesthetic is fun and references the dev cares about (Mr Robot, etc.), and tutorials abound. The trap is that the audience the site is *trying to reach* is exactly the audience that has seen this 1000 times.
+- "Yatak ve kedi" is Eren's explicit ask; the scope was set by user preference, not by audience research.
+- The cyber-room genre (Hacker Simulator, twitch streamers' rooms, etc.) often does include bed + cat — so it feels on-genre.
+- The author wants to make the scene feel "real", and real rooms have beds.
 
 **How to avoid:**
-- The terminal/monospace aesthetic is fine — that's the brief. The traps to avoid specifically:
-  - **Matrix rain** — overdone. If included, treat as small ambient detail, never the hero.
-  - **"Hacking in progress" fake animations** — implies you don't know what hacking actually looks like.
-  - **Skill bars (e.g., "Burp Suite ▓▓▓▓░ 80%")** — universally derided in dev/cyber portfolio reviews. Replace with: "Used in: HTB box X, project Y" — concrete attestation.
-  - **Hooded silhouette / Guy Fawkes mask imagery** — anonymous-aesthetic clichés that read as cosplay.
-  - **Fake terminal that doesn't accept any input** — feels like a broken toy. If you build a terminal, accept at least a few real commands (`ls`, `cat about.md`, `whoami`, `help`) gracefully and reject unknown ones with `command not found: foo`. The animated `whoami` greeting in PROJECT.md is good — that's a constrained, controlled animation, not a fake REPL.
-  - **Listing every tool you've opened** — see Pitfall 7.
-- Show, don't decorate: a real screenshot of an actual `nmap` output you ran, with a paragraph of analysis, beats any aesthetic flourish.
-- Run the design past one real cybersecurity professional (LinkedIn DM, university alum, mentor) before launch and ask "does this look junior or does it look fake-senior?"
+- **Don't refuse the scope, but mitigate placement.** Bed at the back-left of the scene, **off the default `?focus=overview` camera pose**, so a recruiter doing a 30-second skim sees the workstation only. The bed becomes visible if the user explicitly drags the camera to look around — i.e. the engaged hiring-manager mode, which is the audience that values the humanising touch.
+- **Verify with the orbit clamps** (`minAzimuthAngle: -Math.PI / 2, maxAzimuthAngle: Math.PI / 2`): currently the orbit allows ±90° azimuth. The bed should be at an azimuth that requires the user to deliberately drag past 45° from default. If clamps need adjustment to keep the bed off-screen at default, do that.
+- **Couch over bed.** Couch keeps the "humanising touch" without the "is this their bedroom?" connotation. PROJECT.md already lists couch as an acceptable alternative ("single bed/couch fitting cyber-room aesthetic"). Recommend couch unless Eren explicitly prefers bed. (This connects to Pitfall 15 — bed implies studio-apartment.)
+- **No bedding details that scream domesticity** — no pillows arranged like a hotel, no plush toys, no clothes draped on a chair. Make the bed read like a place to sit during a long study session, not a personal sleeping area. (Or, equivalently: choose couch.)
+- **Audience-research check, `discuss-phase` question:** ask Eren which framing he prefers — "more workstation-focused (bed minimised / off-default-view)" or "more lived-in / humanising (bed visible at default)." If he picks the latter, document the tradeoff has been considered. Recommend the former.
 
 **Warning signs:**
-- You're using a green-screen "code rain" effect
-- Your skills section has bars/percentages
-- The terminal animation on the main monitor doesn't accept any input — and the visitor *can* try to click it
-- You've used the word "cyberpunk" or "hacker man" in a code comment
-- A non-cyber friend says "looks cool!" but you've never tested on a cyber person
+- The default `?focus=overview` screenshot prominently includes the bed.
+- The bed has a specific style (e.g. bunk bed, four-poster) that adds personality but adds OSINT-leakage / personal-life surface area.
+- The bed area is more visually interesting than the desk area (composition has shifted).
 
 **Phase to address:**
-Phase 1 (aesthetic decisions, copy) — set anti-cliché rules upfront. Phase 4–5 — peer review.
-
-**Sources:** [How to Present a Cybersecurity Portfolio](https://artempolynko.com/blog/how-to-present-cybersecurity-portfolio/), [Why skill percentage bars are bad](https://www.frontendmentor.io/articles/building-an-effective-frontend-developer-portfolio--7cE8BfMG_), [Cybersecurity portfolio guide](https://www.cybersecuritydistrict.com/a-step-by-step-guide-to-building-a-cybersecurity-portfolio/)
+Phase E (bed corner). `discuss-phase` forcing questions:
+1. **"Bed vs. couch?"** — recommend couch, accept bed if explicitly chosen.
+2. **"Default-view exclusion: is the bed off the `?focus=overview` camera frame?"** — required Yes; adjust placement or orbit clamps to enforce.
 
 ---
 
-### Pitfall 7: Junior-authenticity traps — claiming/copying/listing things you can't defend in interview
+### Pitfall 7: OrbitControls clip into walls
 
 **What goes wrong:**
-- Lists "Burp Suite, Metasploit, Volatility, Wireshark, Splunk, ELK, IDA, Ghidra, Cobalt Strike" as skills when half are tools opened once.
-- Reproduces a CTF write-up nearly verbatim from another author (or the official platform writeup) without attribution.
-- Describes a CTF box solution as if from first-principles thinking when steps were copy-pasted from a YouTube walkthrough.
-- Inflates a class project ("Performed pen test of …") into something that sounds like enterprise consulting.
+Current `Controls.tsx` clamps (lines 31–38):
+```
+minPolarAngle: Math.PI / 3        // ~60° — won't look from below
+maxPolarAngle: Math.PI * (100/180) // ~100° — won't look from above
+minAzimuthAngle: -Math.PI / 2     // -90°
+maxAzimuthAngle: Math.PI / 2      // +90°
+minDistance: 1.2
+maxDistance: 4.0
+```
+The room shell (category A) adds left + right + back wall planes. With walls and the current azimuth range of [-90°, +90°], a user dragging to the maximum azimuth will place the camera *behind* the back wall or *outside* a side wall, looking back into the scene through wall geometry. Depending on whether wall material is back-face-culled or two-sided, the user sees either a transparent-from-behind wall (revealing the scene through a "hole"), wall back-faces (looking inside-out), or a completely empty void where the camera escaped the room.
 
-In interview, the hiring manager asks "walk me through how you'd use Volatility to triage a memory dump" and the candidate freezes. Worse, in cyber the community is *small* — the original write-up author may be on the hiring panel.
+The shipped v1.0 maxDistance of 4.0 m is also relevant — if the room is, say, 5×5 m, then maxDistance puts the camera past the back wall at any azimuth ±90°.
 
 **Why it happens:**
-Junior portfolio templates encourage "list everything you know." Cybersecurity is huge, juniors feel the gap, and padding feels like the safest option. It's the worst option.
+- Orbit clamps were authored for an unbounded scene (just a desk floating in space); walls weren't part of the v1.0 mental model.
+- Adding walls is a "geometry only" task — author thinks of it as decoration, doesn't connect to camera constraints.
+- The clip is only visible if you actually drag to the edge of the azimuth or push max distance — easy to miss during local dev where you stay near the centre.
 
 **How to avoid:**
-- **Skills rule:** every tool listed must have a project/write-up/HTB box on the same site that uses it. If there's no concrete artefact, it doesn't go on the skills list.
-- **Provenance rule:** every CTF write-up explicitly cites: the platform, the box/event name, the date solved, and any sources consulted (other write-ups, hints used, walkthroughs watched). It's not weakness to say "I got stuck on the privilege escalation step and consulted [link] for the technique" — it's professional honesty.
-- **First-person verifiable detail:** include something only you would have — a screenshot timestamp from your own machine, a custom note you took mid-solve, a mistake you made and how you recovered. This makes plagiarism detection trivial and builds trust.
-- **Junior framing:** don't dodge it. "Recent graduate, building toward SOC analyst / blue team. Currently working through HTB Academy + TryHackMe SOC L1 path." Concrete, junior-honest framing beats fake-senior.
-- **Defendable depth:** for the top 3–5 skills you list, mentally rehearse the interview answer "What's the most complex thing you've done with X?" If you can't answer in 60 seconds, demote or remove the skill.
+- **Re-derive orbit clamps from room dimensions, not from desk dimensions.** After walls are in place, walk the orbit envelope (min/max polar × min/max azimuth × min/max distance) corners and verify none of those corners are outside the room. Tighten any clamp that escapes.
+- **Concrete recipe for a 4×4×2.5 m room with desk against the back wall:**
+  - `minDistance`: keep at 1.2 (still inside the desk's clearance).
+  - `maxDistance`: ≤ `(room_depth - desk_z - margin)`. For a 4 m deep room with desk centred at z=-0.5 and a 0.3 m margin from the back wall: `maxDistance ≤ 4 - 0.5 - 0.3 = 3.2 m`. Reduce from 4.0 → 3.0 m.
+  - `minAzimuthAngle / maxAzimuthAngle`: tighten from ±90° to ±60° so the camera doesn't slide past the side walls.
+  - `minPolarAngle`: keep at π/3 (≈60° from straight up) — won't look down through the floor.
+  - `maxPolarAngle`: keep at ≤100° — won't look up through the ceiling.
+- **Visualise the orbit envelope in dev mode.** Use `r3f-perf` or a debug helper that draws a wireframe sphere/cone showing the camera's reachable positions. Run this once after walls land; verify no overlap with wall planes.
+- **OrbitControls collision detection isn't built-in.** Don't expect drei to solve this — it won't. Tighter clamps are the only mechanism. (A raycast-based camera collision would work but adds complexity inappropriate for a 1-month milestone.)
+- **Wall material is two-sided OR camera can't reach behind it — pick one.** If walls are single-sided (default) and the camera can clip through, the user sees the inside-out wall (back faces visible). Pick: either set wall material `side: THREE.DoubleSide` (cheap visual fix; works if camera escapes) OR enforce tight clamps (cleaner fix).
 
 **Warning signs:**
-- Your skills list has more than ~12 tools/technologies
-- A project description has no first-person detail you could only know if you'd done it
-- A CTF write-up has no "where I got stuck" or "what I tried first" — just a clean victorious narrative
-- You can't immediately name 2 things that went wrong on each project
+- Dragging to max azimuth shows void or wall-from-behind.
+- Zooming out reveals a "frame" of the room rather than the room enveloping the camera.
+- Walls visibly clip through any prop (chair, bed, monitor) at orbit positions.
+- Performance drops at certain orbit positions (camera entering wall geometry can mess with shadow rendering).
 
 **Phase to address:**
-Phase 1 — content/skills inventory. Every content phase — provenance rule. Phase 5 — peer review for authenticity.
-
-**Sources:** [What cybersecurity recruiters look for](https://myturn.careers/blog/what-cybersecurity-recruiters-really-look-for-in-a-candidate/), [Junior cybersecurity resume guidance](https://www.beamjobs.com/resumes/entry-level-cyber-security-resume-examples), [HackTheBox resume examples](https://www.hackthebox.com/blog/cybersecurity-resume-examples)
+Phase A (room shell). The plan that adds walls MUST in the same plan re-derive and update `ORBIT_CLAMPS` in `Controls.tsx`. Add a VERIFICATION step: drag the camera to each of the 8 orbit-envelope corners (min/max polar × min/max azimuth × min/max distance) and confirm no wall escape at any corner. Then re-test each of the 5 tab focus poses to confirm the GSAP camera dolly still lands inside the room.
 
 ---
 
-### Pitfall 8: 3D scene captures touch/scroll on mobile and traps the user
+### Pitfall 8: Phase 4 (04-08) human sign-off defers indefinitely
 
 **What goes wrong:**
-Visitor on a phone tries to scroll the page; the Canvas eats the gesture and rotates the camera instead. They can't scroll past the 3D section. They leave.
+The v1.0 audit ships with 4 unsatisfied requirements awaiting human sign-off (`OPS-03` Lighthouse manual median-of-3, `OPS-04` real-device QA, `OPS-05` pre-launch checklist execution, `CTC-01` delivery half — Gmail + Outlook test). These are autonomous: false — no agent can do them. The CHECKLIST-LAUNCH.md is fully authored with `___` placeholders. The pattern that has already failed once (Plan 03-06 was originally autonomous: false, got deferred because Eren didn't run the real labs in the planned window) is now repeating: if v1.1 doesn't gate its own completion on these items being filled, they'll defer to v1.2, then v1.3, then never.
+
+The sign-off items aren't blocked by code — they're blocked by Eren actually deploying to GH Pages, opening Chrome incognito, running Lighthouse 3 times, recording numbers, sending a Web3Forms test, and checking inboxes. ~30–60 minutes of focused human work that **always loses to whatever else is on Eren's plate.**
 
 **Why it happens:**
-`OrbitControls` and most R3F drag handlers default to capturing pointer events on the entire Canvas. On desktop this is fine; on mobile, the same gesture (vertical drag) collides with page scroll.
+- Sign-off work has no satisfying deliverable beyond filling in `___` rows; psychologically less rewarding than building new features.
+- Each individual sign-off item is "I'll do it later when I have 10 quiet minutes" — but 4 items × deferral compounds.
+- v1.0 milestone ended without these closed, which set a precedent that v1.1 can repeat.
+- "Working on v1.1 features" feels like progress; "filling in the launch checklist" feels like paperwork.
 
 **How to avoid:**
-- On mobile breakpoints, **disable Canvas drag-to-look** entirely. Replace with discrete tap-to-focus interactions ("tap a monitor to read it") and a fixed camera path.
-- If you want any drag on mobile, restrict it horizontally only (`enableRotate: true, enablePan: false`, lock vertical) so vertical scroll always wins.
-- Use `touch-action: pan-y` CSS on the Canvas wrapper to give the browser a hint that vertical pans are scrolls, not 3D.
-- Test on real phones: rotate phone, scroll, tap, pinch — every gesture must do something predictable or be ignored.
+- **Mirror the Plan 04-08 resume-signal pattern at the v1.1 milestone level.** v1.1-complete is gated on a single artifact: `CHECKLIST-LAUNCH.md` (existing) with every `___` placeholder filled AND `CHECKLIST-OPSEC.md` (new pitfall rule from #5) verified. If any row is `___`, v1.1 cannot complete.
+- **Make the sign-off its own phase (Phase H per scope), executed AFTER feature phases but BEFORE milestone close.** The Phase H plan's autonomous: false flag is set; the plan body is "ask Eren to run the checklist." VERIFICATION is binary: every row populated. No partial pass.
+- **Forcing function in `gsd-complete-milestone`:** the milestone-close command reads CHECKLIST-LAUNCH.md and refuses to close the milestone if any `___` remains. (If the existing milestone-close command doesn't do this, document the manual check in v1.1 ROADMAP.md.)
+- **Schedule the sign-off explicitly — pick a date.** "Saturday 2026-05-23 morning, 9–10am" or whatever Eren can commit to. Without a date, defer wins.
+- **Lower the friction:** prepare the sign-off Saturday by leaving 3 browser windows open, the checklist file in the editor, a pre-typed Web3Forms test message in clipboard. Make the activation energy near zero.
+- **Decouple from feature work.** v1.1 features (A–G) ship first to a staging/branch deploy. Phase H sign-off runs against staging. This means Eren has something concrete to test against, and the feature work isn't held hostage to the sign-off date.
 
 **Warning signs:**
-- On a phone, you can't scroll past the hero section
-- Pinch-to-zoom either does nothing or zooms the camera unexpectedly
-- The page bounces back to the top when you try to swipe up
+- Phase H plan exists but no calendar date attached.
+- The plan is "ongoing" or "rolling" rather than time-boxed.
+- Feature phases (A–G) keep getting added without Phase H starting.
+- Eren says "I'll get to the checklist after [feature]" — gentle pushback recommended.
 
 **Phase to address:**
-Phase 3 (interaction/controls). Verify on real device in Phase 5.
+Phase H (pre-launch sign-off). `discuss-phase` forcing questions:
+1. **"What date will the sign-off Saturday be?"** — concrete date or refuse plan execution.
+2. **"Have devices been identified for OPS-04 (real-device QA)?"** — must name an iOS model and an Android model BEFORE the plan starts, not during.
+3. **Milestone-close gate:** v1.1 cannot transition to milestone-complete with any `___` in CHECKLIST-LAUNCH.md.
 
 ---
 
-### Pitfall 9: GitHub Pages base path + SPA routing breaks deep links
+### Pitfall 9: CTF write-ups blocked again by no-lab-work
 
 **What goes wrong:**
-- Site loads at `https://username.github.io/portfolio/` — works.
-- Recruiter shares `https://username.github.io/portfolio/projects/honeypot-lab` — 404.
-- After fix: assets fail to load because the base path is wrong (`/assets/...` instead of `/portfolio/assets/...`).
-- Build artifact (`dist/`) gets accidentally committed; pushes get bigger every deploy; CI pipeline confused about source vs. output.
+v1.0 deferred CNT-02 and CNT-03 to v1.1 because Eren hadn't run the real labs (Plan 03-06 override accepted 2026-05-08, per `feedback_no_fabricated_lab_evidence.md`). If v1.1 includes "write 2–3 MDX CTF write-ups" as a phase without first confirming Eren has done the lab work, **the same failure mode recurs** — the phase will be deferred to v1.2 with the same root cause: no real evidence to write from, no fabrication permitted.
+
+This is the cyber-equivalent of the OPS-03/04/05 sign-off pitfall: lab work happens out-of-band of agent execution, and "I'll get to the lab later" loses to other priorities indefinitely.
 
 **Why it happens:**
-Vite defaults assume root-domain hosting. GitHub Pages serves from `/<repo>/` for project sites. SPAs need a 404.html shim or hash routing because GitHub Pages does no client-side routing fallback.
+- Hope that "this milestone will be different."
+- Write-ups feel like they unblock with effort; the actual blocker (running the lab) is invisible to roadmap planning.
+- Lab work is technical and rewarding; the gap between "interest" and "scheduled time to do it" is wide.
 
 **How to avoid:**
-- Set `base: '/<repo-name>/'` in `vite.config.js` (or use `import.meta.env.BASE_URL` everywhere asset paths are constructed). For a custom domain later, change to `/`.
-- Use hash routing for v1 (`#/projects/foo`) — simpler than the 404.html shim and works without any GitHub Pages tricks. Trade-off: slightly less clean URLs. Worth it for a one-month timeline.
-- If using `BrowserRouter`, ship a `404.html` that's an exact copy of `index.html` (or use a redirect script like the `spa-github-pages` pattern), and configure router `basename` to match the base path.
-- `.gitignore` includes `dist/` and `build/`. Deploy via GitHub Actions (`actions/deploy-pages` or `peaceiris/actions-gh-pages`) building on the runner — never commit built output.
-- All env-style values must be inlined at build time (Vite replaces them statically). Do not assume runtime config — there's no server. If you need a "secret" (e.g., Formspree endpoint), it's a public URL anyway, so put it in `.env` as `VITE_FORM_ENDPOINT` and ship it.
+- **`discuss-phase` forcing question, BEFORE the write-ups phase enters the roadmap:** **"Have you actually started any of the 3 labs (PortSwigger JWT, SigmaHQ-against-Sysmon, MalwareBazaar retired-sample triage)? If no: do not include write-ups in v1.1 scope. Pull from v1.0-deferred and re-defer to v1.2 explicitly."** Better to defer honestly at planning time than to defer at execution time after building expectations.
+- **Acceptable v1.1-scope alternatives** if labs haven't started:
+  1. Ship v1.1 with `src/content/writeups/` still empty (status quo from v1.0).
+  2. Ship v1.1 with one *clearly-labelled "study notes"* MDX entry — e.g. "Notes from PortSwigger's Lab: JWT authentication bypass via unverified signature" with full citations to PortSwigger, framed explicitly as "my notes while working through this public lab" not as "my discovery." This is acceptable under the no-fabrication rule per the binding memory.
+  3. Promote write-ups to v1.2 with a calendar commit ("by 2026-07-01") and a parking lot of lab-run dates.
+- **If labs HAVE been started but not finished:** scope the phase to one write-up, not three. One real write-up > three fabricated.
+- **Don't roll labs into a phase plan as an autonomous step.** Labs are out-of-band; planning should treat them as a *precondition*, not a *deliverable* of the write-up phase.
+- **Honest framing wins.** A junior portfolio with 0 write-ups and a visible "in progress" empty state outperforms a portfolio with 3 fabricated write-ups in a community where fabrication is career-ending. This is already established (PROJECT.md Key Decisions row: "No write-up fabrication — author only after real labs").
 
 **Warning signs:**
-- Deploy works locally with `vite preview` but breaks on `username.github.io/repo/`
-- Hard-refresh on a sub-route 404s
-- `dist/` directory shows up in `git status`
-- Asset URLs in dev are `/foo.png` but production fetches `/repo/foo.png` and you discover this only after deploy
-- Your "secret" Formspree key looks like it's leaking — it isn't a secret; the entire bundle is public
+- Plan draft says "Eren will run the lab in week X" with no commitment from Eren.
+- Lab references in the plan have no link to Eren's real run (screenshot, log file, captured cookies, etc.).
+- Plan execution proposes filling in "placeholder" content with "we'll swap it later."
+- Eren responds to "have you started the lab?" with "I will" rather than "I have."
 
 **Phase to address:**
-Phase 1 — repo + Vite + hosting setup, decide router strategy. Phase 4 — first deploy + sub-route smoke test.
-
-**Sources:** [GitHub Pages SPA 404 handling](https://dev.to/lico/handling-404-error-in-spa-deployed-on-github-pages-246p), [Resolving Vite GitHub Pages base path](https://medium.com/@aleksej.gudkov/resolving-vite-v5-4-2-build-404-error-e1f13914f2d7), [Vite GitHub Pages plugin](https://github.com/sctg-development/vite-plugin-github-pages-spa), [Vite static deploy guide](https://vite.dev/guide/static-deploy)
+Phase I (write-ups + GLB revisit). `discuss-phase` forcing question above runs FIRST. If the answer is no labs started → strike the write-ups portion of Phase I and explicitly promote to v1.2. Do not let the roadmap carry an unblockable phase.
 
 ---
 
-### Pitfall 10: 3D scene with no keyboard path, no reduced-motion handling, no alt-content
+### Pitfall 10: Re-attempting GLB workstation V2-3D-01 — same outcome
 
 **What goes wrong:**
-- Keyboard-only user (or screen-reader user) lands on the page and finds nothing navigable. Bounces.
-- User with `prefers-reduced-motion: reduce` set (vestibular disorder, migraine, motion sickness) gets a swooping camera ride and feels physically ill.
-- A recruiter's accessibility-audit tool flags 0 accessible content; some employers screen for this.
+Plan 04-06 GLB workstation (real CC0 Poly Haven composite) shipped in 14 minutes during Phase 4 and was reverted in commit `342d2e7` after autonomous visual tuning concluded that **procedural geometry looked better in context**. The reversion was a quality decision, not a time-budget decision — the GLB files remain on disk under `public/assets/workstation/`. Promoting V2-3D-01 to v1.1 (per Active requirements) and "reattempting with iteration headroom" misreads the failure mode: more iteration time doesn't fix a wrong-direction choice. The same CC0-composite approach with more polish will likely re-converge on the same conclusion — procedural reads better in this scene because the postprocessing pipeline (Bloom + Scanline + CA + Vignette) is tuned for procedural materials, not for the PBR-realistic materials of Poly Haven assets. Re-attempt risk = same outcome = wasted Phase I/v1.1 budget.
+
+The promotion was reasonable as a hedge ("real GLB" was a v1.0 requirement that needed *somewhere* to live), but the assumption "more iteration time will produce a different result" is unverified and probably wrong.
 
 **Why it happens:**
-Canvas content is opaque to the accessibility tree by default. Reduced-motion is in the spec but R3F has no built-in respect for it.
+- Sunk-cost: the GLB files are already in the repo; "shouldn't we use them?"
+- v1.0 REQUIREMENTS.md row for 3D-08 wants "real GLB" closure; the procedural revert leaves a paperwork loose end.
+- Procedural can feel like a fallback even when it's the right choice (because it was Plan 04-06 Path B, not Path A).
 
 **How to avoid:**
-- The 2D fallback is the accessibility path. Make it reachable via a visible "Skip 3D / View text version" link as the first focusable element on the page (visually hidden until focus, like a "Skip to content" link).
-- Detect `prefers-reduced-motion: reduce` (`window.matchMedia('(prefers-reduced-motion: reduce)').matches`) and:
-  - Disable auto-camera flythroughs
-  - Replace lerped camera transitions with instant cuts (or short, opacity-only fades)
-  - Pause ambient animations (terminal cursor blink is fine; floating particles are not)
-- Keyboard interaction model: arrow keys cycle focus through monitors; Enter activates; Escape returns to wide view. Document this in a small "?" panel.
-- Every monitor's content has a corresponding `<section>` in the 2D fallback with proper headings (`<h1>`–`<h3>`).
-- Contrast: the terminal-green-on-black aesthetic *can* fail WCAG AA. Use a green that hits at least 4.5:1 on black — `#00ff41` is iconic but can be eye-strain; `#5eff5e` or `#7dff90` reads better and still feels terminal-correct. Test with WebAIM contrast checker.
-- Camera movement: avoid sudden rotations >30°/s; cap velocity. Even non-reduced-motion users get nauseated by aggressive cameras.
+- **Treat the v1.0 revert as the answer, not the problem.** The procedural look IS the chosen v1 aesthetic. Update REQUIREMENTS.md 3D-08 row to reflect "shipped procedural; GLB promoted to v2" without ambiguity.
+- **Re-attempt GLB only if a fundamentally different approach.** "Bigger budget on the same CC0-composite path" is not different. Fundamentally different = Blender modeling by Eren himself (his style, his lighting, his proportions, baked specifically for this scene's postprocessing). If Eren doesn't have time/skill/inclination for Blender modeling in v1.1, skip GLB revisit entirely.
+- **Decision gate, `discuss-phase` forcing question:** **"Are you committing to Blender modeling for the workstation in v1.1? If no — skip GLB revisit. The procedural look is the right answer."**
+- **Delete or formally archive the public/assets/workstation/ files** if GLB is skipped, so the repo doesn't carry 869 KB of unused assets indefinitely. Even unloaded, they're in the deploy artifact unless excluded.
+- **Update REQUIREMENTS.md 3D-08 row now**, before v1.1 starts, to remove the "partial" status and reflect "shipped procedural by design."
+- **If GLB is genuinely Blender-attempted:** scope it as a single plan with a clear abort criterion ("if it doesn't visibly beat procedural at the 5 tab focus poses in side-by-side screenshots within 1 iteration, abort and accept procedural as final"). Don't let it sprawl.
 
 **Warning signs:**
-- Tabbing through the page hits nothing inside the Canvas
-- Lighthouse Accessibility score < 90
-- You don't have a `useReducedMotion` hook (or equivalent) anywhere
-- Default green-on-black has contrast ratio < 4.5:1
-- One real user has said "that camera move made me feel a bit sick"
+- Plan draft re-uses the same Poly Haven asset list.
+- "Just one more iteration" appears more than once.
+- The case for GLB rests on "we already have the files" rather than "the look is better."
+- No side-by-side comparison screenshots get committed.
 
 **Phase to address:**
-Phase 1 — pick contrast-safe palette, set up reduced-motion hook stub. Phase 3 — wire reduced-motion to camera + animation. Phase 5 — Lighthouse + manual screen-reader pass.
-
-**Sources:** [prefers-reduced-motion (web.dev)](https://web.dev/articles/prefers-reduced-motion), [WCAG C39 reduced-motion](https://www.w3.org/WAI/WCAG21/Techniques/css/C39), [Motion accessibility (Motion.dev)](https://motion.dev/docs/react-accessibility)
+Phase I (write-ups + GLB revisit) — split into Phase I-writeups and Phase I-glb, gate GLB on the Blender-commitment question. Or, recommended: drop GLB revisit entirely and update v1.0 REQUIREMENTS.md 3D-08 row + delete `public/assets/workstation/`.
 
 ---
 
-## Moderate Pitfalls
-
-### Pitfall 11: Loading UX — blank screen, jarring snap from nothing to scene
+### Pitfall 11: Performance budget creep — size-limit gate trips late
 
 **What goes wrong:**
-First paint is empty (or just a spinner). 4 seconds later, the full 3D scene snaps in. Visitor has no idea what's happening; bounce rate spikes during that window.
+Current 3D chunk is 38.95 KB gz against a 450 KB budget — substantial headroom. The temptation: assume headroom is endless, add components freely. v1.1 adds 10–15 new procedural components: WallLeft, WallRight, WallBack, Ceiling, Window, Blinds, ServerRack, RackLEDs, Cables, HDD, Whiteboard, AnalogClock, FramedCert, Plant, BookSpines, BiasLight, LedStrip, Bed, Nightstand, BedsideLamp, Cat. Each is small (probably 1–3 KB gz uncompressed JSX with primitives), but cumulatively 20 × 2 KB = 40 KB gz on top of 39 → ~80 KB gz. Still under budget — but **the failure mode isn't running out of budget, it's running out of budget LATE.** If Phase G (secondary devices) gets squeezed at the end because Phases A–F filled the budget, you'll cut features you committed to.
+
+Additionally, the **GLB files** in `public/assets/workstation/` (869 KB total) are in the deploy artifact even though `src/` doesn't reference them. They count against deploy size if not the `size-limit` JS budget. And canvas-texture generation (whiteboard, wall poster) adds runtime memory but not bundle size — different budget axis entirely.
+
+**Why it happens:**
+- "We're at 9% of budget, who cares" reasoning.
+- Per-PR size-limit increases are individually small and trigger no warning.
+- size-limit budgets are JS gzipped; canvas-texture memory + GLB deploy weight are different metrics not enforced.
+- New components default to live in the 3D chunk because they live in `src/scene/`.
 
 **How to avoid:**
-- Render a static "concept art" SVG/CSS rendition of the workstation as the immediate first paint — looks like the scene, takes zero JS. The 3D scene fades in over the top when ready.
-- Use `useProgress` from `@react-three/drei` for an actual progress percentage, not an indeterminate spinner. Progress visible = perceived speed up.
-- Preload critical assets (`useGLTF.preload(...)`) at module top so they kick off before mount.
-- Show real content immediately: the CV link/contact bar (per Pitfall 1) is text and present at first paint regardless of scene state.
+- **Monitor per-phase delta, not just absolute.** After each phase, log the 3D chunk size to a row in a tracking comment in ROADMAP.md or a `size-history.md`. If any single phase adds > 30 KB gz, investigate — probably means a non-primitive sneak (a heavy import, an oversized canvas texture).
+- **Reserve 100 KB gz for Phase G (secondary devices)** by tracking forward. Don't let A–F consume all 450 KB.
+- **Delete `public/assets/workstation/` if GLB revisit is skipped** (see Pitfall 10). 869 KB off the deploy artifact.
+- **Canvas-texture sizes deliberate.** The existing whoami poster is 500×700 = 350K pixels. The whiteboard at the same resolution is fine; but if multiple canvas textures are created (whiteboard + framed cert + analog clock + book-spine textures), each at high resolution, runtime memory adds up. Cap at, say, 1024×1024 max per texture and 8 total textures.
+- **Lazy-load Phase G if it's the swing vote.** Secondary devices (laptop, SDR) can be a separate dynamic import behind a `?advanced=true` URL flag if budget gets tight.
+- **No new third-party deps for A–G.** PROJECT.md already says "no new deps expected"; enforce that.
 
-**Phase:** Phase 3 — loading sequence as part of scene polish.
+**Warning signs:**
+- 3D chunk gz size goes up by more than the expected per-phase delta (a single primitive component shouldn't add > 5 KB gz; if it does, look at what got imported).
+- CI size-limit job warning yellow > 70% of budget.
+- A phase wants to add a new prop and the author says "let's skip the texture optimisation, we have headroom."
+- Multiple canvas textures created at full 2048×2048 resolution.
 
-**Sources:** [R3F Suspense + useProgress patterns](https://r3f.docs.pmnd.rs/tutorials/loading-models), [Wawa Sensei loading screen](https://wawasensei.dev/courses/react-three-fiber/lessons/loading-screen)
+**Phase to address:**
+Every phase from A through G includes a size-limit check in VERIFICATION. Phase A bootstraps the tracking row (records baseline). Phase G is the swing vote; if budget got tight in A–F, Phase G falls back to lazy-load.
 
 ---
 
-### Pitfall 12: Drei `<Html>` overlays — z-fighting, click-through bugs, accidental layout reflow
+### Pitfall 12: a11y — animation gating gaps for vestibular-sensitive users
 
 **What goes wrong:**
-HTML labels on monitor screens flicker (z-fighting) when camera moves; clicks on overlay buttons either don't fire or also fire raycaster events on the mesh behind; the `<Html>` element triggers layout reflow on the parent page.
+v1.0 already wires `prefers-reduced-motion` site-wide (TXT-05 satisfied) and gates the `whoami` typing animation (3D-07) and OrbitControls damping (Controls.tsx line 53). v1.1 adds new animated elements:
+- **Server rack LEDs** blinking (Phase B).
+- **Cat breathing animation** (Phase F).
+- **Neon strip pulse** if any added beyond the static v1.0 one (Phase D).
+- **LED strip** with possible breathing / colour-cycle.
+- **Analog clock** with second-hand sweep (Phase C).
+- **Door swinging or any cosmetic motion** (Phase A).
+
+Each animation should be gated behind `useReducedMotion()` (existing hook in `src/lib/useReducedMotion.ts`, already used in `Controls.tsx`). The pitfall: gating gets forgotten on small/decorative animations because they don't feel like "motion." A user with vestibular disorder visits, sees 8 simultaneously-blinking LEDs + a breathing cat + a sweeping second hand + a pulsing LED strip = vestibular trigger. Reduced-motion users currently get an excellent experience (the whole site is designed around them); a single missed gate is a regression.
+
+**Why it happens:**
+- "Tiny animations don't count" mental shortcut.
+- `prefers-reduced-motion` is a per-component opt-in, not a global toggle — easy to forget.
+- The reduced-motion failure mode is silent (the user doesn't complain, they just leave).
 
 **How to avoid:**
-- Prefer rendering monitor *content* as Three.js textures (canvas textures, R3F `useFBO`, or pre-rendered images) rather than `<Html>` for anything that's part of the "in-world" experience. Use `<Html>` only for floating UI chrome (close button, breadcrumb, "press Esc").
-- When using `<Html>`, set `transform` and `occlude` props deliberately and test with camera at extreme angles.
-- Stop event propagation explicitly: `onClick={(e) => { e.stopPropagation(); ... }}` on UI overlays so the underlying mesh raycaster doesn't also fire.
-- If you do put the CV/long-form text inside `<Html>`: be aware that scrolling inside it on mobile is a separate gesture problem (see Pitfall 8).
+- **Every animation, no exceptions.** LED blinks, cat breath, clock sweep, neon pulse, door swing, anything using `useFrame` for animation — gate behind `useReducedMotion()`. Reduced-motion state = animation frozen at a static representative frame (LED on or off at fixed pattern, cat at neutral scale, clock at static time, neon at constant emissiveIntensity).
+- **Per-phase ESLint-or-grep audit.** After each phase, grep `useFrame` and `useSpring` in the touched files; for each result, verify the call site checks `useReducedMotion()`. If a `useFrame` doesn't, fix or document why (e.g. damping in OrbitControls is already off when reduced — verify).
+- **A "reduced-motion screenshot" verification step.** Toggle reduced-motion via DevTools rendering panel, take a screenshot at the default `?focus=overview` pose. The screenshot should look intentional (everything settled in a representative pose), not broken (e.g. LEDs all off looking dead, cat at mid-breath looking deflated).
+- **No `Glitch` postprocessing effect added.** Already in Out-of-Scope list — but worth re-stating. Glitch is the highest-vestibular-risk effect in the postprocessing library.
+- **No pulsing emissive on the bedside lamp.** Bedside lamp emits a fixed warm point light; it doesn't flicker. (Flickering lamp is a thriller trope, not a SOC analyst's room.)
 
-**Phase:** Phase 2–3 (monitor content rendering).
+**Warning signs:**
+- A new `useFrame` call doesn't reference `useReducedMotion`.
+- LED blink frequency overlaps another animation (potential motion-trigger).
+- Reduced-motion screenshot looks "wrong" or "broken" rather than "still."
+- Reviewer says "ooh, lots of stuff moving" — that means there's lots of stuff moving.
 
-**Sources:** [Drei Html + pointer events issues](https://github.com/pmndrs/drei/issues/319), [R3F event propagation](https://r3f.docs.pmnd.rs/api/events)
+**Phase to address:**
+Every phase B/C/D/F that adds an animated element runs the audit + reduced-motion screenshot in VERIFICATION. Phase F (cat) is the most likely to forget because the breathing animation is the cat's *only* feature.
 
 ---
 
-### Pitfall 13: Stats panels, debug helpers, dev-only logging shipped to production
+### Pitfall 13: Inherited v1.0 phase numbering / ownership confusion
 
 **What goes wrong:**
-Visitor sees an FPS counter in the corner. Console has 50 `console.log` lines from your scene-debugging session. A `<axesHelper />` is still in the scene. A `<gridHelper />` floor is visible.
+v1.0 collapsed to 4 phases (1 Foundation, 2 3D shell, 3 Content, 4 Polish). v1.1 starts at Phase 5. v1.1 owns work that conceptually belongs to v1.0 phases — sign-off (was Plan 04-08), write-ups (was Plan 03-06), GLB revisit (was Plan 04-06). When a verification step later asks "did Phase 3 satisfy CNT-02?" the answer is "Phase 3 deferred, Phase X (v1.1) closed it" — which is confusing because Phase X belongs to a different milestone.
+
+Less critically, this causes traceability noise: REQUIREMENTS.md rows currently point CNT-02 → "Phase 3" but Phase 3 didn't complete it. The ownership table needs to reflect v1.1's phase doing the closure.
+
+**Why it happens:**
+- Inherited deferrals are a normal artifact of milestone boundaries; the workflow doesn't have a clean "this work topologically belongs to milestone A but executes in milestone B" expression.
+- Phase numbering is monotonic by milestone; the deferral relationship is orthogonal.
 
 **How to avoid:**
-- Wrap every `<Stats />`, `<Perf />`, `<axesHelper />`, `<gridHelper />`, `<OrbitControls makeDefault />` (debug version with no constraints), and dev-only `<Leva />` panel in `{import.meta.env.DEV && <... />}`.
-- Pre-launch checklist: `grep -r "console.log\|<Stats\|<Perf\|axesHelper\|gridHelper\|Leva" src/` and verify each hit is gated by DEV.
-- Vite drops `console.log` in production if you configure terser; even better, just don't ship them.
+- **Tag each v1.1 phase with `closes_v1.0:` metadata.** Phase H (sign-off) → `closes_v1.0: [OPS-03, OPS-04, OPS-05, CTC-01]`. Phase I-writeups → `closes_v1.0: [CNT-02, CNT-03]`. Phase I-glb → `closes_v1.0: [3D-08 (path A)]`. Phases A–G → `closes_v1.0: []` (new v1.1 work only).
+- **REQUIREMENTS.md traceability table dual-entry.** Add a column "Closed by" alongside "Phase." For CNT-02: Phase = "3 (deferred)", Closed by = "v1.1 Phase I-writeups". Makes the lineage explicit.
+- **v1.1 milestone audit reads both v1.0 deferrals and v1.1 new requirements.** Don't lose the inherited items.
+- **In the ROADMAP.md narrative for v1.1, group phases into "Inherited from v1.0" and "New v1.1 scope" sections.** Eren-readable, not just metadata-readable.
 
-**Phase:** Phase 5 — pre-launch checklist enforced.
+**Warning signs:**
+- A reviewer asks "which phase satisfies CNT-02?" and gets contradictory answers from REQUIREMENTS.md vs. the plan.
+- Phase H/I plans don't reference v1.0 REQUIREMENTS IDs.
+- v1.1 milestone close fires without confirming v1.0 inherited items are also closed.
+
+**Phase to address:**
+Roadmap creation (before Phase A). Tag every v1.1 phase with closes_v1.0 metadata. Update REQUIREMENTS.md traceability column.
 
 ---
 
-### Pitfall 14: Oversized GLB / uncompressed textures / no Draco or KTX2
+### Pitfall 14: Cat anatomy & identity implication
 
 **What goes wrong:**
-The desk model is 18MB because it was exported direct from Blender with PBR textures at 4K. First load takes 12 seconds on home broadband, longer on phone tethering.
+A cat in the scene with no caveat reads as "this is Eren's cat." If Eren doesn't have a cat, the portfolio implicitly states a fact that isn't true. This is in the same family as fabricating lab evidence — it's not technically a security claim, but it's a personal claim that doesn't bear scrutiny. If a hiring manager comments "cute cat — what's its name?" in an interview and there's no real cat, the moment is awkward and Eren either invents a cat-name (small fabrication snowball) or admits the cat is decorative (mild credibility ding). Better to never put the question on the table.
+
+**Why it happens:**
+- The cat is set-dressing; the author doesn't think of it as a personal claim.
+- Cats are universal enough that it doesn't feel like a strong identity statement.
+- "Yatak ve kedi" was user-suggested without an honesty audit attached.
 
 **How to avoid:**
-- Run all GLB through `gltf-transform optimize` (Draco for geometry, KTX2/Basis for textures, dedup, prune, weld). Target: each GLB under 1MB, all assets combined under 5MB.
-- Texture sizes: 1024×1024 max for hero objects, 512×512 for background props. 4K is for product visualisation, not a portfolio.
-- Use a single combined texture atlas where possible to reduce draw calls.
-- Audit with `lhci` / Lighthouse "Total Byte Weight."
+- **`discuss-phase` forcing question for Phase F (cat):** **"Do you have a cat in real life? If no, do you want the portfolio to imply you do? Options: (a) skip the cat, (b) keep it but never refer to it as 'my cat' anywhere in code/copy/alt-text, (c) keep it and acknowledge it's decorative if asked."** Default recommendation if no real cat: option (b) — include the cat, but never personalise.
+- **Alt-text neutral.** The drei `<Html>` won't have an alt-text relationship to the cat (cat is procedural geometry, not HTML), but if any prop description / dev comment / commit message references "Eren's cat" or names it, strip those references. Phrase as "decorative cat prop" in code comments.
+- **Don't name the cat.** No "fluffy" / "luna" / "tahini" / etc. anywhere.
+- **Apply the same rule to bed style.** A specifically-personal bed (bunk, four-poster, futon, particular bedding pattern) implies more about Eren's life than a generic single bed or couch does.
 
-**Trade-off note:** Combining Draco + KTX2 has known interop issues with some loader setups (see source). Test the compressed pipeline early; have a fallback to "Draco-only + WebP textures" if KTX2 misbehaves.
+**Warning signs:**
+- Code comment says "// Eren's cat" or similar.
+- Cat has a name.
+- Cat appears on a tooltip / hover label / a11y description as anything other than "cat" / "decorative cat".
+- Anyone in code review asks "what's the cat's name?" — that's the audience question that signals the implication landed.
 
-**Phase:** Phase 2 (asset pipeline setup).
-
-**Sources:** [Three.js Draco + KTX2 forum](https://discourse.threejs.org/t/compression-draco-ktx2-example/31382), [gltf-transform optimization](https://www.axl-devhub.me/en/blog/optimizing-3d-models)
+**Phase to address:**
+Phase F (cat). `discuss-phase` question above. Apply at planning, not at execution.
 
 ---
 
-### Pitfall 15: Contact form / email is broken, obfuscated, or goes to spam
+### Pitfall 15: Bed style implies studio apartment / personal living arrangement
 
 **What goes wrong:**
-The interested hiring manager clicks "Contact" → form throws a JS error (Formspree key wrong). Or `mailto:` opens a desktop client they don't have. Or the email arrives in Gmail spam folder because it's from a static-form-handler service the recruiter's domain blocks.
+Tied to Pitfall 6. A bed visible in the same room as the workstation reads as "this is where Eren works AND sleeps" = studio apartment OR student bedroom. Neither is bad in itself; both are personal information the portfolio doesn't need to disclose. The recruiter audience splits — some find it relatable, some downgrade. The 50/50 audience split (recruiters skim, hiring managers engage) means at least one half is at risk.
+
+If Eren is in a multi-room flat in real life and just *likes* the cyber-room genre's bed-in-the-corner trope, the portfolio is over-disclosing in a direction that doesn't match reality. If Eren IS in a studio, the portfolio is accurate but invites assumptions.
+
+**Why it happens:**
+- Genre conformity — cyber-room renders often include a bed.
+- "Yatak ve kedi" user request was style-driven, not framing-driven.
+- The honest-junior framing applies to skills (don't lie about Burp Suite); it should apply equally to lifestyle (don't imply a studio apartment if not).
 
 **How to avoid:**
-- Provide **two** contact paths: a contact form (Formspree / Web3Forms / Getform) **and** a visible (obfuscated) email + LinkedIn link. If form fails, email and LinkedIn still work.
-- Test the form end-to-end after deploy by submitting a real test message; confirm it lands in inbox (not spam) on at least Gmail and Outlook.
-- Don't gate contact behind a captcha if you can avoid it on a portfolio (small spam volume, friction is high). Use Formspree's built-in honeypot.
-- Email obfuscation: use JS to assemble the address (`['eren', 'example.com'].join('@')`), or use a button that copies to clipboard, or use a standard image — but always pair with the form so there's a fallback if JS breaks.
-- Ensure the form's "from" address (when the handler sends the notification) doesn't look suspicious — most handlers let you customise the reply-to so the recruiter can hit reply directly.
+- **Couch over bed (recommended).** PROJECT.md already lists couch as an option. Couch reads as "I sit here during long study sessions" — a workstation extension, not a sleep area. Lower personal-disclosure surface. Recommended default.
+- **If bed: keep it minimal, off-default-view (Pitfall 6), and visually framed as a study spot.** No pillows, no duvet, no decorative bedding.
+- **`discuss-phase` forcing question:** **"In your actual living arrangement, do you work in the same room you sleep in? If no: prefer couch to bed; the bed would imply a studio apartment you don't live in."**
 
-**Phase:** Phase 4 (contact + deploy). Verify in Phase 5.
+**Warning signs:**
+- Bed has bedding (pillow, duvet) styled.
+- Bed visible at default `?focus=overview` pose.
+- Reviewer says "studio apartment vibe" or "student-room vibe."
+- Bed is positioned in a way that emphasises rather than de-emphasises it.
 
----
-
-### Pitfall 16: Maintenance bomb — stack the dev can't update in 6 months
-
-**What goes wrong:**
-6 months later, Eren wants to add a new project. `npm install` fails — minor versions of R3F and three.js drifted, build script doesn't run, TypeScript errors after a tooling bump. The fix takes a Saturday. He gives up.
-
-**How to avoid:**
-- Pin major + minor versions of `react`, `react-dom`, `three`, `@react-three/fiber`, `@react-three/drei`. `~` not `^`. The R3F + three.js + drei version trio is famous for drifting.
-- Use `package-lock.json` (committed) and CI a lock-file-respecting `npm ci` build.
-- Document setup in `README.md`: Node version (in `.nvmrc`), `npm ci`, `npm run dev`, `npm run build`. One screen of instructions.
-- Content-as-data (Pitfall 4): adding a new project = editing one MDX/JSON file, not touching scene code. This is the single biggest maintainability win.
-- Set up Renovate or Dependabot at "monthly, security only" — keep updates predictable, skip the noise.
-
-**Phase:** Phase 1 (project setup) + Phase 5 (docs).
-
----
-
-### Pitfall 17: Postprocessing pipeline cost (bloom, glitch, scanlines) tanking framerate
-
-**What goes wrong:**
-Terminal aesthetic invites bloom + scanline + chromatic aberration + film grain shaders. Stack them all and a mid-range laptop drops to 20fps; mobile drops to 5fps and overheats.
-
-**How to avoid:**
-- Pick at most one heavy postprocess effect (e.g., bloom for the monitor glow). Skip film grain, chromatic aberration, scanlines unless you've measured them.
-- Disable postprocessing entirely on mobile / low-power devices.
-- Bake the look into textures where possible (a "scanline" texture overlay on a monitor mesh costs nothing; a full-scene scanline pass costs everything).
-- Profile with Drei `<Stats />` per-effect: turn each off and measure the FPS gain.
-
-**Phase:** Phase 3 (visual polish) — measure as you add effects, not at the end.
-
----
-
-## Minor Pitfalls
-
-### Pitfall 18: Tailwind purge breaks dynamic class names
-Class strings constructed dynamically (`bg-${color}-500`) get stripped from the final CSS. Use full class names or Tailwind's safelist. **Phase:** Phase 2.
-
-### Pitfall 19: GitHub Pages cache headers are aggressive
-Visitors see stale versions for hours after deploy. Use cache-busting filenames (Vite does this by default) and mention "hard-refresh if seeing old version" in setup notes. **Phase:** Phase 4.
-
-### Pitfall 20: Favicon, OG tags, and tab title forgotten
-Default Vite favicon, generic `<title>`, no Open Graph image. When recruiter shares the link in Slack to a colleague, it shows a blank preview. Add: real favicon (initials), `<title>Eren Atalay — Cybersecurity Portfolio</title>`, OG image (1200×630 screenshot of the workstation), `description` meta. **Phase:** Phase 4.
-
-### Pitfall 21: HTTPS / mixed content from form handler
-If form handler is `http://`, browser blocks. All third-party endpoints must be `https://`. **Phase:** Phase 4.
-
-### Pitfall 22: GitHub Pages monorepo / `gh-pages` branch confusion
-Mixing up `main` vs `gh-pages` deploy branch, or the new GitHub Actions Pages flow vs. the legacy `gh-pages` branch flow. Pick GitHub Actions flow (newer, less branch-juggling), document it. **Phase:** Phase 1 / 4.
-
-### Pitfall 23: Privacy-respecting analytics still leaking PII
-"Privacy-respecting" analytics still add cookies and beacons. PROJECT.md says "keep it light." If you must, use Plausible/Umami self-hosted or Cloudflare Web Analytics — never GA4 on a portfolio that's meant to look privacy-aware. **Phase:** Phase 4 (decision); ideally skip entirely for v1.
+**Phase to address:**
+Phase E (bed corner). Combine `discuss-phase` question with Pitfall 6 question. Recommend couch by default.
 
 ---
 
@@ -459,216 +514,146 @@ Mixing up `main` vs `gh-pages` deploy branch, or the new GitHub Actions Pages fl
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Hardcoding project content as JSX inline in scene components | Fast to write | Adding a project means editing scene code; 2D fallback drifts | **Never** — content must be data-driven from day one (Pitfall 4) |
-| Skipping the 2D fallback "for now" | Saves a week | Recruiters bounce; you ship 3 weeks late "fixing" it | Never on this project — fallback is the *primary* recruiter view |
-| Skipping mobile testing until the end | Faster dev loop | Discover crashes the day before launch with no time to fix | Acceptable in Phase 1 only; mandatory by Phase 3 |
-| Inlining R3F state in `useFrame` "just for this one animation" | Quick win | Compounds — every animation gets the pattern, eventual refactor required | **Never** — refs from day one (Pitfall 2) |
-| `console.log`-driven scene debugging without a debug-flag pattern | Instant feedback | Logs ship to prod; sensitive paths leak | Acceptable in dev; gate with `import.meta.env.DEV` from day one |
-| Using `^` ranges in `package.json` for R3F/three/drei | Latest features auto | Future builds break unpredictably | Never for this trio — use `~` (Pitfall 16) |
-| Dropping accessibility "for v1, fix later" | Saves Lighthouse-tuning days | "Later" never comes; recruiter accessibility audits fail | Never — at minimum: skip-link, reduced-motion, contrast (Pitfall 10) |
-| Listing every cyber tool you've ever opened on the skills section | Looks impressive at a glance | Interview destruction — "tell me about your Cobalt Strike work" | **Never** (Pitfall 7) |
-| Putting CV PDF only inside the 3D scene | Aesthetic continuity | Recruiter can't get to it without loading scene | Never — must have a plain-HTML link path (Pitfall 1) |
-
----
+| Add every emissive material with `toneMapped={false}` to match neon strip | Strong glow on each new emitter; "consistent" with v1.0 | Cumulative bloom contribution explodes; readability of monitor content drops; can't selectively dial back | Never — only neon strip earned this; new emitters use default tone mapping |
+| Hardcode `emissiveIntensity` per-component rather than reference `emissiveBudget.ts` constants | One-line addition during phase execution | No central audit of cumulative emissive load; Pitfall 4 happens silently | Never once Phase B creates `emissiveBudget.ts` |
+| Skip OrbitControls clamp re-derivation when walls land | Phase A finishes faster | Camera escapes room geometry at orbit edges; visible "void"; OPSEC-adjacent (user sees scene from outside, reads as broken) | Never |
+| Use real photo for window backdrop "just for the mockup, will swap later" | Faster iteration on window prop | Photo gets forgotten and ships; OSINT exposure | Only if the photo is procedural-generated AND the swap is scheduled before merge |
+| Skip the 3-second silhouette test on the cat | Cat ships in one iteration | Uncanny-valley cat damages credibility on the whole scene | Never — the cost of a bad cat exceeds the cost of switching to CC0 GLB |
+| Defer Phase H sign-off "until after the v1.1 features land" | Feature work isn't blocked | OPS-03/04/05 defer to v1.2; CHECKLIST-LAUNCH stays empty; pre-launch debt accumulates | Never — Phase H gets a calendar date at planning time |
+| Include write-ups in v1.1 scope hoping the lab work happens "soon" | Phase plan looks complete; CNT-02/03 looks addressed on paper | Phase deferred at execution time; expectation set then missed; trust drag | Never — write-ups phase gated on labs already started, verified at discuss-phase |
+| Re-attempt GLB workstation with the same Poly Haven composite | Closes the partial 3D-08 row on paper | Same revert; budget wasted; same outcome | Only if the approach is fundamentally different (Eren's own Blender model) |
+| Skip per-phase size-limit check ("we have lots of headroom") | Phase finishes faster | Budget exhausted by Phase F; Phase G cut at the last minute | Never — log per-phase delta even if under budget |
+| Skip `useReducedMotion()` gate on "small" animations | One fewer hook call per component | Reduced-motion users get vestibular triggers; silent regression | Never |
+| Name the cat in code comments / commit messages / dev notes | Convenient shorthand | Implies a personal fact about Eren; awkward in interviews | Never — refer to it as "decorative cat prop" in all artifacts |
+| Keep `public/assets/workstation/` GLB files for "maybe later" | No deletion needed today | 869 KB in every deploy; clutter; signals indecision | Only if GLB revisit is genuinely in v1.1 scope with Blender commit |
 
 ## Integration Gotchas
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| GitHub Pages | Forgetting `base: '/<repo>/'` in Vite config | Set base; use `import.meta.env.BASE_URL` for runtime path constructions |
-| GitHub Pages SPA routing | Using BrowserRouter without 404.html shim | Use HashRouter for v1; or copy index.html → 404.html in build (Pitfall 9) |
-| Formspree / Web3Forms | Treating endpoint as secret | It's public — ship in `VITE_FORM_ENDPOINT`; don't try to hide |
-| GitHub Actions deploy | Building locally and pushing `dist/` | `actions/deploy-pages` builds on runner; never commit `dist/` |
-| `useGLTF` + Draco | Forgetting Draco decoder URL | `useGLTF.setDecoderPath('/draco/')` and ship decoder in public dir |
-| GLB texture compression (KTX2) | Combining KTX2 + Draco without testing loader interop | Test compressed pipeline early; have fallback (Pitfall 14) |
-| Drei `<Html>` | Mixing in-world content + chrome in same `<Html>` | Chrome only; in-world content as textures |
-| `prefers-reduced-motion` | Setting it once at mount, ignoring runtime changes | Subscribe to media-query change events; react during session |
-| LinkedIn / GitHub external links | Missing `rel="noopener noreferrer"` and `target="_blank"` | Add both — security + UX standard |
-
----
+| Bloom postprocessing (existing, Plan 04-01) | Add new emitters and re-tune Bloom luminanceThreshold to compensate | Re-tune number of emitters and their `emissiveIntensity`; Bloom config stays Plan 04-01-frozen |
+| `useReducedMotion` (existing hook) | Forget to import + check on each new `useFrame` callsite | Per-phase grep audit; reduced-motion screenshot in VERIFICATION |
+| `useReducedMotion` (existing hook) | Treat blink-LED as "not motion" because it doesn't translate | Frequency change IS motion for vestibular users; gate it |
+| OrbitControls clamps (existing, Controls.tsx) | Add walls without re-deriving clamps | Walls + clamps land in same plan; corner-walk test in VERIFICATION |
+| size-limit budgets (existing CI gate) | Cross-component component growth not flagged until close to budget | Log per-phase delta; reserve headroom for later phases |
+| Web3Forms delivery (existing, CTC-01 code-side) | Treat the code-side wiring as "done" | Phase H closes the delivery half via real Gmail + Outlook test |
+| Canvas-texture (existing pattern in WallDecor) | Re-use the pattern for whiteboard without thinking about texture memory | Cap textures at 1024×1024; ≤ 8 canvas textures total in scene |
+| drei `<Html transform occlude>` (existing on monitor) | Add additional `<Html>` overlays (e.g. screen on laptop) for content | Keep `<Html>` to monitor only — content already lives there via 5 tabs; secondary devices can have static emissive screens (no Html needed) |
+| MITRE / Kill Chain content on whiteboard | Render text from memory ("I remember the ATT&CK tactics") | Reference the public source URL in canvas-texture code comment; verify against the URL during VERIFICATION |
+| GLB asset deploy weight | Forget `public/assets/workstation/` GLBs in deploy if not used | Delete the files or add to the Pages-artifact exclusion list |
 
 ## Performance Traps
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| State-driven animation in useFrame | 60 React renders/sec, 100% CPU | Refs only in useFrame (Pitfall 2) | Immediately on any non-flagship device |
-| Unmemoized geometries / materials | Stutter on every scene mount, growing memory | `useMemo`, share materials, instance | Becomes obvious at ~10 mesh instances |
-| Default device pixel ratio on retina | Mobile fans, battery drain, frame drops | `dpr={[1, 1.5]}` cap | iPhones / iPads immediately |
-| No frustum culling on out-of-view meshes | GPU rendering things you can't see | Three.js culls by default — but `frustumCulled` can be turned off accidentally on imported GLB | At ~100+ meshes |
-| Postprocessing stack | Frame rate halves per heavy effect | Pick one, measure, kill on mobile (Pitfall 17) | Mid-range laptops at 2+ effects; mobile at 1 |
-| `frameloop="always"` when nothing animates | Battery drain, fan noise on idle | `frameloop="demand"` and `invalidate()` on interaction | Always wasted; pain shows up after 5 min on battery |
-| Loading all assets eagerly | 8+ second first paint | Lazy-load monitors not in initial view; preload only the workstation hero | At 3+ MB total assets |
-| 4K textures | 12s loads, 200MB GPU memory, mobile crashes | 1024² hero, 512² props, KTX2 compressed (Pitfall 14) | Anywhere not on gigabit + flagship hardware |
+| Multiple `useFrame` callbacks per blinking LED | Frame time inflates with LED count | Single shared `useFrame` clock; LEDs read phase from a uniform | At ~16 LEDs with individual `useFrame` (Phase B server rack) |
+| High-res canvas textures recreated on every render | Memory blip + GC pauses on mount | `useMemo` the texture (already done in WallDecor); dispose on unmount (already done) | Whiteboard re-created on every render of Phase C |
+| New point lights for every emitter | Real-time shadow cost explodes if shadows enabled | Cap point lights at ~8 scene-wide (Three.js soft limit per Lighting.tsx comment); use emissive materials + Bloom for "glow without light" | At ~10 point lights with shadows enabled |
+| Adding `castShadow` / `receiveShadow` on every new mesh | Shadow map regenerates each frame; perf cliff | Only the desk + chair + cat + bed need shadow participation; walls do `receiveShadow` only; props (books, cables, HDD) don't shadow at all | At ~15 shadow-casting meshes |
+| Wall planes single-sided + ambient occlusion attempted | AO fails to compute in corner geometry; visible bands | Two-sided walls OR no AO on walls (procedural scene doesn't need AO) | Phase A wall material setup |
+| Postprocessing chain modified | Visible vs. v1.0 baseline | Don't modify; the chain is Plan 04-01-frozen | Any time bloom config touched outside Plan 04-01 |
+| Lazy-loading more than the 3D chunk | Initial paint regression on `?view=3d` direct entry | Phase G (secondary devices) is the only candidate for further lazy-load; gate on actual budget pressure | If 3D chunk exceeds 350 KB gz (78% of budget) |
 
----
-
-## Security Mistakes
-
-Domain-relevant security issues beyond standard web hygiene. These matter extra here because the *audience* is security professionals.
+## Security Mistakes (cyber-portfolio specific)
 
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| EXIF metadata in screenshots | GPS coords, device serial, software paths leak | EXIF strip in build pipeline + manual review (Pitfall 5) |
-| Visible internal IPs / hostnames in lab screenshots | Reveals home network topology | Manually crop / black-box; verify at full size; prefer screenshots from VMs with sanitized hostnames |
-| Live CTF flags in published write-ups | Violates platform rules; gets account banned; embarrasses publicly | Only publish after CTF closes; mask flags with black box, never blur |
-| `mailto:` plain-text email scraping | Spam flood | Obfuscate via JS or contact form (Pitfall 15) |
-| Employer details / NDA-covered content | Career damage; potential legal | Generic role descriptions; no client/product names from current QA role |
-| CV PDF metadata | Author name, software, modification history, sometimes home path | `qpdf --linearize` or re-export with metadata stripped; verify with `exiftool` |
-| Source-map leaking original code paths | Reveals project structure, sometimes secrets in comments | Disable production source maps OR review them — secrets in source comments stay there |
-| Content Security Policy absent | XSS surface (low, but signals carelessness on a *cyber* portfolio) | Add a strict CSP via `<meta>` tag — even a basic one signals you know about it |
-| HTTP form endpoint | Mixed content block + credential interception | All third-party endpoints `https://` |
-| Real DOB / home address on publicly-linked CV | Identity theft / stalking surface | City + region only; full DOB → year only or omit |
-| Dependencies with known CVEs | Looks bad on a *cyber* portfolio specifically | Run `npm audit`; fix before launch; ideally `npm audit` in CI |
-
----
+| Real CVE IDs / Sigma rules on whiteboard implying Eren investigated them | Career-damaging fabrication signal | Use MITRE ATT&CK framework cells only; or generic study-queue todo list with no specifics |
+| Real IPs (non-RFC-5737) on network-diagram whiteboard content | Implies privileged knowledge or fabricates one; latter is fabrication, former is OPSEC | Use RFC 5737 documentation IPs (192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24) exclusively |
+| Photo of real neighbourhood through the window | OSINT location leak; narrows to neighbourhood when only city was disclosed | Procedural shader / abstract / generic; verify in CHECKLIST-OPSEC |
+| Real book spines visible via photo / texture revealing personal library | Light personal inference; possibly identifies specific cyber-textbook ownership matched to a known purchase trail | Use procedural book spines with generic / topical titles ("Practical Malware Analysis", "The Linux Programming Interface") — books that are common enough that ownership doesn't identify; never specific copy / sleeve |
+| Visible passwords / tokens / "demo" credentials on whiteboard or monitor | Recruiter screenshot tweeted; even fake creds in real screenshots create awkwardness | No credential-shaped strings anywhere on visible surfaces; if you need to show a CLI, use `<your-token>` placeholder syntax |
+| Fake "incident in progress" theatre | Cliché flagged in v1.0 Out-of-Scope; signals genre-naïveté to technical hiring managers | Whiteboard shows learning content (frameworks, queue), not theatre |
+| Cat / bed details revealing real-life specifics | Adjacent OSINT-by-inference (specific cat breed, specific bed style → narrows demographic) | Generic procedural; never named; no personally-identifying decor |
+| GLB workstation files deploy weight | Not security — but 869 KB deploy bloat with no `src/` references is suspicious of "leftover from a deleted feature", inviting questions in code review | Delete or formally archive `public/assets/workstation/` if GLB revisit is skipped |
 
 ## UX Pitfalls
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| 3D loads before any content is visible | Recruiter bounces in the loader window | First-paint static "concept art" + content links present in DOM (Pitfalls 1, 11) |
-| Camera capture trapping mobile scroll | User can't navigate; treats site as broken | Disable rotate on mobile or restrict to horizontal (Pitfall 8) |
-| No way back from a "zoomed-in monitor" view | User feels stuck | Always-visible Esc button + Esc key + click-outside |
-| Click-anywhere-to-continue prompt over a 3D scene | Feels like a video game intro, not a portfolio | Skip it; first interaction is the explore action itself |
-| Audio / sound effects | Auto-played audio violates browser policy + annoys recruiters in open offices | No audio, or strictly user-initiated and off by default |
-| "Press any key" terminal prompts that don't accept any key | Feels broken | Either accept input or remove the prompt |
-| Dense terminal text at small font on mobile | Unreadable | Larger base font on mobile breakpoint, or fall back to 2D view |
-| Custom cursor that hides system cursor | Disorienting; accessibility regression | Skip; or only on desktop and only as a small augmentation |
-| No loading progress indication | "Is this broken?" → bounce | `useProgress` percentage (Pitfall 11) |
-| Page title is "Vite + React" or similar default | Tab in recruiter's tab graveyard becomes invisible | "Eren Atalay — Cybersecurity Portfolio" (Pitfall 20) |
-
----
+| Default `?focus=overview` camera includes bed + cat in frame | Recruiter does 30s skim, mentally files Eren as "studio apartment / personal vibe" before reading CV | Bed + cat at azimuth requiring deliberate drag past default; default frame is workstation-only |
+| All 5 tab focus poses end up inside-the-room views obstructed by walls or props | User clicks a tab and the camera lands behind a wall | Re-test every tab pose after walls land (cameraPoses.ts) |
+| Server rack at default view dominates over monitor visually | Monitor (the content) gets less attention than the prop | Rack at far/scale-disadvantage position; smaller angular size than monitor at default |
+| Whiteboard text too small to read at default view + too detailed to read at tab focus | User can't engage with the prop's content | Whiteboard text is *visible motif* at default (recognise it's a kill chain), readable at deliberate camera focus on the whiteboard (optional tab? or just OrbitControls drag) |
+| Cat breathing animation is the most-moving element in the scene | Eye drawn to cat instead of monitor | Subtle amplitude (±2% scale, 0.5 Hz); doesn't out-compete monitor's cursor blink |
+| Reduced-motion users see a "dead" scene (everything frozen mid-pose) | Looks broken | Static representative poses for everything — LEDs at chosen pattern, cat at neutral, clock at static time |
+| Secondary device (laptop, SDR) screen shows fake interface | Same fabrication risk as whiteboard; reads as theatre | Static dark screen with cyan glow only; OR a real public CLI prompt (`$` on a single line); no fake dashboard / output |
+| Door prop hints at an exit / clickable destination that goes nowhere | User clicks expecting interaction | Doors are visually closed; not interactive; tooltip says nothing |
+| Plant added "for warmth" reads as Mediterranean / specific botany style | Personal-identity inference (small but non-zero) | Generic snake plant / pothos / cactus silhouette; no flowering specimen |
 
 ## "Looks Done But Isn't" Checklist
 
-Pre-launch items that are routinely missing on demos.
-
-- [ ] **CV is reachable without loading 3D** — there exists a path (link, route, or query param) that surfaces CV in <2s on slow connection. Verify on throttled "Slow 4G."
-- [ ] **2D fallback has every section the 3D view has** — checklist of content sections compared between views.
-- [ ] **Real-device test on iOS + Android** — not just DevTools mobile emulation; actual phone in hand.
-- [ ] **Reduced-motion mode tested** — toggle in OS, reload, verify camera doesn't swoop.
-- [ ] **Keyboard-only navigation tested** — unplug the mouse, can you reach CV / project / contact?
-- [ ] **EXIF stripped from every image in `public/`** — `exiftool -all= public/**/*.{png,jpg}` and re-verify.
-- [ ] **All screenshots reviewed at full resolution** — IPs, hostnames, tab titles, file paths checked.
-- [ ] **No `console.log`, `<Stats>`, `<Perf>`, `axesHelper`, `gridHelper`, or `<Leva>` in production bundle** — grep + build inspection.
-- [ ] **404 / sub-route deep link works** — open `username.github.io/repo/projects/foo` directly, must not 404.
-- [ ] **Contact form submitted as a test, message arrived in inbox not spam** — check Gmail and Outlook.
-- [ ] **OG tags set, OG image renders in LinkedIn/Slack preview** — paste link into LinkedIn DM compose to preview.
-- [ ] **Favicon is real, not Vite default.**
-- [ ] **`<title>` is real and includes name + "cybersecurity."**
-- [ ] **Lighthouse: Performance ≥ 80, Accessibility ≥ 90, Best Practices ≥ 90, SEO ≥ 90 on the 2D fallback view.**
-- [ ] **Skill list audit:** every tool listed has a project/write-up on the same site demonstrating it. No tool listed without evidence.
-- [ ] **CTF write-up provenance check:** every write-up cites platform, date, and any walkthrough/hint sources consulted.
-- [ ] **CV PDF metadata stripped** — `exiftool` shows no author, software, or path.
-- [ ] **`npm audit` clean** (or each issue documented + acknowledged).
-- [ ] **Tested in Safari (macOS + iOS)** — Safari is where R3F surprises live.
-- [ ] **`prefers-reduced-motion` honoured** — confirm with macOS Reduce Motion setting.
-- [ ] **No `dist/` or `build/` in the repo.**
-- [ ] **External links have `rel="noopener noreferrer"`.**
-- [ ] **CSP `<meta>` tag present** — at least a baseline (signals security awareness on a cyber portfolio).
-- [ ] **Repo README explains how to run + deploy** — Node version, install, dev, build, deploy. One screen.
-- [ ] **A non-cyber friend AND a cyber-professional both reviewed it** — different failure modes (ux + authenticity).
-
----
+- [ ] **Walls landed:** Often missing OrbitControls clamp re-derivation — verify camera can't escape the room at orbit envelope corners.
+- [ ] **Server rack landed:** Often missing `useReducedMotion()` gate on LED blink — verify reduced-motion screenshot looks intentional.
+- [ ] **Whiteboard landed:** Often missing public-source citation for every text element — verify code comment lists URL for each cell.
+- [ ] **Bias-light + LED strip landed:** Often missing `emissiveBudget.ts` reference — verify centralised constants used.
+- [ ] **Bed landed:** Often missing default-view exclusion check — verify `?focus=overview` screenshot doesn't include bed.
+- [ ] **Cat landed:** Often missing 3-second silhouette test — verify with a fresh viewer it reads as cat.
+- [ ] **Cat landed:** Often missing reduced-motion gate on breathing — verify `prefers-reduced-motion: reduce` freezes the cat.
+- [ ] **Window backdrop:** Often missing procedural verification — verify no real-photo content, no recognisable buildings.
+- [ ] **Secondary devices:** Often missing fake-content rule — verify static screens, no fake dashboards.
+- [ ] **All tab focus poses:** Often missing re-test after room shell — verify GSAP camera lands inside the room for all 5 tabs.
+- [ ] **size-limit:** Often missing per-phase delta log — verify cumulative 3D chunk size still leaves Phase G room.
+- [ ] **Pre-launch sign-off:** Often missing OPS-03/04/05 row completion — verify every `___` in CHECKLIST-LAUNCH.md is filled before milestone close.
+- [ ] **Web3Forms delivery (CTC-01 delivery half):** Often missing real-inbox confirmation — verify Eren has Gmail + Outlook test message screenshots.
+- [ ] **REQUIREMENTS.md 3D-08 row:** Often missing update after GLB decision — verify "Path A deferred or shipped, current state explicit."
+- [ ] **`public/assets/workstation/` GLBs:** Often missing deletion / formal archive — verify deploy artifact size or that files are intentionally retained.
+- [ ] **Write-ups CNT-02/03:** Often missing real-lab provenance — verify each `.mdx` cites a real lab run or is honestly labelled "study notes from [public source]."
+- [ ] **Procedural cat:** Often missing identity-implication guard — verify no code comment / commit message / alt-text personalises the cat.
 
 ## Recovery Strategies
 
-When pitfalls slip through despite prevention.
-
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| 3D scene crashes on real device discovered post-launch | LOW | Add `?fallback=1` query, show 2D unconditionally, ship hotfix; investigate device class for next deploy |
-| Recruiter says "couldn't find your CV" | LOW | Add a banner-level CV button to all views; verify all CV-link paths work |
-| EXIF / IP leak discovered after publish | MEDIUM (depending on what leaked) | Remove asset, force-push history rewrite *only if necessary* (history of removed file may persist on GitHub mirrors), update screenshot, redeploy. For severe leaks (live CTF flags), notify the platform. |
-| `setState` in `useFrame` causing pre-launch jank | MEDIUM | Refactor each occurrence to refs; use `useFrame` to mutate `mesh.current.*` instead of state |
-| GitHub Pages base path broken after deploy | LOW | Set `base` in Vite config, redeploy; usually a 5-minute fix once diagnosed |
-| 2D fallback content drift | MEDIUM | Refactor to single content source (MDX/JSON) + two views; not a quick fix but mandatory |
-| Skill bars / Matrix rain shipped and getting silent rejection | LOW–MEDIUM | Remove; replace with project-attestation list. Most recruiters won't return if rejected, but the next batch sees the cleaner version |
-| GLB too big, slow load | LOW | Run `gltf-transform optimize`, redeploy; usually 5–10× size reduction |
-| Postprocessing crashing low-end devices | LOW | Gate effects on `deviceMemory`/`hardwareConcurrency`; redeploy |
-| CTF write-up plagiarism allegation | HIGH (career risk) | Acknowledge openly, add attribution, link sources, rewrite from genuine first-person solve. Don't silently delete — the original publisher may have already seen it |
-| Source map leaking dev paths/secrets | MEDIUM | Disable production source maps; rotate any leaked secrets; rebuild + redeploy |
-| Email going to spam | LOW–MEDIUM | Switch to a different form handler; add SPF-friendly reply-to; mention LinkedIn as primary contact |
-
----
+| Visual-overload / RGB battlestation feel | MEDIUM — design rework, not code | Inventory all emitters in `emissiveBudget.ts`; pick 2 to disable; A/B screenshot vs. v1.0 baseline; commit the reduced version |
+| Whiteboard fabrication shipped | HIGH — credibility hit (potentially career-damaging) | Hotfix: revert whiteboard prop to a placeholder (e.g. ATT&CK framework only); commit + redeploy same day; no public acknowledgement needed unless asked |
+| Cat reads as alien | LOW — swap to CC0 GLB | Pull a CC0 low-poly cat from Poly Pizza; replace primitive cat; one commit |
+| Bloom blowout / monitor unreadable | LOW–MEDIUM — emissive intensity dial-back | Identify the 1–2 emitters added since last good baseline; lower their `emissiveIntensity` 50%; A/B screenshot |
+| OPSEC leak via window content | HIGH if discovered, MEDIUM to fix | Replace with procedural shader immediately; reverse-image-search the live screenshots to confirm no archival exposure |
+| OrbitControls clip through wall | LOW — tighter clamps | Re-derive clamps from room dimensions; PR + verify corner walk |
+| Phase H sign-off didn't happen | MEDIUM — recurring failure mode | Schedule a hard date; clear calendar; lower friction; if still doesn't happen, accept that v1.1 ships gaps_found just like v1.0 and re-defer to v1.2 with a documented deadline |
+| Write-ups phase deferred again | LOW — honest reframing | Update plan to "study notes" path with one public-lab citation, OR honestly defer to v1.2 with a calendar commitment |
+| GLB workstation V2-3D-01 re-reverted | LOW — accept procedural as final | Update REQUIREMENTS.md 3D-08 row; delete `public/assets/workstation/`; close V2-3D-01 as "won't fix — procedural is the chosen aesthetic" |
+| Size-limit budget exhausted mid-Phase F | MEDIUM — lazy-load Phase G | Move Phase G (secondary devices) behind dynamic import flagged by `?advanced=true` URL param |
+| Reduced-motion regression | LOW — gate the missed animation | Add `useReducedMotion()` check; re-verify reduced-motion screenshot |
+| Bed reads too personal | LOW — reposition or swap to couch | Move bed beyond default-view azimuth; or swap to couch (same primitive composition with different proportions) |
 
 ## Pitfall-to-Phase Mapping
 
-This is the load-bearing section for roadmap planning. Use it to seed phase success criteria.
-
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| 1. Recruiter can't find CV without loading 3D | Phase 1 (foundation rules) | Throttled-network test; static HTML inspection |
-| 2. setState in useFrame / scene rebuilds | Phase 2–3 (scene impl) | Profiler shows no React rerenders during idle scene; ESLint/grep rule |
-| 3. Mobile crash / context lost | Phase 3 (capability detection) + Phase 5 (real-device QA) | Real iOS + Android test; 30-min stress soak |
-| 4. 2D fallback content parity | Phase 1 (content-as-data) + Phase 2 (build 2D first) | Section-by-section content checklist between views |
-| 5. OPSEC leaks (EXIF, IPs, flags, employer) | Phase 1 (asset pipeline) + every content phase + Phase 5 audit | Final OPSEC checklist; exiftool sweep; manual screenshot review |
-| 6. Cyber-portfolio clichés | Phase 1 (aesthetic rules) + Phase 5 peer review | Cyber-pro reviewer; explicit anti-cliché list |
-| 7. Junior authenticity (skill list, CTF provenance) | Phase 1 (content inventory) + every content phase | Skills→evidence mapping audit; provenance citations on every write-up |
-| 8. Mobile gesture capture | Phase 3 (interaction) | Real-device gesture test |
-| 9. GitHub Pages base path / SPA 404 | Phase 1 (setup) + Phase 4 (deploy) | Sub-route deep-link test post-deploy |
-| 10. Accessibility (keyboard, reduced-motion, contrast) | Phase 1 (palette) + Phase 3 (motion handling) + Phase 5 (audit) | Lighthouse ≥ 90; manual keyboard pass; reduced-motion toggle test |
-| 11. Loading UX | Phase 3 (loading sequence) | Throttled-network UX walkthrough |
-| 12. Drei `<Html>` overlays | Phase 2–3 (monitor content) | Camera-extreme-angle test; click propagation test |
-| 13. Stats panels / debug helpers in prod | Phase 5 (pre-launch) | Bundle inspection; grep audit |
-| 14. Oversized GLBs / textures | Phase 2 (asset pipeline) | Per-asset size budget; Lighthouse Total Byte Weight |
-| 15. Broken contact path | Phase 4 (deploy) + Phase 5 (verify) | Real submission test on Gmail + Outlook |
-| 16. Maintenance bomb | Phase 1 (deps + docs) | `npm ci` + `npm run build` from scratch verifies |
-| 17. Postprocessing cost | Phase 3 (visual polish) | Per-effect FPS measurement on mid-tier device |
-| 18–23. Minor (Tailwind purge, cache, OG, HTTPS, deploy branch, analytics) | Phase 4 (deploy/polish) | Pre-launch checklist |
-
----
+| 1. Visual-overload / RGB battlestation | Phase D (warmth touches) primarily; Phase B (rack LEDs) secondary | Per-phase cumulative screenshot vs. v1.0 baseline; ≤ 4 hues rule check |
+| 2. Whiteboard fabrication | Phase C (wall content) | Per-element public-source citation in code comment; QA re-reads at full zoom; `discuss-phase` forcing question |
+| 3. Cat alien / Cthulhu | Phase F (cat) | 3-second silhouette test with fresh viewer; pre-committed CC0 fallback |
+| 4. Bloom blowout | Phase B (rack LEDs) bootstraps `emissiveBudget.ts`; Phase D (bias-light + LED strip) is largest-area emitter | Per-tab readability screenshot; cumulative emissive budget tracked |
+| 5. Window OPSEC leak | Phase A (room shell) | CHECKLIST-OPSEC row "window backdrop is procedural / abstract"; `discuss-phase` forcing question on source |
+| 6. Bed + cat overshare | Phase E (bed) + Phase F (cat) joint | Default-view screenshot excludes bed; `discuss-phase` audience-framing question |
+| 7. OrbitControls clip | Phase A (room shell) — same plan that lands walls | Orbit envelope corner walk in VERIFICATION; 5-tab focus pose re-test |
+| 8. Sign-off defers indefinitely | Phase H (pre-launch sign-off) | CHECKLIST-LAUNCH.md fully populated; milestone-close gate on every `___` filled; pre-scheduled date |
+| 9. Write-ups blocked by no-lab-work | Pre-Phase I-writeups (`discuss-phase`) | "Have you started the labs?" forcing question; defer to v1.2 if no |
+| 10. GLB revisit same outcome | Phase I-glb (or skip) | Blender-commitment `discuss-phase` question; pre-committed abort criterion |
+| 11. Size-limit budget creep | Every phase A–G includes size-limit log | Per-phase delta logged; Phase G headroom reserved |
+| 12. Reduced-motion gating gaps | Phases B / C / D / F (all animated) | Per-phase `useFrame` grep audit; reduced-motion screenshot |
+| 13. v1.0 inherited phase ownership confusion | Roadmap creation (before Phase A) | `closes_v1.0:` metadata on each v1.1 phase; REQUIREMENTS.md traceability column |
+| 14. Cat identity implication | Phase F (cat) | `discuss-phase` question on real-life cat; code-comment audit (no personalisation) |
+| 15. Bed studio-apartment implication | Phase E (bed) | `discuss-phase` question on couch vs. bed; recommend couch default |
 
 ## Sources
 
-**R3F / Three.js technical (HIGH confidence):**
-- [R3F Performance Pitfalls (official docs)](https://r3f.docs.pmnd.rs/advanced/pitfalls)
-- [R3F Hooks docs](https://r3f.docs.pmnd.rs/api/hooks)
-- [R3F Events docs](https://r3f.docs.pmnd.rs/api/events)
-- [R3F Loading Models docs](https://r3f.docs.pmnd.rs/tutorials/loading-models)
-- [3 R3F Mistakes I'll Never Make Again — Wawa Sensei](https://wawasensei.dev/tuto/3-react-three-fiber-mistakes)
-- [Common R3F issues — Wawa Sensei](https://wawasensei.dev/tuto/react-three-fiber-projects-common-issues)
-- [Loading screen patterns — Wawa Sensei](https://wawasensei.dev/courses/react-three-fiber/lessons/loading-screen)
-- [Drei Html + pointer events issue](https://github.com/pmndrs/drei/issues/319)
-- [Three.js context lost iOS/Android](https://discourse.threejs.org/t/how-to-fix-context-lost-android-iphone-ios/56829)
-- [Three.js iOS 17 context lost](https://discourse.threejs.org/t/three-js-broken-on-ios-17-with-context-lost/58025)
-- [WebGL context lost on M4 iPad](https://discourse.threejs.org/t/webgl-context-lost-on-m4-ipad-app-and-browsers/79845)
-- [Draco + KTX2 compression discussion](https://discourse.threejs.org/t/compression-draco-ktx2-example/31382)
-- [Optimizing 3D models for web — Axel Cuevas](https://www.axl-devhub.me/en/blog/optimizing-3d-models)
-
-**GitHub Pages / Vite deployment (HIGH confidence):**
-- [Vite Static Deploy Guide](https://vite.dev/guide/static-deploy)
-- [Vite Env Variables and Modes](https://vite.dev/guide/env-and-mode)
-- [Handling 404 Error in SPA on GitHub Pages](https://dev.to/lico/handling-404-error-in-spa-deployed-on-github-pages-246p)
-- [Resolving Vite GitHub Pages 404](https://medium.com/@aleksej.gudkov/resolving-vite-v5-4-2-build-404-error-e1f13914f2d7)
-- [vite-plugin-github-pages-spa](https://github.com/sctg-development/vite-plugin-github-pages-spa)
-- [GitHub Pages SPA routing discussion](https://github.com/orgs/community/discussions/64096)
-
-**Accessibility / motion (HIGH confidence):**
-- [prefers-reduced-motion (web.dev)](https://web.dev/articles/prefers-reduced-motion)
-- [WCAG C39 reduced-motion technique](https://www.w3.org/WAI/WCAG21/Techniques/css/C39)
-- [prefers-reduced-motion (MDN)](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion)
-- [Motion accessibility (Motion.dev)](https://motion.dev/docs/react-accessibility)
-
-**Cybersecurity portfolio + recruiter signals (MEDIUM confidence — synthesised from multiple sources):**
-- [What Cybersecurity Recruiters Really Look For](https://myturn.careers/blog/what-cybersecurity-recruiters-really-look-for-in-a-candidate/)
-- [How to Present a Cybersecurity Portfolio — Artem Polynko](https://artempolynko.com/blog/how-to-present-cybersecurity-portfolio/)
-- [Cybersecurity Portfolio Step-by-Step Guide](https://www.cybersecuritydistrict.com/a-step-by-step-guide-to-building-a-cybersecurity-portfolio/)
-- [HackTheBox cybersecurity resume examples](https://www.hackthebox.com/blog/cybersecurity-resume-examples)
-- [Entry-level Cyber Security Resume Examples — BeamJobs](https://www.beamjobs.com/resumes/entry-level-cyber-security-resume-examples)
-
-**Junior dev portfolio antipatterns (HIGH confidence — strongly converged):**
-- [Building an Effective Frontend Developer Portfolio — Frontend Mentor](https://www.frontendmentor.io/articles/building-an-effective-frontend-developer-portfolio--7cE8BfMG_)
-- [What I Learned After Reviewing 40 Developer Portfolios](https://dev.to/kethmars/what-i-learned-after-reviewing-over-40-developer-portfolios-9-tips-for-a-better-portfolio-4me7)
-- [Junior Developer Portfolio Best Practices — DEV](https://dev.to/jtrevdev/junior-developer-portfolio-best-practices-4bj2)
-
-**OPSEC / privacy (HIGH confidence for principles, MEDIUM for portfolio-specific application):**
-- [OPSEC & Privacy Handbook — Varppi](https://medium.com/@varppi/opsec-privacy-handbook-5e0a012c58f6)
-- [OPSEC in OSINT — SOS Intelligence](https://sosintel.co.uk/opsec-in-osint-protecting-yourself-while-investigating/)
-- [Operational Security in the Digital Era — CyberForces](https://cyberforces.com/en/opsec-operational-security-in-the-digital-era)
-- [CTF Forensics: Metadata — CTF101](https://ctf101.org/forensics/what-is-metadata/)
-- [CTF Plagiarism Detection (research paper)](https://ceur-ws.org/Vol-3056/paper-11.pdf)
+- `.planning/PROJECT.md` (project value, audience split, anti-feature list)
+- `.planning/milestones/v1.0-MILESTONE-AUDIT.md` (4 unsatisfied requirements + 2 partials; deferral history)
+- `.planning/milestones/v1.0-REQUIREMENTS.md` (Out-of-Scope table — anti-feature canon; CNT-02/03 and OPS-03/04/05 lineage)
+- `~/.claude/projects/-Users-erenatalay-Desktop-App-Portfolio-Website/memory/feedback_no_fabricated_lab_evidence.md` (no-fabrication binding rule; Plan 03-06 override 2026-05-08; pushback playbook)
+- `src/scene/WallDecor.tsx` (canvas-texture pattern; neon strip `emissiveIntensity 2.0`, `toneMapped:false`)
+- `src/scene/Controls.tsx` (`ORBIT_CLAMPS` baseline: polar π/3–100°·π/180, azimuth ±π/2, distance 1.2–4.0)
+- `src/scene/Lighting.tsx` (existing ambient + directional + 2 point lights; "Three.js handles up to ~8 point lights" comment)
+- `src/scene/Workstation.tsx` (current composition — Floor + Desk + Monitor + Lamp + Bookshelf + DeskDecor + WallDecor + Chair)
+- MITRE ATT&CK Enterprise framework (public, https://attack.mitre.org/)
+- Lockheed Martin Cyber Kill Chain (public)
+- RFC 5737 (documentation IP ranges) — for any IP shown in scene
+- drei `<PerformanceMonitor>` + `@react-three/postprocessing` Bloom documentation
+- v1.0 Plan 04-01 postprocessing pipeline + Plan 04-06 GLB revert commit `342d2e7` (project history)
 
 ---
-*Pitfalls research for: 3D hacker-workstation cybersecurity portfolio (R3F + Tailwind + GitHub Pages, solo junior, ~1 month)*
-*Researched: 2026-05-06*
+*Pitfalls research for: v1.1 Room Build-Out + Pre-Launch Close*
+*Researched: 2026-05-15*

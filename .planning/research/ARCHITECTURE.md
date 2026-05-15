@@ -1,725 +1,532 @@
-# Architecture Research
+# Architecture Research — v1.1 Room Build-Out + Pre-Launch Close
 
-**Domain:** 3D portfolio website (R3F + Tailwind, GitHub Pages, single maintainer)
-**Researched:** 2026-05-06
-**Confidence:** HIGH (component boundaries, data flow, deploy) / MEDIUM (asset budgets — depend on real GLTFs)
+**Domain:** R3F-rendered procedural 3D room (additive to shipped v1.0 desk-island)
+**Researched:** 2026-05-15
+**Confidence:** HIGH (most decisions extend already-shipped patterns; only the lighting-count question crosses a measurable performance line, and that's verified against the Three.js forum consensus)
 
-This file answers four load-bearing questions for the roadmap:
+## Scope Boundary
 
-1. **Top-level shell:** SPA-with-anchor-sections vs multi-route — which works for a 3D-first site that must also serve recruiters in <5s?
-2. **3D vs 2D fallback:** same tree / two routes / two builds?
-3. **Where 3D content lives:** monolith Canvas vs composed scene; HTML overlay vs CSS3D vs render-to-texture for monitor content?
-4. **Build order:** what does a solo junior dev ship first so something is live early?
+v1.1 is **additive**, not a rewrite. The architecture work is: layer a room shell around the existing desk, add 7 categories of decoration that live within that shell, and close two non-architecture v1.0 carry-overs (human sign-off + write-ups). The shipped patterns (`Workstation.tsx` composer, `<Html transform occlude="blending">` for the monitor, `<PerformanceMonitor>`-gated postprocessing, query-param routing, zustand `tabStore`, `useReducedMotion` gate, `SCENE_COLORS` mirror, `<FocusController>` 2-pose toggle) are all keepers — none need to be rewritten.
 
-The recommendations are concrete, not "options A–C."
+What v1.1 does change:
+1. Wraps the scene in geometry (4 walls + ceiling). This implicates `Controls.tsx` clamps and `Lighting.tsx` light count, and nothing else structurally.
+2. Adds 13-15 new procedural primitive components, all under `src/scene/`. No new top-level folders; one optional subfolder for textures.
+3. Adds at most 1 new zustand slice (and the answer is "probably zero — don't add one").
+4. Reuses the `WallDecor` canvas-texture recipe for the whiteboard and certs frame.
+5. Does NOT modify the camera state machine. The single overview pose is sufficient for everything we're adding.
 
----
-
-## Standard Architecture
-
-### System Overview
+## System Overview (v1.1 target)
 
 ```
-                       index.html (Vite-built, GitHub Pages /Portfolio_Website/)
-                                          |
-                                          v
-                          +---------------------------------+
-                          |         <App />                 |
-                          |  - reads ?view= / device hint   |
-                          |  - mounts ONE of the shells     |
-                          +----------------+----------------+
-                                           |
-              +----------------------------+----------------------------+
-              |                                                         |
-              v                                                         v
-   +---------------------+                                  +-------------------------+
-   |   <ThreeDShell />   | (default on capable desktop)    |  <TextShell />          | (?view=text, mobile, low-end, prefers-reduced-motion)
-   +----------+----------+                                  +-------------+-----------+
-              |                                                            |
-              | imports                                                    | imports
-              v                                                            v
-   +---------------------+                                  +-------------------------+
-   |  src/scene/*        |                                  | src/text/*              |
-   |  - <Workstation/>   |                                  | - <Header/>             |
-   |    - <Desk/>        |                                  | - <CVSummary/>          |
-   |    - <Monitor x3/>  |                                  | - <ProjectsList/>       |
-   |    - <Lamp/>        |                                  | - <CTFList/>            |
-   |    - <Bookshelf/>   |                                  | - <Contact/>            |
-   |  - <Camera/>        |                                  +-------------+-----------+
-   |  - <Controls/>      |                                                |
-   |  - <SceneOverlay/>  | (drei <Html> bound to monitor screens)         |
-   +----------+----------+                                                |
-              |                                                            |
-              | both shells read from                                      |
-              v                                                            v
-                          +---------------------------------+
-                          |  src/content/*  (single source) |
-                          |  - profile.ts                   |
-                          |  - projects.ts                  |
-                          |  - ctfs.ts (+ MDX bodies)       |
-                          |  - certifications.ts            |
-                          |  - skills.ts                    |
-                          |  - education.ts                 |
-                          +---------------------------------+
-                                          ^
-                                          |
-                          +---------------------------------+
-                          |  public/assets/                  |
-                          |  - models/workstation.glb (Draco)|
-                          |  - textures/*.webp               |
-                          |  - cv.pdf                        |
-                          |  - og-image.png                  |
-                          +---------------------------------+
+┌──────────────────────────────────────────────────────────────────────┐
+│  <App> (capability gate, Suspense, ?view= router) — UNCHANGED         │
+├──────────────────────────────────────────────────────────────────────┤
+│  <ThreeDShell>  (Canvas wrapper, view-toggle overlay) — UNCHANGED     │
+│  ├── <Lighting />                          ← MODIFIED (recomposed)    │
+│  ├── <Controls ref={controlsRef} … />      ← MODIFIED (room clamps)   │
+│  ├── <FocusController controlsRef={…} />   ← UNCHANGED (2 poses)      │
+│  ├── <ScenePostprocessing />               ← UNCHANGED                │
+│  └── <Workstation focused onMonitorClick>  ← MODIFIED (composer)      │
+│      │                                                                │
+│      ├── A. ROOM SHELL  (new — defines the world bounds)              │
+│      │   ├── <Floor />                              ← UNCHANGED       │
+│      │   ├── <WallBack />  <WallLeft />  <WallRight />                │
+│      │   ├── <Ceiling />                                              │
+│      │   ├── <Window />  (frame + foggy-night canvas texture + blinds)│
+│      │   └── (optional) <Door />                                      │
+│      │                                                                │
+│      ├── (existing desk island — unchanged)                           │
+│      │   <Desk />  <Monitor>…</Monitor>  <Lamp />                     │
+│      │   <Bookshelf />  <DeskDecor />  <WallDecor />  <Chair />       │
+│      │                                                                │
+│      ├── B. CYBER DETAIL  (new — anchors the cyber identity)          │
+│      │   ├── <ServerRack />   (chassis + instanced blink-LEDs)        │
+│      │   ├── <CableBundle />  (extruded cylinders)                    │
+│      │   └── <ExternalHDDTower />                                     │
+│      │                                                                │
+│      ├── C. WALL CONTENT  (new — informational density)               │
+│      │   ├── <Whiteboard />   (canvas-texture: ATT&CK matrix)         │
+│      │   ├── <WallClock />    (analog hands via useFrame, gated)      │
+│      │   └── <FramedCert />   (canvas-texture, reuses WallDecor recipe)│
+│      │                                                                │
+│      ├── D. WARMTH  (new — kills "showroom" feel)                     │
+│      │   ├── <Books />        (instancedMesh on bookshelf)            │
+│      │   ├── <PottedPlant />                                          │
+│      │   ├── <BiasLight />    (emissive plane behind monitor)         │
+│      │   └── <UnderDeskLED /> (emissive plane under desk top)         │
+│      │                                                                │
+│      ├── E. BED CORNER  (new — lived-in)                              │
+│      │   ├── <Bed />                                                  │
+│      │   ├── <Nightstand />                                           │
+│      │   └── <BedsideLamp /> (geometry only; light is in <Lighting>)  │
+│      │                                                                │
+│      ├── F. <Cat />  (new — breathing animation, reduced-motion gated)│
+│      │                                                                │
+│      └── G. SECONDARY DEVICES  (new — optional within v1.1)           │
+│          ├── <Laptop />        (open lid + glowing screen)            │
+│          ├── <SDRDongle />                                            │
+│          └── <SecondaryMonitor /> (optional; static screen, no <Html>)│
+└──────────────────────────────────────────────────────────────────────┘
+
+State (unchanged):
+  zustand useTabStore   — MonitorTab (5 tabs)
+  URL ?view= ?focus=    — single source of truth for shell + focus
+  useReducedMotion()    — gates every per-frame animation
+  PerformanceMonitor    — gates postprocessing chunk
 ```
 
-Key invariants:
-
-- **Content is the only shared mutable surface.** Both shells pull from `src/content/*`. They never read from each other or from the DOM.
-- **The Canvas is exactly one mount point** inside `<ThreeDShell />`. The text shell never instantiates R3F — that is the entire reason it loads fast.
-- **There is no router on the critical path.** GitHub Pages cannot do server-side route fallbacks cleanly; we route at the App level via a single `?view=` query param. (See "Routing" below.)
-
-### Component Responsibilities
+## Component Responsibilities
 
 | Component | Responsibility | Implementation |
-|-----------|----------------|----------------|
-| `<App />` | Decide which shell to render. Read `?view=text` and a one-time device-capability check. Mount `<TextShell />` or lazy-load `<ThreeDShell />`. | ~50 LOC, no dependencies on R3F |
-| `<TextShell />` | Static, semantic HTML CV. First paint <1s on broadband. Crawler-readable. Tailwind only. | Vanilla React, no Canvas |
-| `<ThreeDShell />` | Hosts `<Canvas>`, `<Suspense>`, `<Loader>`, scene overlay. Lazy-loaded via `React.lazy`. | R3F + drei |
-| `<Workstation />` | Composes the room. No state, no logic — pure scene graph. | Composed of small primitives |
-| `<Desk />`, `<Monitor />`, `<Lamp />`, `<Bookshelf />` | One file per scene part. Each owns its own GLTF reference and materials. Use `gltfjsx` to generate skeletons. | Pure mesh components |
-| `<MonitorScreen monitorId>` | Renders interactive content onto a monitor's screen plane via drei `<Html transform occlude>`. Reads from `src/content`. | drei + content imports |
-| `<Camera />` / `<Controls />` | OrbitControls (clamped) for free-look; on click of a monitor, animates camera to that monitor's "view" pose. | drei + small custom hook |
-| `<SceneOverlay />` | DOM overlay siblings of Canvas: top-bar (`whoami` indicator, "View as text" toggle, contact email), bottom-bar (loading progress via `useProgress`). Tailwind, not inside Canvas. | Sibling div |
-| `src/content/*` | Typed content collections. Single source of truth. | `.ts` files exporting typed records, MDX only for long-form CTF write-ups |
-| `src/lib/device.ts` | One-shot capability check: WebGL2 supported? `prefers-reduced-motion`? `navigator.deviceMemory < 4`? `navigator.hardwareConcurrency < 4`? mobile UA? | ~30 LOC |
+|-----------|---------------|----------------|
+| `<WallBack/Left/Right>` | Bound the room on three sides; backdrop for wall content | `<planeGeometry>` per wall; one-sided meshStandardMaterial, dark surface tone |
+| `<Ceiling>` | Cap the top; receives the `<CeilingLight>` emissive plane | Single inward-facing plane at y=3.0 |
+| `<Window>` | Foggy night-city look at the back-left wall; defines a single bright light source motivation | Canvas-texture plane (reuses `WallDecor` recipe) inside a thin frame; optional horizontal-slat group for blinds |
+| `<ServerRack>` | Visual "cyber identity" anchor near the desk | Box chassis + `<instancedMesh>` of ~12 LED tiles; one `useFrame` loop drives all blink phases |
+| `<Whiteboard>` | Renders ATT&CK matrix or kill-chain as a 2D drawing | Canvas-texture module in `src/scene/textures/`; consumed by single component |
+| `<WallClock>` | Analog clock with second/minute hands rotating in real time | `useFrame` reads `Date.now()`; rotation only on hand groups; reduced-motion → freeze |
+| `<Books>` | Real-looking book spines on the existing `<Bookshelf>` | `<instancedMesh>` with per-instance color matrix; instanced because ~20-30 spines |
+| `<BiasLight>` | Emissive plane behind monitor; reads as ambient back-glow | Reuses existing emissive recipe (see `WallDecor.NeonStrip`); no point light needed |
+| `<UnderDeskLED>` | Emissive strip under desk top | Same pattern as `<BiasLight>` |
+| `<Cat>` | Procedural cat geometry (sphere+cone+cylinder), gentle breathing | `useFrame` scales body group on y; reduced-motion → frozen |
+| `<Bed>` | Mattress + base + pillow + sheet | All `<boxGeometry>`; no skinned mesh |
+| `<BedsideLamp>` | Lamp geometry (reuses `<Lamp>` component) | Import `<Lamp>` with different position/rotation; light handled centrally in `<Lighting>` |
 
----
-
-## Recommended Project Structure
+## Recommended File Structure
 
 ```
-portfolio/
-├── index.html                  # Single entry; Vite injects scripts
-├── public/
-│   ├── 404.html                # Identical to index.html — SPA fallback for GH Pages
-│   ├── assets/
-│   │   ├── models/
-│   │   │   └── workstation.glb # ONE consolidated, Draco-compressed model (target <2 MB)
-│   │   ├── textures/           # WebP, 1024 max
-│   │   └── cv.pdf
-│   ├── og-image.png            # Static social preview
-│   └── robots.txt
-├── src/
-│   ├── App.tsx                 # Shell selector
-│   ├── main.tsx                # ReactDOM.createRoot
-│   ├── shells/
-│   │   ├── ThreeDShell.tsx     # Lazy-loaded; owns <Canvas>
-│   │   └── TextShell.tsx       # Eager; ships in initial JS
-│   ├── scene/
-│   │   ├── Workstation.tsx
-│   │   ├── Desk.tsx
-│   │   ├── Monitor.tsx
-│   │   ├── MonitorScreen.tsx   # The drei <Html> binding
-│   │   ├── Lamp.tsx
-│   │   ├── Bookshelf.tsx
-│   │   ├── Camera.tsx
-│   │   ├── Controls.tsx
-│   │   └── effects/            # Postprocessing (optional, gated by perf monitor)
-│   ├── ui/                     # DOM components used by BOTH shells
-│   │   ├── TerminalPrompt.tsx  # The animated `whoami` greeting
-│   │   ├── ProjectCard.tsx
-│   │   ├── CTFCard.tsx
-│   │   ├── ContactBlock.tsx    # Obfuscated email + GitHub + LinkedIn
-│   │   └── ViewToggle.tsx      # 3D <-> Text switch
-│   ├── content/
-│   │   ├── profile.ts          # name, title, summary, contact
-│   │   ├── projects.ts         # typed Project[]
-│   │   ├── ctfs.ts             # typed CTF[] with optional MDX body refs
-│   │   ├── certifications.ts
-│   │   ├── skills.ts
-│   │   ├── education.ts
-│   │   ├── ctf-writeups/
-│   │   │   ├── htb-machine-x.mdx
-│   │   │   └── ...
-│   │   └── index.ts            # Barrel exports
-│   ├── lib/
-│   │   ├── device.ts           # Capability detection
-│   │   ├── obfuscate.ts        # Email anti-scrape
-│   │   └── analytics.ts        # No-op or privacy-light (defer; out of scope v1)
-│   └── styles/
-│       └── globals.css         # Tailwind directives + terminal palette tokens
-├── vite.config.ts              # base: '/Portfolio_Website/', plugins: [react(), mdx()]
-├── tailwind.config.ts
-├── tsconfig.json
-├── package.json
-└── .github/workflows/deploy.yml # Build + deploy to gh-pages branch / Pages action
+src/scene/
+├── (existing — keep flat)
+│   Floor.tsx, Desk.tsx, Monitor.tsx, MonitorOverlay.tsx, Bookshelf.tsx,
+│   Lamp.tsx, Chair.tsx, DeskDecor.tsx, WallDecor.tsx, Controls.tsx,
+│   FocusController.tsx, Lighting.tsx, Workstation.tsx, colors.ts,
+│   cameraPoses.ts
+│
+├── (new — flat additions; the convention is flat <PascalCase>.tsx per "thing")
+│   WallBack.tsx, WallLeft.tsx, WallRight.tsx, Ceiling.tsx, Window.tsx,
+│   ServerRack.tsx, CableBundle.tsx, ExternalHDDTower.tsx,
+│   Whiteboard.tsx, WallClock.tsx, FramedCert.tsx,
+│   Books.tsx, PottedPlant.tsx, BiasLight.tsx, UnderDeskLED.tsx,
+│   Bed.tsx, Nightstand.tsx, Cat.tsx,
+│   Laptop.tsx, SDRDongle.tsx, SecondaryMonitor.tsx (optional)
+│
+└── textures/                                ← NEW SUBFOLDER (one)
+    ├── attackMatrix.ts      (exports a usePaintedTexture-style hook)
+    ├── windowNightCity.ts
+    └── certFrame.ts
 ```
 
 ### Structure Rationale
 
-- **`shells/` separation is the load-bearing decision.** Vite's tree-shaker drops anything `<TextShell />` doesn't import. R3F + three + drei + the GLTF is roughly ~300 KB gzipped — the text path must not pay that cost. Lazy-loading `<ThreeDShell />` via `React.lazy` is what makes the recruiter <5s contract achievable.
-- **`scene/` is composed, not monolithic.** One file per scene part means: GLTFs can be swapped in pieces; materials are colocated with the mesh that uses them; `gltfjsx` output drops in cleanly; test/storybook later is feasible. A 600-line `<Scene>` god-component is the single most common R3F pitfall.
-- **`ui/` is shared.** A `<ProjectCard />` rendered by drei `<Html>` inside a 3D monitor and a `<ProjectCard />` rendered as a list item in `<TextShell />` are the **same component**. This is why we don't fork content/styles between shells.
-- **`content/` is `.ts` not JSON.** TS gives autocompletion, refactor safety, and lets us co-locate small helper functions (e.g., a `formatDateRange()`) — for a solo maintainer this is the lowest-friction option. CTF write-ups that have prose-heavy bodies use MDX (one file per write-up); short metadata stays in `ctfs.ts`. This is the "data + MDX for long-form" hybrid.
-- **`public/assets/` not `src/assets/`.** Vite hashes and inlines anything in `src/`, which we don't want for large GLTFs (we want stable URLs cacheable by the browser, and we want them served as-is). `public/` is copied verbatim, respecting our `base` path.
-
----
+- **Stay flat in `src/scene/`.** The codebase convention is one `<PascalCase>.tsx` per scene primitive, all siblings. v1.0 ships 9 such files. Adding 15-18 brings the total to ~25. That's still well under the "split it" threshold for a 5-file editor sidebar; grouping into `room/`, `cyber/`, `comfort/` would create import-path churn for zero comprehension benefit since every consumer is `Workstation.tsx`. Keep flat.
+- **One subfolder exception: `src/scene/textures/`.** Canvas-texture authoring is a different kind of thing — it produces a `CanvasTexture` instance, not a `<mesh>`. Extracting it from the component (as `WallDecor.tsx` did inline) has two wins: the component file stays focused on layout/geometry, and the texture module can grow without bloating the consumer. The wallpaper poster in `WallDecor.tsx` is the precedent we **break here** — that inline pattern was fine for one texture but does not scale to 3+ textures. Move texture authoring to `src/scene/textures/<name>.ts` exporting a `useXTexture()` hook; refactor `WallDecor`'s inline `usePosterTexture` into `textures/wallPoster.ts` as part of the room-shell phase or in a small follow-up so all canvas textures live in one place.
 
 ## Architectural Patterns
 
-### Pattern 1: Shell Selection at the App Boundary
+### Pattern 1: Procedural Primitive Component
 
-**What:** `<App />` runs a synchronous capability check, then mounts exactly one shell. The 3D shell is `React.lazy()` — its bundle is fetched only when chosen.
+**What:** A single `.tsx` file that exports one `function Foo()` returning a `<group>` of `<mesh>` primitives, all using `SCENE_COLORS` constants or local neon literals (matched to `WallDecor`'s `NEON_CYAN`). Comment header documents source, world coordinates, and any non-obvious geometry decisions.
 
-**When to use:** Any time you need a hard, mutually-exclusive split between two render paths with very different cost profiles. This is our case: the text shell must ship in the initial bundle so recruiters get content immediately; the 3D shell must NOT.
+**When to use:** Every new v1.1 component (A through G).
 
-**Trade-offs:**
-- (+) Clean: each shell is its own world, no `if (is3D)` sprinkled across components.
-- (+) Bundle math is obvious: open the network tab and you see only `text-shell.js` for the text path.
-- (–) Two shells means two layouts to maintain. Mitigated by sharing `ui/` components and `content/`.
+**Trade-off:** Bias is "boring and readable" over "clever and DRY." Don't introduce a `<RoomWall direction="left" />` mega-component to deduplicate three nearly-identical walls — three sibling files is fine and ships faster. The codebase's `Lamp.tsx` (~50 LOC) is the size target. If a component grows past ~150 LOC, split sub-shapes into private function components inside the same file (see `DeskDecor.tsx`'s `Keyboard`/`Mouse`/`Mug`/`TowerPC` pattern).
+
+**Example (skeleton):**
+```typescript
+// src/scene/WallBack.tsx
+//
+// Back wall of the room. Plane at z = -1.6 m, 6 m wide × 3 m tall.
+// One-sided geometry; only renders when camera is on the inside.
+// Surface tone matches Floor.tsx so corners read as one space.
+//
+// Source: research/ARCHITECTURE.md § Pattern 1; Plan 05-xx Task A.
+
+import { SCENE_COLORS } from './colors';
+
+export function WallBack() {
+  return (
+    <mesh position={[0, 1.5, -1.6]} receiveShadow>
+      <planeGeometry args={[6, 3]} />
+      <meshStandardMaterial color={SCENE_COLORS.bg} roughness={0.95} metalness={0.0} />
+    </mesh>
+  );
+}
+```
+
+### Pattern 2: Canvas-Texture Hook
+
+**What:** A `useXTexture()` hook in `src/scene/textures/<name>.ts` that returns a `CanvasTexture | null`, wrapped in `useMemo` with empty deps, with cleanup. The component consumes it and applies as `material map={tex}`.
+
+**When to use:** `<Whiteboard>` (ATT&CK matrix), `<Window>` (foggy night-city silhouette), `<FramedCert>`, and as the refactor target for `WallDecor`'s existing inline texture code.
+
+**Trade-off:** Canvas drawing happens once at mount, costs ~5-10 ms per texture, and the resulting `CanvasTexture` is allocated on the GPU once. Don't write canvas-texture code inside `useFrame` — there's no use case for that here. SSR-safety guard (`typeof document === 'undefined'`) is already in the WallDecor recipe — keep that pattern.
+
+**Example signature:**
+```typescript
+// src/scene/textures/attackMatrix.ts
+import { useMemo, useEffect } from 'react';
+import { CanvasTexture, SRGBColorSpace } from 'three';
+
+export function useAttackMatrixTexture(): CanvasTexture | null {
+  return useMemo(() => {
+    if (typeof document === 'undefined') return null;
+    const canvas = document.createElement('canvas');
+    // … draw the ATT&CK grid + tactic headers + technique cells …
+    const tex = new CanvasTexture(canvas);
+    tex.colorSpace = SRGBColorSpace;
+    return tex;
+  }, []);
+}
+```
+
+The hook returns the texture; the consumer is responsible for disposal:
+```typescript
+const tex = useAttackMatrixTexture();
+useEffect(() => () => tex?.dispose(), [tex]);
+```
+(Same as `WallDecor.WallPoster` does today.)
+
+### Pattern 3: Per-Frame Animation with Reduced-Motion Gate
+
+**What:** Any `useFrame` callback that drives visible motion checks `useReducedMotion()` at hook level (NOT inside the frame callback — a re-render isn't free, but the early-return cost is) and either skips the update entirely or freezes to a sensible "still" state.
+
+**When to use:** Cat breathing (F), Server rack LED blink (B), Wall clock hands (C). Do NOT use for static emissive surfaces (bias light, under-desk LED, neon strip) — those are pure material properties and require no animation.
+
+**Trade-off:** Three per-frame animation consumers across the scene is well within budget — none of these are doing significant CPU work. The pattern that already exists for `WhoamiGreeting` (DOM-side typing animation gated by `useReducedMotion`) is the same shape; reuse the mental model.
 
 **Example:**
+```typescript
+// src/scene/Cat.tsx
+const reduced = useReducedMotion();
+const bodyRef = useRef<THREE.Group>(null);
 
-```tsx
-// src/App.tsx
-import { lazy, Suspense, useState } from 'react';
-import { detectCapability } from './lib/device';
-import TextShell from './shells/TextShell';
-const ThreeDShell = lazy(() => import('./shells/ThreeDShell'));
+useFrame(({ clock }) => {
+  if (reduced) return;
+  if (!bodyRef.current) return;
+  // 0.3 Hz sine wave ⇒ ~3.3 s period; ±2% scale on y so it's gentle.
+  const t = clock.getElapsedTime();
+  bodyRef.current.scale.y = 1 + Math.sin(t * 2 * Math.PI * 0.3) * 0.02;
+});
+```
 
-export default function App() {
-  const params = new URLSearchParams(window.location.search);
-  const forced = params.get('view'); // 'text' | '3d' | null
-  const [view] = useState<'text' | '3d'>(() => {
-    if (forced === 'text') return 'text';
-    if (forced === '3d') return '3d';
-    return detectCapability().shouldUse3D ? '3d' : 'text';
+**Critical:** `frameloop="demand"` is in use. `useFrame` consumers force the loop to run every tick; that's by design when motion is intended, but for the cat alone it'd burn frames continuously. Two options, in order of preference:
+
+1. **Cluster the per-frame consumers behind a single `<AnimationDriver>` component** that owns the cat-breath, server-LEDs, and wall-clock-tick updates with a shared `useFrame`. This is a real "demand-loop" win — one consumer keeps the loop alive, not three.
+2. **Accept three consumers** for now and revisit if the perf HUD shows it.
+
+Pick option 2 for v1.1 simplicity. If `r3f-perf` shows the demand loop never sleeping, regroup to option 1.
+
+### Pattern 4: Instanced LEDs and Books
+
+**What:** Use `<instancedMesh>` (via drei `<Instances>` + `<Instance>` for ergonomics) when a component renders 10+ near-identical primitives with different positions/colors.
+
+**When to use:** Server rack LEDs (~12), bookshelf books (~20-30). Do NOT use it for low-count primitives (e.g., 3 cable bundles, 4 wall clock numerals) — `<instancedMesh>` adds bookkeeping overhead that beats out individual meshes only past ~10 instances.
+
+**Trade-off:** Drei's `<Instances><Instance/></Instances>` is the declarative wrapper around `THREE.InstancedMesh`; the API is React-idiomatic and the per-instance color via `<Instance color="…" />` is one line. The cost vs. plain meshes is: shared material (all instances share one `meshStandardMaterial`), which is fine for books (each spine can differ in color/scale via instance attributes) and fine for LEDs (all share the cyan emissive look; per-instance blink phase is driven by adjusting the instance matrix or the color attribute).
+
+**Example shape (server rack LEDs):**
+```typescript
+// src/scene/ServerRack.tsx
+import { Instance, Instances } from '@react-three/drei';
+
+const LED_POSITIONS: ReadonlyArray<[number, number, number]> = [
+  /* 12 positions … */
+];
+
+function BlinkLEDs() {
+  const reduced = useReducedMotion();
+  const instancesRef = useRef<THREE.InstancedMesh>(null);
+
+  useFrame(({ clock }) => {
+    if (reduced || !instancesRef.current) return;
+    const t = clock.getElapsedTime();
+    // For each LED, set per-instance color intensity from a per-LED phase.
+    LED_POSITIONS.forEach((_, i) => {
+      const phase = (i * 0.137) % 1; // pseudo-random spread
+      const lit = Math.sin(t * 1.5 + phase * 6.28) > 0.2 ? 1.0 : 0.15;
+      // mutate the instance color attribute via instancesRef …
+    });
   });
 
-  if (view === 'text') return <TextShell />;
   return (
-    <Suspense fallback={<TextShell skeleton />}>
-      <ThreeDShell />
-    </Suspense>
+    <Instances ref={instancesRef} limit={LED_POSITIONS.length}>
+      <planeGeometry args={[0.006, 0.006]} />
+      <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" toneMapped={false} />
+      {LED_POSITIONS.map((p, i) => (
+        <Instance key={i} position={p} />
+      ))}
+    </Instances>
   );
 }
 ```
 
-The Suspense fallback is the text shell itself (in skeleton mode) — so even during the 3D bundle download, the recruiter sees real content.
+### Pattern 5: OrbitControls Bounds for a Closed Room
 
-### Pattern 2: Composed Scene with Single GLTF Source
+**What:** For a 6 m × 4 m × 3 m room, the OrbitControls clamps in `Controls.tsx` need three things: a tighter `maxDistance`, an enforced `minDistance`, and a `target` close enough to a stationary point inside the desk-island that orbiting never pushes the camera through a wall.
 
-**What:** Each room element is a small React component. They all read meshes from one Draco-compressed `workstation.glb` (loaded once, shared via R3F's `useGLTF` cache).
+**Decision:** Tighten the existing clamps. Do not introduce a separate "outside the room" / "inside the room" mode.
 
-**When to use:** Scenes where parts conceptually belong together but you want compositional reuse, named-mesh access, and the ability to attach interactivity per-piece (e.g., per-monitor click handlers). This is the standard R3F pattern.
+| Clamp | Current (v1.0) | v1.1 | Reason |
+|-------|----------------|------|--------|
+| `minPolarAngle` | `π/3` (~60°) | `π/3` | Unchanged — keeps camera above floor |
+| `maxPolarAngle` | `100°` | `100°` | Unchanged — already prevents floor dive |
+| `minAzimuthAngle` | `-π/2` | `-π/2` | Unchanged — keeps camera on the front 180° of the room |
+| `maxAzimuthAngle` | `+π/2` | `+π/2` | Unchanged |
+| `minDistance` | `1.2 m` | `1.2 m` | Unchanged |
+| `maxDistance` | `4.0 m` | `2.6 m` | **Tighten.** Room half-diagonal from desk to back-left corner ≈ √(3² + 1.6²) ≈ 3.4 m. A `maxDistance` of 4 will clip the back wall. 2.6 keeps the camera comfortably inside. |
 
-**Trade-offs:**
-- (+) One HTTP fetch for the whole room. Browser caches it.
-- (+) `gltfjsx --transform` produces typed JSX you drop into each component file.
-- (–) If you later need to swap one prop (say, replace the lamp), you re-export the whole GLTF. For a portfolio, that's fine.
+The OrbitControls `target` stays at `[0, 0.85, 0]` (desk-island center, slightly above floor) so all orbiting happens around the desk; the camera physically cannot reach the back wall.
 
-**Example:**
+**Critical:** Do **not** try to clamp via collision with wall geometry. OrbitControls doesn't support that, and writing a frame-by-frame raycast against walls is over-engineering for a portfolio. The distance-clamp is the right shape.
 
-```tsx
-// src/scene/Monitor.tsx
-import { useGLTF } from '@react-three/drei';
-import { MonitorScreen } from './MonitorScreen';
+**Bed/cat camera pose question (the explicit ask):** Stay with **one overview pose**. Reasoning:
+- The bed sits inside the same room; tighter `maxDistance` plus a slight azimuth swing already lets the overview camera see it without a dedicated pose.
+- A second overview pose would require a UI affordance to switch (extra button, new `?focus=bed` value, new state in `FocusController`). That's complexity for marginal value — a recruiter is not the audience for "look at my bed."
+- The cat is a discoverability easter egg; the user finding it via free-look is the intended experience, not a focus-button.
 
-export function Monitor({ id, position, content }: MonitorProps) {
-  const { nodes, materials } = useGLTF('/Portfolio_Website/assets/models/workstation.glb');
-  return (
-    <group position={position} onClick={() => focusMonitor(id)}>
-      <mesh geometry={nodes[`Monitor_${id}_Body`].geometry} material={materials.PlasticBlack} />
-      <MonitorScreen monitorId={id} content={content} />
-    </group>
-  );
-}
-```
+If after wiring everything up the bed feels under-displayed in the overview pose, the cheapest fix is to nudge the `DEFAULT_ORBIT_POSE` slightly (move position from `[1.4, 1.6, 1.6]` to `[1.6, 1.6, 1.8]` or similar) — that's a tuning constant, not a new pose.
 
-### Pattern 3: Monitor Screens via drei `<Html transform occlude>`
+### Pattern 6: Static-Boolean-Driven Composition (no new state)
 
-**What:** Content on a monitor's screen plane is rendered with drei's `<Html>` component in `transform` mode (so it follows the monitor's rotation/scale) with `occlude="blending"` (so 3D objects in front of it actually hide it).
+**What:** New v1.1 components are pure visual children of `<Workstation>`. They render based on prop-drilled `focused` or no props at all. They do **not** read or write `tabStore`.
 
-**When to use:** When the content needs to be real, accessible HTML — selectable text, links, scrolling, copy-to-clipboard, anchor navigation — AND it must look like it lives on the monitor (rotates with it, gets occluded by the desk lamp swinging in front). This matches our requirements exactly: CV/projects/CTFs need to be read.
+**Rationale (the question):** No new component in v1.1 needs zustand. The store exists to bridge the Canvas/DOM boundary for the monitor tab surface. Nothing else has that bridge requirement:
+- Bed, cat, server rack, wall content: render once, never change tab/focus state.
+- Cable bundle, plants, LED strips: pure decoration.
+- Window: static texture.
+- Secondary monitor (if added): could render a small `<Html>` overlay with a tiny snippet of static text (e.g. "wireshark"), but that's a one-direction render — no shared state needed.
 
-**Trade-offs and concrete decision:**
+If you find yourself reaching for `useTabStore` from a v1.1 component, **stop and ask why** — there's almost certainly a simpler answer (prop, derive from URL, hard-code).
 
-| Approach | Verdict | Why |
-|----------|---------|-----|
-| **drei `<Html transform occlude>`** (CHOSEN) | Real DOM means real selectable text, real links, full Tailwind. `transform` + `occlude` give it 3D presence. | Accessibility, SEO of the text rendered there, dead-simple to author. |
-| CSS3DRenderer | Skip. | Heavier integration, no occlusion against WebGL geometry without manual effort, redundant given drei `<Html>` covers the same ground. |
-| Render-to-texture (HTML on a canvas → texture) | Skip. | Loses selectable text, links, scroll. Visually nice but breaks the "recruiter copies email from the 3D scene" use case. Useful only if we wanted post-processing effects (CRT scanlines) — and those we'll do with a shader pass instead. |
-| 2D modal that opens on monitor click | Skip as the *primary* mechanism. Fine as a supplemental "fullscreen this section" affordance. | Defeats the immersion the 3D scene is supposed to sell. |
+## Lighting Recomposition (the most load-bearing call)
 
-Caveats from drei docs to plan around:
-- `occlude="blending"` only correctly occludes rectangular HTML by default; pass a `geometry` prop matching the monitor's screen plane shape.
-- `transform` mode can render slightly blurry on some devices — mitigation is the documented "scale parent down 0.5x, scale children up 2x" trick.
-- Pointer events work, but z-index battles between multiple `<Html>` instances are real. We have only ~3 monitors so it's tractable.
+### Current lighting (v1.0)
+- 1 `<ambientLight>` (cool blue, intensity 0.18)
+- 1 `<directionalLight>` (key, intensity 0.45, with shadow map)
+- 1 `<pointLight>` cyan accent behind monitor
+- 1 `<pointLight>` warm at lamp bulb
+- **Plus emissive materials** on monitor screen, neon strip, keyboard backlight, tower power LED, lamp bulb sphere (these are not "lights" in the Three.js sense — they contribute to Bloom but cost ~nothing per frame)
 
-**Example:**
+### v1.1 proposed lighting
+- Keep ambient + directional + cyan-monitor-accent + warm-lamp = **4 dynamic lights baseline**
+- Add **at most 2** new dynamic lights:
+  - 1 dim warm `<pointLight>` at the bedside lamp position (justifies the bed corner)
+  - 1 cool `<pointLight>` near the window (justifies the foggy-night silhouette)
+- **Do NOT add point lights** for: ceiling light (use one wide-radius hemisphere or a directional from above; better, just use an emissive ceiling-plane material), server rack LEDs, bias light, under-desk LED, under-rack glow. All of those are **emissive surfaces** picked up by Bloom in postprocessing.
 
-```tsx
-// src/scene/MonitorScreen.tsx
-import { Html } from '@react-three/drei';
-import { TerminalPrompt } from '../ui/TerminalPrompt';
-import { ProjectsView } from '../ui/ProjectsView';
+### Three.js point-light reality check (HIGH confidence — verified via Three.js forum + community consensus)
 
-export function MonitorScreen({ monitorId, content }: Props) {
-  return (
-    <Html
-      transform
-      occlude="blending"
-      distanceFactor={0.7}
-      position={[0, 0, 0.01]}        // a hair in front of the screen mesh
-      rotation={[0, 0, 0]}
-      style={{ width: 800, height: 500 }}
-      className="font-mono text-green-400 bg-black"
-    >
-      {monitorId === 'main' && <TerminalPrompt />}
-      {monitorId === 'projects' && <ProjectsView />}
-      {monitorId === 'ctfs' && <CTFsView />}
-    </Html>
-  );
-}
-```
+| Light count | What happens |
+|-------------|--------------|
+| ≤ 4 dynamic (any type), 1 with shadows | Fine everywhere, including low-end mobile |
+| 5-8 dynamic, ≤2 with shadows | Fine on desktop; mobile starts paying noticeable per-frame cost |
+| 9-12 with shadows | Mobile breaks. Point-light shadows render 6× (one per cube face) — two shadowed point lights on 10 shadow-casters = 120 extra draw calls. WebGL register exhaustion possible. |
+| > 12 lights | Lighting can silently break on some mobile GPUs (register limit) |
 
-### Pattern 4: Capability-Gated Default View
+Target: stay at **6 dynamic lights with exactly 1 shadow-caster (the directional)**. Everything decorative is emissive material + Bloom.
 
-**What:** First-time visitor without `?view=` gets routed by `detectCapability()`. Mobile, no WebGL2, `prefers-reduced-motion`, or low device memory → text shell. Otherwise → 3D shell. There is always a visible toggle ("View as text" / "Enter the workstation") in both shells.
+### Lighting tier-gating recommendation
 
-**When to use:** When the heavyweight experience is a feature, not a requirement, and the site has a real audience that might not want it. This is exactly our case (recruiter skim vs hiring manager engagement).
+**Do not** wire a "lighting count" tier flip. The current `PerformanceMonitor` gates postprocessing as a binary mount/unmount. Wiring it to also conditionally render lights creates a worse user experience (sudden change in scene appearance) for marginal perf win, because: (a) we're staying inside the safe light count above anyway; (b) emissive materials still render without postprocessing — they just look less glowy.
 
-**Trade-offs:**
-- (+) No "blank canvas" or "loading bar of doom" experience for the wrong device.
-- (+) Power user can still force `?view=3d` on their phone.
-- (–) Heuristic is imperfect. Mitigated by the always-visible toggle.
-
-### Pattern 5: Content as Typed Data + MDX for Prose
-
-**What:** Short, structured content (project metadata, cert list, skills) lives in `.ts` files as typed arrays. Long-form CTF write-ups live in `.mdx` files imported by `ctfs.ts`.
-
-**When to use:** Solo maintainer who wants to update content without restarting their architecture brain. TS gives type-safety; MDX gives ergonomic prose with embedded React for code blocks/screenshots.
-
-**Why not pure MDX everywhere:** Authoring a list of certifications as a markdown table is annoying; authoring it as a typed array of objects is trivial.
-
-**Why not Contentlayer/Velite:** Contentlayer is archived (no longer maintained as of 2024). Velite works but is overkill for ~10 pieces of content owned by one person. For v1, Vite's built-in `@mdx-js/rollup` plugin is enough. Revisit if content grows past ~30 entries.
-
-**Example:**
-
-```ts
-// src/content/projects.ts
-export type Project = {
-  id: string;
-  title: string;
-  summary: string;
-  stack: string[];
-  github?: string;
-  live?: string;
-  date: string; // ISO
-};
-
-export const projects: Project[] = [
-  {
-    id: 'homelab',
-    title: 'Home Lab — pfSense / Suricata / ELK',
-    summary: 'Routed traffic through Suricata IDS, shipped alerts to Elastic, dashboards in Kibana.',
-    stack: ['pfSense', 'Suricata', 'Elastic Stack'],
-    github: 'https://github.com/eren-atalay/homelab',
-    date: '2025-09-01',
-  },
-  // ...
-];
-```
-
----
+If a future profile shows lighting is the bottleneck (it won't, given the recipe above), the right move is to **drop a single point light** for low-tier devices via the existing `PerformanceMonitor` pattern — not to dynamically rebalance.
 
 ## Data Flow
 
-### Content Flow (one direction, both shells)
+### Render flow (unchanged)
 
 ```
-src/content/*.ts
-        |
-        | static import (no fetch, no async)
-        v
-+----------------+         +-------------------+
-| TextShell      |         | ThreeDShell       |
-| reads content  |         | reads content     |
-| renders HTML   |         | passes to <Html>  |
-+----------------+         +-------------------+
-                                    |
-                                    v
-                          drei <Html> on monitor
-                                    |
-                                    v
-                          DOM (selectable, linkable)
+URL ?view=3d
+    ↓
+<App> capability gate
+    ↓ (pass)
+<ThreeDShell>
+    ↓
+<Canvas frameloop="demand">
+    ↓
+<Lighting/>  <Controls/>  <FocusController/>  <ScenePostprocessing/>
+    ↓
+<Workstation focused={…} onMonitorClick={…}>
+    ↓
+[Room shell] [Desk island] [Cyber] [Wall content] [Warmth] [Bed corner] [Cat] [Secondary]
 ```
 
-There is no fetch, no API, no client-side state for content. Content changes require a rebuild — which is correct because GitHub Pages is static.
-
-### Interaction Flow (3D shell)
+### State flow (unchanged for v1.1)
 
 ```
-User drag                        User click monitor
-   |                                    |
-   v                                    v
-OrbitControls (clamped)        <Monitor onClick>
-   |                                    |
-   v                                    v
-camera moves                     focusMonitor(id) hook
-                                        |
-                                        v
-                              animates camera to preset pose
-                                        |
-                                        v
-                              updates url ?focus=projects
-                                        |
-                                        v
-                              <MonitorScreen> already showing content;
-                              optional: zoom-in animation toggles a
-                              "fullscreen" class on the <Html>
+URL ?focus=<tab>
+    ↑↓
+useTabStore.activeTab          ← FocusController syncs both directions
+    ↓
+<MonitorTabs> in <MonitorOverlay> in <Monitor>
 ```
 
-Deep links: `?view=3d&focus=projects` directly opens the 3D shell with the camera animating to the projects monitor on mount. This is how a recruiter shares a link to a specific section.
+No new state flows. The new components are render-only.
 
-### State Surfaces
-
-| State | Owner | Lifetime |
-|-------|-------|----------|
-| `view` (text vs 3d) | `<App />` (URL-derived, set once) | Page lifetime |
-| `focus` (which monitor camera is aimed at) | `<ThreeDShell />` (URL-synced via `history.replaceState`) | Page lifetime |
-| `loadingProgress` | drei `useProgress()` | Until GLTF loads |
-| `perfTier` | drei `<PerformanceMonitor>` | Continuous, drives effect quality |
-
-No Redux, no Zustand, no React Query for v1. The state surface is small enough that React's built-ins handle it.
-
----
-
-## Routing & Deep Links — Concrete Recommendation
-
-**Don't use React Router.** For this site:
-
-- The "pages" of the site (Projects, CTFs, etc.) are **monitors in a 3D scene**, not separate documents.
-- React Router on GitHub Pages requires either HashRouter (ugly URLs: `/#/projects`) or a 404.html SPA-fallback hack — and we still get only one HTML document, so the SEO benefit is zero.
-- The 2D fallback is a single long-scroll page with anchor sections — that's idiomatic for portfolio CVs.
-
-**Use:** A single `index.html`, a single React mount, and **query params** as the routing surface:
-
-- `?view=text` — force text shell
-- `?view=3d` — force 3D shell
-- `?focus=projects|ctfs|cv|contact` — 3D camera focus, or anchor-scroll target in text shell
-
-Rationale:
-1. One HTML doc → recruiters and crawlers always land on something with content (the text shell renders synchronously with first JS).
-2. Query params survive GitHub Pages with no hacks.
-3. Deep links work in both shells (`?view=text&focus=projects` scrolls to `#projects`; `?view=3d&focus=projects` animates the camera).
-
-For SEO, render the text shell's content into `index.html` at build time via a tiny pre-render script (or just accept that the bundled JS is small enough that crawlers will execute it; modern Googlebot does). Ship a real `<title>`, meta description, OG tags, and `application/ld+json` Person schema in `index.html`.
-
----
-
-## 3D vs 2D Fallback — The Load-Bearing Decision
-
-Three options were considered. The recommendation is **(a) same React tree, conditional shell mounting**, with a strong refinement.
-
-### Option A — Same tree, conditional shell ✅ CHOSEN
-
-`<App />` mounts either `<TextShell />` or `<ThreeDShell />`. The 3D shell is `React.lazy`-loaded so its bundle is not on the recruiter's critical path.
-
-- **SEO:** One canonical URL. `<TextShell />` content can be SSG-pre-rendered into `index.html` at build (Vite + a tiny pre-render plugin), or just rely on JS-rendered SEO (acceptable for a personal portfolio).
-- **Performance:** Text path ships React + Tailwind + content (~50–80 KB gz). 3D path additionally ships R3F + drei + three (~280–320 KB gz) + GLTF (target <2 MB). Recruiter on the text path never pays for the 3D path.
-- **Maintenance:** Single repo, single build, single deploy. Shared `ui/` and `content/`.
-- **Verdict:** Best for our solo-maintained, GitHub-Pages, recruiter-tolerance-<5s constraints.
-
-### Option B — Two routes (`/` for 3D, `/text` for 2D) ❌
-
-- Loses: under GitHub Pages, route fallbacks require either HashRouter or the 404.html copy hack.
-- Gains: cleaner URLs to share. But query param `?view=text` is functionally equivalent.
-- Verdict: All cost, no benefit for our constraints.
-
-### Option C — Two builds entirely ❌
-
-- Loses: doubles deploy complexity, doubles content drift risk, requires either two GH Pages sites or a build-time merge step.
-- Gains: minor — each build is slightly smaller than the lazy-split approach.
-- Verdict: The lazy-split in Option A already achieves the bundle isolation that justified Option C, without the maintenance cost. Skip.
-
-### How "fast" is the text shell?
-
-Targets (broadband, mid-range laptop, fresh cache):
-- **Time to first byte:** GitHub Pages CDN, ~100ms.
-- **Time to first paint:** <800ms (HTML + critical CSS + initial React mount).
-- **Time to interactive (text shell):** <1.5s.
-- **Recruiter sees CV summary, contact, GitHub/LinkedIn:** under the 5s contract. Comfortably.
-
-3D shell targets:
-- **Time to interactive (camera responsive):** <4s on broadband, <8s on slow 4G.
-- **Frame rate:** 60fps target on mid-range laptop with PerformanceMonitor regression to 30fps + reduced effects on weaker devices.
-- **First meaningful paint of scene:** <2.5s (loading screen visible from <1s).
-
----
-
-## Asset Pipeline
+### Animation flow (new, small)
 
 ```
-Blender / source assets
-        |
-        | export GLTF
-        v
-gltf-pipeline + Draco compression
-        |
-        | gltfjsx --transform (also: webp textures, draco, dedupe, prune)
-        v
-public/assets/models/workstation.glb       <-- ONE file, target <2 MB
-public/assets/textures/*.webp              <-- 1024px max, SRGB
-        |
-        v
-useGLTF('/Portfolio_Website/assets/models/workstation.glb')
-        |
-        | cached by R3F across all components
-        v
-<Suspense fallback={<Loader/>}> wraps the scene
+clock.elapsed (R3F)  →  useFrame consumers (gated by useReducedMotion)
+                        ├── <Cat>       (body.scale.y sine)
+                        ├── <ServerRack BlinkLEDs>  (per-LED color)
+                        └── <WallClock> (Date.now → hand rotations)
 ```
 
-### Loading strategy
-
-- **One Suspense boundary** at the top of the scene. drei's `<Loader>` reads `useProgress` and shows a terminal-styled progress bar (matches our aesthetic, doubles as content).
-- **Don't lazy-load by section.** Splitting the GLTF would mean multiple HTTP fetches for what is conceptually one room; the room is small enough (target <2 MB) that one fetch wins.
-- **Do lazy-load the `<ThreeDShell />` JS.** That's a separate chunk via `React.lazy`.
-- **Texture format:** WebP with KTX2/Basis as a possible upgrade if we hit the budget.
-
-### Performance budgets (concrete numbers)
-
-| Asset | Budget | Hard ceiling |
-|-------|--------|--------------|
-| Initial HTML + critical CSS | 8 KB | 15 KB |
-| Text shell JS (initial) | 80 KB gz | 120 KB gz |
-| 3D shell JS (lazy chunk) | 320 KB gz | 450 KB gz |
-| Workstation GLTF (Draco + WebP) | 1.5 MB | 2.5 MB |
-| Total page weight on 3D path | ~2.0 MB | 3.5 MB |
-| Total page weight on text path | <200 KB | 350 KB |
-| Draw calls | <100 | 250 |
-| Time to interactive (text) | <1.5s broadband | 3s slow 4G |
-| Time to interactive (3D) | <4s broadband | 10s slow 4G |
-| Frame rate (mid laptop) | 60 fps | 30 fps under regression |
-
-These are budgets, not estimates. Enforce via Vite's `build.rollupOptions.output.manualChunks` and a CI size check (e.g., `size-limit`) once budgets matter.
-
----
-
-## Build Order (One Month, Solo) — Justified
-
-The principle: **something demoable in week 1; the riskiest 3D work in the middle weeks; polish last.** This order is shaped by two real constraints — the recruiter <5s contract has to be live early so the project is shippable at any moment, and the 3D work has the most unknowns so it gets the most slack.
-
-### Phase 1 — Static skeleton + 2D fallback first (Week 1)
-
-What ships:
-- Vite + React + TS + Tailwind project scaffolded.
-- `src/content/*` populated with real CV data.
-- `<TextShell />` fully functional: terminal-styled CV, projects list, CTFs list, certs, skills, contact (obfuscated email + GitHub + LinkedIn).
-- GitHub Pages deploy workflow. Site is live at `eren-atalay.github.io/Portfolio_Website/`.
-- 404.html fallback in place. `vite.config` `base` set.
-
-**Why first:** If the project gets dropped at end of week 1, Eren still has a live, recruiter-grade portfolio. This single property is what justifies the entire ordering.
-
-### Phase 2 — 3D scene shell (Week 2)
-
-What ships:
-- `<ThreeDShell />` lazy-loaded from `<App />` based on capability check + `?view=`.
-- A placeholder GLTF (a desk + 3 monitors, no detailed materials) loaded with Suspense and `<Loader>`.
-- OrbitControls (clamped) for free-look. Camera focus animation skeleton.
-- Empty monitor screens (just emissive material, no `<Html>`).
-- View toggle DOM overlay.
-
-**Why second:** Validates the whole pipeline (asset load, capability gating, lazy chunk, deploy, performance budget) before we pour content into it. If R3F + GH Pages has a gotcha (it doesn't, but if), we discover it now with a placeholder, not three weeks in with finished content.
-
-### Phase 3 — Content integration into the 3D scene (Week 3)
-
-What ships:
-- drei `<Html transform occlude>` bindings on each monitor reading from `src/content`.
-- Animated `whoami` terminal prompt on the main monitor.
-- Per-monitor click → camera focus animation → fullscreen-able content.
-- MDX pipeline for CTF write-ups; render inside the scene.
-- Deep-link support (`?focus=projects`).
-
-**Why third:** Components in `ui/` are now mature (built and shipped in Phase 1 inside `<TextShell />`), so we are reusing them, not authoring them. This is the highest-leverage week.
-
-### Phase 4 — Polish, real model, deploy (Week 4)
-
-What ships:
-- Real workstation GLTF (Blender-built or sourced + customized) replaces the placeholder.
-- Lighting pass (point light from monitors, lamp, rim light).
-- Optional postprocessing (CRT scanlines, bloom on monitor emissives) — gated by `<PerformanceMonitor>`.
-- Performance regression: lower DPR / disable effects on weak devices.
-- Sound off by default; one tasteful keyboard tap on click? (decide; if scoped in.)
-- Mobile pass: confirm text shell on mobile is excellent; confirm 3D path is gracefully refused or capped.
-- SEO: meta tags, OG image, JSON-LD Person schema, sitemap.
-- Final size pass: hit the budgets, run Lighthouse.
-
-**Why last:** Polish work that's obvious to do, low-risk, but absorbs unbounded time if started early. Quarantining it to week 4 forces shipment.
-
-### Build-order anti-patterns (do not do these)
-
-| Anti-pattern | Why it kills the project |
-|--------------|--------------------------|
-| "Build the perfect 3D scene first, then add content" | You miss the recruiter contract entirely. The site sits on `localhost` for three weeks. |
-| "Build a generic 3D portfolio, then theme it cyber later" | The cyber/terminal aesthetic IS the value prop. Build it in from `<TextShell />` Phase 1; the 3D scene inherits the language. |
-| "Defer the deploy pipeline" | GH Pages quirks (base path, 404.html) WILL bite at the worst possible moment. Lock it in week 1, redeploy continuously. |
-| "Big-bang content migration in week 4" | Content schema changes ripple through every component. Lock content shapes in week 1. |
-
----
-
-## GitHub Pages Constraints — Concrete Handling
-
-| Constraint | Handling |
-|------------|----------|
-| Deploys to `username.github.io/Portfolio_Website/` (subpath) | `vite.config.ts` `base: '/Portfolio_Website/'`; all asset URLs use `import.meta.env.BASE_URL` or relative paths. |
-| Static files only, no SSR | We embrace it. No SSR features used. SEO via static `index.html` meta + optional Vite SSG pre-render of text shell. |
-| No server-side route fallback | `public/404.html` is a copy of `index.html`. Any unknown URL serves the SPA, which then reads `?view=` / `?focus=`. |
-| No HTTP headers config (no `Cache-Control` tuning) | Don't rely on it. Vite already hashes asset filenames; default GH Pages caching is acceptable for our scale. |
-| Custom 404 not on the same path on user-pages vs project-pages | We deploy as a project page (`/Portfolio_Website/`). 404.html in `public/` lands at the project root. Verified pattern. |
-| HTTPS only by default | Fine. No mixed-content concerns. |
-
-Deploy workflow (`.github/workflows/deploy.yml`):
-
-```yaml
-name: Deploy to GitHub Pages
-on:
-  push:
-    branches: [main]
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'npm' }
-      - run: npm ci
-      - run: npm run build
-      - run: cp dist/index.html dist/404.html   # SPA fallback
-      - uses: actions/upload-pages-artifact@v3
-        with: { path: dist }
-      - uses: actions/deploy-pages@v4
-```
-
-(Use the official `actions/deploy-pages` flow rather than the older `peaceiris/gh-pages` action — it's GitHub's recommended path now and avoids managing a separate `gh-pages` branch.)
-
----
+If `prefers-reduced-motion` is set: all three skip their updates and remain at a sensible still state (cat scale = 1, LEDs at half-lit, clock hands at last-painted time).
 
 ## Scaling Considerations
 
-For a personal portfolio, "scaling" means asset weight and code complexity, not user count.
+This is a static portfolio scene with a stable visitor model (one viewer at a time, no server). Traditional scaling axes don't apply. The relevant axes are:
 
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| v1 (today, ~10 projects, 1 maintainer) | Current architecture as described. `.ts` content + occasional MDX. |
-| Content grows past ~30 entries / Eren wants in-browser editing | Add Velite or netlify-cms-style editor; still static-deploy. |
-| Multiple roles / blog / readership | Migrate to Astro or Next-on-Pages for SSG with route-based code splitting. The shell pattern transfers cleanly. |
-| Custom domain | Drop `base` from `vite.config`. CNAME file in `public/`. No code rewrite needed. |
-| Analytics required | Add Plausible (privacy-light, no cookies) — fits constraint. Defer beyond v1. |
+| Axis | At v1.0 | At v1.1 target | At "if v2 added more" |
+|------|---------|---------------|---------------------|
+| Draw calls | ~80 | ~140-180 (add walls + ~20 decor) | ~250 starts to hurt mobile; use instancing |
+| Dynamic lights | 4 | 6 (+2 max) | 8 = mobile pain line |
+| Per-frame consumers (`useFrame`) | 0 | 1-3 (cat, LEDs, clock) | Cluster behind one driver when > 5 |
+| Triangles | ~5-10k | ~20-30k (rough estimate for the room + decor) | 100k = mobile pain line |
+| GLB assets | 0 (procedural) | 0 (procedural) | If v2 swaps to GLB, KTX2 + draco mandatory |
+| Bundle size budgets | 6 budgets in size-limit | Unchanged — no new deps planned | If new dep added, budget MUST be updated in same PR |
 
-Realistic first bottleneck: **GLTF size**. If the model creeps past 3 MB, the recruiter's 3D-path TTI degrades fast. Mitigations in priority order: more aggressive Draco compression → texture downsize to 512 → split off the bookshelf as a lazy chunk on close-up zoom.
+The size-limit budgets in `package.json` are the **enforcement boundary** for "we accidentally added something heavy." Do not loosen those budgets without a written justification. Adding a new component file is free in bundle terms; adding a new dep is not.
 
----
+## Anti-Patterns to Avoid
 
-## Anti-Patterns
+### Anti-Pattern 1: "Big atmosphere" lighting
 
-### Anti-Pattern 1: God-Canvas
+**What people do:** Add a hemisphere light, a fill light, a kicker light, a window-sun light, a bedside light, a ceiling light, a rack LED point light, an under-desk LED point light = 10+ dynamic lights.
 
-**What people do:** One file, `<Scene>`, 600+ lines, everything inside.
+**Why wrong:** Mobile WebGL breaks past ~8 lights with shadows; even without shadows, fragment shader cost grows linearly. The visual difference between 6 well-placed lights and 12 is barely perceptible inside a dark room; the perf gap is large.
 
-**Why it's wrong:** Unreadable; no piece can be reused; every change risks the whole scene; refactoring later means rewriting from scratch.
+**Do instead:** Emissive materials + Bloom. The neon strip, monitor backlight, LED strip patterns in v1.0 are the template — Bloom amplifies them so they read as light sources without actually casting light.
 
-**Do this instead:** Compose the scene from small per-element files (`Desk.tsx`, `Monitor.tsx`, etc.). Use `gltfjsx --transform` to generate skeletons.
+### Anti-Pattern 2: New zustand slice for every new section
 
-### Anti-Pattern 2: Forking Content Between Shells
+**What people do:** Add `useRoomStore` with flags for "rack LEDs enabled," "cat visible," "blinds open," "bedside lamp on." Every component subscribes.
 
-**What people do:** Hardcode the CV in `<TextShell />` and *also* hardcode it inside the 3D monitor's `<Html>` content. Six months later, only one of them is up to date.
+**Why wrong:** None of those flags change in response to anything. They're constants. Subscribing to a constant is overhead with no benefit, and the store becomes a junk drawer.
 
-**Why it's wrong:** Two sources of truth → guaranteed drift. Recruiter sees stale info on whichever shell they happen to land on.
+**Do instead:** Hard-code visual state in the components. If a flag truly needs to be user-toggleable later, add it then — not now.
 
-**Do this instead:** All content lives in `src/content/*`. Both shells import. Both render via shared `ui/*` components.
+### Anti-Pattern 3: Camera bound = wall collision raycast
 
-### Anti-Pattern 3: Loading the 3D Bundle on the Text Path
+**What people do:** On every frame, raycast from camera toward all walls; if too close, push camera back. Implements "physically realistic" room constraints.
 
-**What people do:** Import R3F at the top of `<App />` "for convenience." Vite ships it in the initial chunk. Recruiter on a phone downloads 300 KB they will never need.
+**Why wrong:** Frame-by-frame raycasting for camera collision in `useFrame` is real CPU work, OrbitControls fights against it (target keeps trying to interpolate back), and edge cases (camera inside a wall after fast drag) require additional restitution. Massive complexity for a portfolio that has one cameraman.
 
-**Why it's wrong:** Defeats the entire fallback rationale. The <5s recruiter contract becomes impossible.
+**Do instead:** Tighter `maxDistance` clamp (Pattern 5 above). Cheap, works, done.
 
-**Do this instead:** `<ThreeDShell />` is `React.lazy()`. Verify with `vite-bundle-visualizer` after every meaningful change.
+### Anti-Pattern 4: Visual logic inside `useFrame` that doesn't need to be there
 
-### Anti-Pattern 4: Render-to-Texture for Monitor Content
+**What people do:** Drive blink LEDs by `useFrame` updating `emissiveIntensity` from a sine wave that's almost-constant (e.g., `1 + 0.05*sin(t)`), or have the clock hands recompute layout (text, numerals) every frame.
 
-**What people do:** Render the CV into an offscreen canvas, use it as a texture on the monitor mesh.
+**Why wrong:** Wastes the demand-loop ticks. The demand loop is supposed to sleep when nothing changes; if you're keeping it awake for invisible animation, you've lost the perf budget that gating provides.
 
-**Why it's wrong:** The text isn't selectable. Links don't work. Crawlers can't read it. The "user copies email from the 3D scene" path is broken.
+**Do instead:** If the animation is too subtle to see, drop it. If it's worth seeing, make it visible (clear blink phases, ±2% scale, real second-hand tick). And cluster multiple animators behind one driver as discussed in Pattern 3.
 
-**Do this instead:** drei `<Html transform occlude>`. Real DOM, real text, real links. Visual fidelity loss is negligible if you nail the styling (monospace + scanlines via shader on the screen mesh underneath the `<Html>`).
+### Anti-Pattern 5: New camera pose per new "interesting thing"
 
-### Anti-Pattern 5: HashRouter "because GitHub Pages"
+**What people do:** Add `BED_POSE`, `RACK_POSE`, `CAT_POSE`, `WHITEBOARD_POSE` to `cameraPoses.ts`. Wire `?focus=bed`, `?focus=rack`, etc., into `FocusController`. UI sprouts buttons.
 
-**What people do:** Reach for `<HashRouter>` reflexively to avoid 404s.
+**Why wrong:** v1.0 already shipped the simplification work to **collapse three poses down to two** (HS-redesign Task 3). Re-fragmenting them undoes that. The overview pose's job is to show "here's the room" with one drag for orientation, not "here's the bed in detail."
 
-**Why it's wrong:** Ugly URLs (`/#/projects`), worse SEO than even query params, and unnecessary. Our routing surface is tiny — query params plus an `id`-anchor scroll cover everything.
-
-**Do this instead:** `?view=` and `?focus=`. 404.html copy of index.html. Done.
-
-### Anti-Pattern 6: Skipping the Capability Check, Hoping Mobile Will "Just Work"
-
-**What people do:** Mount the 3D scene on every device. Hope.
-
-**Why it's wrong:** A janky scene at 8 fps on a $200 Android is the worst possible first impression — worse than no scene at all.
-
-**Do this instead:** `detectCapability()` defaults mobile, low-memory, no-WebGL2, and `prefers-reduced-motion` users to text. Always-visible toggle for power users.
-
----
+**Do instead:** Single overview pose, single focused-on-monitor pose. Period.
 
 ## Integration Points
 
-### External Services
+### Existing components that v1.1 MODIFIES
 
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| GitHub Pages (hosting) | Static deploy via Pages action | Subpath `/Portfolio_Website/`; 404.html fallback |
-| Email contact | Obfuscated `mailto:` link, optionally a static form-handler (Formspree, Web3Forms) — out of scope v1 | v1: obfuscated mailto only |
-| GitHub (project repos) | External `<a target="_blank" rel="noopener">` links | No GitHub API at runtime |
-| LinkedIn | External link | Same as above |
-| Plausible / Umami | Out of scope v1 (privacy constraint) | Re-evaluate later |
+| File | Change | Reason |
+|------|--------|--------|
+| `src/scene/Workstation.tsx` | Add ~15 new child component imports + JSX | Composer pattern — this is its job |
+| `src/scene/Controls.tsx` | Tighten `maxDistance` from 4.0 → 2.6 | Room shell needs camera kept inside |
+| `src/scene/Lighting.tsx` | Add up to 2 dim `<pointLight>` (bedside + window) | Motivate bed corner and window |
+| `src/scene/WallDecor.tsx` | (Optional refactor) Extract inline texture code to `src/scene/textures/wallPoster.ts` | Pattern 2 consistency once 2+ canvas textures exist |
 
-### Internal Boundaries
+### Existing components that v1.1 LEAVES ALONE
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| `<App />` ↔ shells | Direct mount based on URL/capability | One-way; shells don't talk to App |
-| `<TextShell />` / `<ThreeDShell />` ↔ `src/content/*` | Static imports only | No runtime fetching |
-| `<ThreeDShell />` ↔ `<MonitorScreen />` | Props (content slice + focus state) | drei `<Html>` is the DOM portal |
-| `src/scene/*` ↔ `src/ui/*` | `<MonitorScreen>` imports `ui/*` components | Same components used by text shell |
-| Capability detection ↔ `<App />` | Synchronous on mount, never re-runs | Toggle is the user-controlled override |
+- `src/app/App.tsx`, `src/shells/TextShell.tsx`, `src/shells/ThreeDShell.tsx`
+- `src/scene/Monitor.tsx`, `MonitorOverlay.tsx`, `FocusController.tsx`, `cameraPoses.ts`, `Floor.tsx`, `Desk.tsx`, `Bookshelf.tsx`, `Lamp.tsx`, `Chair.tsx`, `DeskDecor.tsx`
+- `src/store/tabStore.ts`, `src/ui/MonitorTabs.tsx`
+- `src/3d/PostFX.tsx`, `src/3d/ScenePostprocessing.tsx`
+- `src/content/*`, `src/sections/*`, `src/lib/*`
+- `vite.config.ts`, size-limit budgets
 
----
+If a v1.1 phase finds it "needs to" modify any of the leave-alone list, that's a yellow flag — either the design is regressing v1.0 (e.g., re-fragmenting camera poses) or the phase is doing too much.
+
+### External / build pipeline
+
+- **No new npm deps.** All v1.1 categories A-G are achievable with the shipped stack (R3F, drei, three, zustand). If a category genuinely needs something (e.g., extruded book spines using a complex curve), prefer a hand-rolled procedural over adding a dep. If a dep is unavoidable: file a separate research task before adding.
+- **No build-pipeline changes.** vite.config.ts, MDX setup, chunkFileNames, 404.html copy — all unchanged.
+- **Asset pipeline.** No new GLBs in v1.1 (I — write-ups + GLB — keeps the GLB swap as an explicit follow-up, but Plan 04-06 already documents the gltfjsx workflow if you go down that road).
+
+## Build Order Recommendation
+
+The natural shape is **structural first → anchors second → decoration third → animated last → content close last**. Mapping to plan-phase chain:
+
+| Phase | Content | Why this order | Autonomous? |
+|-------|---------|---------------|-------------|
+| **Phase 5** | **A. Room shell + Controls clamp tighten + lighting baseline** (walls, ceiling, window-as-static-texture, tighter `maxDistance`, optional bedside `<pointLight>` placeholder) | Defines bounds for everything else. Must ship first because every subsequent component places relative to walls. Test now: does overview pose still look right? Does camera stay inside? Are existing v1.0 components still well-framed? | autonomous: true (visual + measurable) |
+| **Phase 6** | **B. Cyber detail + E. Bed corner** (server rack, cable bundle, HDD tower; bed + nightstand + bedside lamp geometry) | Large anchor objects that occupy floor space. Wiring them next means decor in later phases can be placed knowing what's already there. Rack on rack-side wall, bed on opposite side; balances composition. | autonomous: true |
+| **Phase 7** | **C. Wall content + D. Warmth** (whiteboard with ATT&CK matrix, framed cert, wall clock; books, plant, bias light, under-desk LED) | Surface decoration. Now that A+B+E are placed, the wall planes have clear empty regions begging for content; the bookshelf has a known target for instanced books. Includes the canvas-texture-folder refactor that's been deferred. | autonomous: true |
+| **Phase 8** | **F. Cat + G. Secondary devices** (cat with breathing useFrame; optional laptop / SDR / secondary monitor) | The "easter egg + optional polish" phase. Done last because: cat placement depends on bed/window from earlier phases; secondary devices are the most droppable scope if v1.1 is running long. | autonomous: true |
+| **Phase 9** | **H. Plan 04-08 human sign-off close** (OG image, Lighthouse median-of-3, Web3Forms delivery test Gmail+Outlook, real-device QA iOS+Android, named peer reviews) | Inherited from v1.0; cannot be automated; must run after the visible-scope work is done so the QA round captures the final v1.1 state. | autonomous: false (human-only; follows the 04-08 checklist model) |
+| **Phase 10** | **I. Write-ups + GLB reattempt** (2-3 MDX write-ups dropped into `src/content/writeups/`; reattempt real GLB workstation V2-3D-01 OR formally promote to v1.2) | Write-ups are content authoring (autonomous: false — depends on real labs being run). GLB reattempt is technical (autonomous: true) but optional within v1.1 — if scope is tight, promote to v1.2 and ship v1.1 without it. | mixed: write-ups autonomous: false; GLB autonomous: true |
+
+**Why not interleave H/I with visual phases?** Because (a) H is a QA pass that wants the final state, not intermediate states — running Lighthouse halfway through v1.1 wastes the run; (b) I is content authoring that depends on real cyber lab work, which is unrelated to visual phases and bottlenecked on Eren's lab time, not on the codebase. Keep them at the end where they don't block visual work.
+
+**Optional split of Phase 10:** If `I` slips on lab availability (the "no fabrication" rule binds; real labs take real time), shipping v1.1 with **only** the visual phases + H is acceptable. CNT-02/CNT-03 stay open, V2-3D-01 stays open, and v1.2 picks them up. The roadmap should reflect this — phase 10 is a single phase but its two sub-tracks can ship independently.
+
+## Test Strategy
+
+### v1.0 baseline (for reference)
+- Unit tests: capability gate, identity rendering, obfuscation round-trip, contact form post, tab store, colors mirror parity
+- No tests: Lamp, Chair, DeskDecor, WallDecor visuals; OrbitControls clamp values; FocusController GSAP timeline
+- Approach: visual regressions caught by eye + manual screenshots; automated tests focus on **logic and contracts**
+
+### v1.1 recommendation
+
+**Rule:** Follow the v1.0 convention. New visual components are **not** unit-tested. Smoke-render tests in jsdom would fail (no WebGL), and snapshot tests of R3F JSX trees are brittle without catching the actual visual regression.
+
+**What to test:**
+1. **Pure logic only.** If a v1.1 component contains a non-trivial function (e.g., the LED phase calculation, the ATT&CK canvas drawing helper, a procedural book-color generator), extract that function to a sibling utility module and unit-test the function. Example: `src/scene/textures/attackMatrix.ts` exports a `drawAttackMatrix(ctx)` function — test the function with a fake canvas context that records call counts/argument shapes.
+2. **The OrbitControls clamp change.** Add one test asserting the clamp object has `maxDistance: 2.6` (catches accidental edit-undo). Same pattern as the existing `colors.test.ts` (which asserts hex parity with `tokens.css`).
+3. **The component renders without throwing in import.** Optional, low-value: a single test file `src/scene/v11Components.smoke.test.tsx` that imports every new component and asserts the module loads. Catches typo-level mistakes; not catching real bugs but cheap insurance.
+
+**What NOT to test:**
+- The cat's breathing math.
+- The server rack LED blink pattern.
+- The whiteboard canvas pixel output.
+- The wall clock hand rotations.
+- Any geometry positions, sizes, or rotations.
+
+These should be visually verified in the browser. The Playwright smoke test from the OPS-02 budget set (text shell loads in <5s) is the right altitude — verify that the 3D shell loads and that the toggle works; don't try to assert the cat is at `[1.2, 0.6, -1.0]`.
+
+**One addition worth considering:** A `size-limit` budget entry for the 3D-shell chunk that includes v1.1's new geometry. If the new components push the chunk past the budget, CI catches it. This is in line with v1.0's discipline.
 
 ## Sources
 
-- [React Three Fiber — Examples](https://r3f.docs.pmnd.rs/getting-started/examples)
-- [React Three Fiber — Scaling Performance (official)](https://r3f.docs.pmnd.rs/advanced/scaling-performance)
-- [React Three Fiber — Hooks (Suspense / useLoader / useProgress)](https://r3f.docs.pmnd.rs/api/hooks)
-- [drei — Html component (transform / occlude / blending)](https://drei.docs.pmnd.rs/misc/html)
-- [drei Html — real occlusion discussion (issue #1129)](https://github.com/pmndrs/drei/issues/1129)
-- [Combining WebGLRenderer & CSS3DRenderer — R3F discussion #820](https://github.com/pmndrs/react-three-fiber/discussions/820)
-- [pmndrs/gltfjsx — GLTF → JSX with --transform compression](https://github.com/pmndrs/gltfjsx)
-- [gltf.pmnd.rs — interactive GLTF → R3F converter](https://gltf.pmnd.rs/)
-- [pmndrs/react-three-a11y — accessibility primitives for R3F](https://github.com/pmndrs/react-three-a11y)
-- [R3F fallback canvas content discussion (issue #1326)](https://github.com/pmndrs/react-three-fiber/issues/1326)
-- [Vite + GH Pages SPA 404 handling — DEV community walkthrough](https://dev.to/lico/handling-404-error-in-spa-deployed-on-github-pages-246p)
-- [vite-plugin-github-pages-spa](https://github.com/sctg-development/vite-plugin-github-pages-spa)
-- [Varun Vachhar — Modular WebGL with R3F (scene composition patterns)](https://varun.ca/modular-webgl/)
-- [14islands/r3f-scroll-rig — keeping Canvas outside the router](https://github.com/14islands/r3f-scroll-rig)
-- [MDX — official docs (content authoring)](https://mdxjs.com/)
-- [Wawa Sensei — R3F loading screen pattern](https://wawasensei.dev/courses/react-three-fiber/lessons/loading-screen)
+- Codebase files inspected:
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/scene/Workstation.tsx`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/scene/Lamp.tsx`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/scene/Chair.tsx`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/scene/DeskDecor.tsx`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/scene/WallDecor.tsx`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/scene/FocusController.tsx`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/scene/cameraPoses.ts`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/scene/Controls.tsx`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/scene/Lighting.tsx`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/scene/Floor.tsx`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/scene/Bookshelf.tsx`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/scene/Monitor.tsx`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/scene/colors.ts`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/store/tabStore.ts`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/src/3d/ScenePostprocessing.tsx`
+  - `/Users/erenatalay/Desktop/App/Portfolio_Website/.planning/PROJECT.md`
+- Three.js forum: "Optimizing Point Lights" — https://discourse.threejs.org/t/optimizing-point-lights/36153 — HIGH confidence: corroborates ≤4 lights ideal, shadow-cost 6× for point lights
+- Three.js forum: "Point lights and performance, revisited" — https://discourse.threejs.org/t/point-lights-and-performance-revisited/49316 — HIGH confidence: same body of community guidance
+- GitHub issue mrdoob/three.js#8463 "PBR Light Limits" — HIGH confidence: register-limit failure mode past ~12 lights
+- Discover three.js Tips & Tricks — https://discoverthreejs.com/tips-and-tricks/ — MEDIUM confidence: general "use as few direct lights as possible" guidance
 
 ---
-*Architecture research for: 3D portfolio website (R3F + Tailwind, GitHub Pages, solo maintainer)*
-*Researched: 2026-05-06*
+*Architecture research for: v1.1 Room Build-Out + Pre-Launch Close (additive to v1.0 shipped state)*
+*Researched: 2026-05-15*
