@@ -1,6 +1,26 @@
-# Phase 4 Deferred Items
+# Phase 4 Deferred Items — SUPERSEDED
 
-Out-of-scope discoveries during plan execution that need follow-up.
+> **Status: superseded 2026-05-15 by v1.0 milestone audit.**
+>
+> All three items below assumed D-17 final = `eren-atalay.github.io`. D-17 was later
+> rolled back to `erenatalaycs.github.io` (STATE.md, 2026-05-12). After rollback,
+> every item is a non-issue verified against the current tree. File kept as
+> historical record; do NOT act on the rows below.
+
+## Reconciliation (2026-05-15)
+
+| # | Original concern | Post-D-17-rollback state | Verdict |
+|---|---|---|---|
+| 1 | README.md line 4 host string | Already `erenatalaycs.github.io/Portfolio_Website/` after D-17 rollback | NON-ISSUE |
+| 2 | JSON-LD `sameAs` LinkedIn placeholder `handle-pending` | `index.html:83` reads `linkedin.com/in/eren-atalay/`; no `handle-pending` strings anywhere in `src/` or `index.html` | NON-ISSUE |
+| 3 | GitHub username vs GH-Pages host alignment | Username `erenatalaycs` and host `erenatalaycs.github.io` align natively — no rename, no CNAME needed | NON-ISSUE |
+
+## Historical Record (do not act)
+
+The original "Why deferred" rationale below pre-dates the D-17 host rollback. Retained
+only so that `git blame` continuity is preserved; the resolution above is authoritative.
+
+---
 
 ## From Plan 04-04 (SEO surfaces, 2026-05-09)
 

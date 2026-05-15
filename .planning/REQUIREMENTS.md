@@ -38,7 +38,7 @@
 - [ ] **3D-05**: drei `<Html transform occlude="blending">` on each monitor renders the same `src/ui/*` components used by the text shell — single source of truth
 - [ ] **3D-06**: Free-look + click navigation — clamped `OrbitControls` for drag-to-look, click monitor → GSAP camera-focus animation
 - [ ] **3D-07**: Animated `whoami` terminal greeting on the main monitor (constrained, not a fake REPL); skips to final state when `prefers-reduced-motion` is set
-- [x] **3D-08**: Postprocessing pipeline — Bloom + Scanline (density 1.25, opacity 0.15) + ChromaticAberration (offset 0.0008) + low Noise; gated by drei `<PerformanceMonitor>` and disabled on low-perf tier; no DOF, no SSAO, no permanent Glitch. _Delivered: Plan 04-01 (postprocessing pipeline + lazy PostFX chunk) + Plan 04-06 (real CC0 GLB workstation as the emissive Bloom target — desk/lamp/bookshelf via Poly Haven composite, 869 KB; monitor mesh stays procedural because Poly Haven has no CC0 monitor model). Visual verification of Bloom selectivity deferred to Plan 04-08 real-device QA._
+- [~] **3D-08**: Postprocessing pipeline — Bloom + Scanline (density 1.25, opacity 0.15) + ChromaticAberration (offset 0.0008) + low Noise; gated by drei `<PerformanceMonitor>` and disabled on low-perf tier; no DOF, no SSAO, no permanent Glitch. _Partial: Plan 04-01 postprocessing pipeline + lazy PostFX chunk shipped ✓. Plan 04-06 real CC0 GLB workstation landed then was reverted to procedural geometry in commit `342d2e7` after an autonomous visual-tuning loop concluded the procedural look read better; GLB files retained under `public/assets/workstation/` (desk/lamp/bookshelf, 869 KB total) but not imported by `src/`. Workstation ships procedural in v1.0; real GLB swap promoted to v2 V2-3D-01. Visual verification of Bloom selectivity against procedural emissives still deferred to Plan 04-08._
 - [x] **3D-09**: `webglcontextlost` listener swaps gracefully to the text shell (no blank screen, no crash)
 
 ### Contact & External Links
@@ -136,7 +136,7 @@ Explicit exclusions. Anti-features from research are documented here so they can
 | 3D-05 | Phase 3 | Pending |
 | 3D-06 | Phase 3 | Pending |
 | 3D-07 | Phase 3 | Pending |
-| 3D-08 | Phase 4 | Complete (Plans 04-01 + 04-06) |
+| 3D-08 | Phase 4 | Partial — Plan 04-01 postprocessing ✓; Plan 04-06 GLB reverted to procedural (commit 342d2e7); GLB swap promoted to v2 V2-3D-01 |
 | 3D-09 | Phase 2 | Complete |
 | CTC-01 | Phase 4 | Complete |
 | CTC-02 | Phase 1 | Pending |
