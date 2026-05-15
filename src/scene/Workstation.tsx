@@ -9,6 +9,14 @@
 // 5 tabs (whoami / projects / writeups / certs / contact) inside the
 // monitor's <Html transform> overlay via <MonitorTabs>.
 //
+// v1.1 Phase 5 (ROOM-01..02): the desk-island is now enclosed by
+// <Walls /> (3 inward-facing planes; back z=-2.5, left x=-2.0, right
+// x=+2.0) and <Ceiling /> (slab at y=2.6 + recessed flush fixture
+// emissive disc + 1 pointLight). OrbitControls.maxDistance tightened
+// 4.0 → 2.6 in Plan 05-01 so the camera cannot exit the room.
+//
+// Source: 05-CONTEXT.md D-01..D-05, D-20..D-22, D-27; ROOM-01, ROOM-02.
+//
 // Monitor geometry:
 //   - Frame:  1.10 × 0.46 × 0.04 m  (ultrawide ≈ 26:11)
 //   - Screen: 1.04 × 0.40 m         (3 cm bezel each side, 3 cm top/bottom)
@@ -24,6 +32,8 @@
 //         ~/.claude/plans/neon-tabbing-workstation.md Task 2.
 
 import { Floor } from './Floor';
+import { Walls } from './Walls';
+import { Ceiling } from './Ceiling';
 import { Desk } from './Desk';
 import { Monitor } from './Monitor';
 import { Lamp } from './Lamp';
@@ -43,6 +53,8 @@ export function Workstation({ focused, onMonitorClick }: WorkstationProps) {
   return (
     <>
       <Floor />
+      <Walls />
+      <Ceiling />
       <Desk />
       <Monitor
         position={[0, 1.1, -0.05]}
