@@ -34,6 +34,7 @@
 import { Floor } from './Floor';
 import { Walls } from './Walls';
 import { Ceiling } from './Ceiling';
+import { Window } from './Window';
 import { Desk } from './Desk';
 import { Monitor } from './Monitor';
 import { Lamp } from './Lamp';
@@ -55,6 +56,7 @@ export function Workstation({ focused, onMonitorClick }: WorkstationProps) {
       <Floor />
       <Walls />
       <Ceiling />
+      <Window />
       <Desk />
       <Monitor
         position={[0, 1.1, -0.05]}
