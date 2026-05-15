@@ -18,10 +18,14 @@
 //     bookshelf (x ∈ [-0.5, 0.5]); rotated slightly toward the
 //     overview camera for legibility.
 //
-// Source: ~/.claude/plans/neon-tabbing-workstation.md Task 5.
+// Source: ~/.claude/plans/neon-tabbing-workstation.md Task 5;
+//         05-CONTEXT.md D-24 (NeonStrip emissiveIntensity refactored
+//         to read from EMISSIVE_BUDGET.NEON_STRIP; D-25 documents
+//         that toneMapped:false stays exclusive to this surface).
 
 import { useMemo, useEffect } from 'react';
 import { CanvasTexture, SRGBColorSpace } from 'three';
+import { EMISSIVE_BUDGET } from './emissiveBudget';
 
 const NEON_CYAN = '#22d3ee';
 const NEON_TEAL = '#0fb5c2';
@@ -33,7 +37,7 @@ function NeonStrip() {
       <meshStandardMaterial
         color={NEON_CYAN}
         emissive={NEON_CYAN}
-        emissiveIntensity={2.0}
+        emissiveIntensity={EMISSIVE_BUDGET.NEON_STRIP}
         toneMapped={false}
       />
     </mesh>

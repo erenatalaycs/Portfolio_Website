@@ -21,10 +21,20 @@
 //         02-CONTEXT.md D-06; 02-RESEARCH.md Pattern 7;
 //         03-RESEARCH.md Pattern 3 + Pattern 5;
 //         03-UI-SPEC.md § Monitor refactor (Option A locked);
-//         ~/.claude/plans/neon-tabbing-workstation.md Task 2.
+//         ~/.claude/plans/neon-tabbing-workstation.md Task 2;
+//         05-CONTEXT.md D-24 (emissive intensity refactored to read
+//         from EMISSIVE_BUDGET.MONITOR_SCREEN; focus boost is local).
 
 import type { ReactNode } from 'react';
 import { SCENE_COLORS } from './colors';
+import { EMISSIVE_BUDGET } from './emissiveBudget';
+
+// Focus-pop multiplier. Preserves the HS-redesign focus ratio (was
+// 2.0/1.5 ≈ 1.333× pre-Plan-05-01). Resting intensity is read from
+// EMISSIVE_BUDGET.MONITOR_SCREEN; this multiplier is local because the
+// ratio is a Monitor-component concern (focus emphasis), not a scene-
+// wide budget concern.
+const MONITOR_FOCUS_BOOST = 1.333;
 
 interface MonitorProps {
   position: [number, number, number];
@@ -77,7 +87,11 @@ export function Monitor({
         <meshStandardMaterial
           color={SCENE_COLORS.bg}
           emissive={SCENE_COLORS.accent}
-          emissiveIntensity={isFocused ? 2.0 : 1.5}
+          emissiveIntensity={
+            isFocused
+              ? EMISSIVE_BUDGET.MONITOR_SCREEN * MONITOR_FOCUS_BOOST
+              : EMISSIVE_BUDGET.MONITOR_SCREEN
+          }
           toneMapped={false}
         />
       </mesh>

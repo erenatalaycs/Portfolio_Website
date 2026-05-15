@@ -8,9 +8,12 @@
 // Source: 02-UI-SPEC.md § Procedural workstation primitives — Lamp rows;
 //         02-CONTEXT.md D-06 (no permanent blink — Phase 2 ships zero
 //         per-frame animation consumers; reduced-motion gate would apply
-//         if any animation were ever added)
+//         if any animation were ever added);
+//         05-CONTEXT.md D-24 (bulb emissiveIntensity refactored to
+//         read from EMISSIVE_BUDGET.LAMP_BULB).
 
 import { SCENE_COLORS } from './colors';
+import { EMISSIVE_BUDGET } from './emissiveBudget';
 
 interface LampProps {
   position: [number, number, number];
@@ -49,7 +52,7 @@ export function Lamp({ position, rotation = [0, 0, 0] }: LampProps) {
         <meshStandardMaterial
           color={SCENE_COLORS.bg}
           emissive={SCENE_COLORS.warn}
-          emissiveIntensity={2.0}
+          emissiveIntensity={EMISSIVE_BUDGET.LAMP_BULB}
           toneMapped={false}
         />
       </mesh>

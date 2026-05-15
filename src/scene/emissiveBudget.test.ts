@@ -11,14 +11,11 @@ import { describe, it, expect } from 'vitest';
 import { EMISSIVE_BUDGET } from './emissiveBudget';
 
 describe('EMISSIVE_BUDGET', () => {
-  it.each(Object.entries(EMISSIVE_BUDGET))(
-    '%s is a finite number in [0, 10]',
-    (_key, value) => {
-      expect(Number.isFinite(value)).toBe(true);
-      expect(value).toBeGreaterThanOrEqual(0);
-      expect(value).toBeLessThanOrEqual(10);
-    },
-  );
+  it.each(Object.entries(EMISSIVE_BUDGET))('%s is a finite number in [0, 10]', (_key, value) => {
+    expect(Number.isFinite(value)).toBe(true);
+    expect(value).toBeGreaterThanOrEqual(0);
+    expect(value).toBeLessThanOrEqual(10);
+  });
 
   it('exports all 8 D-23 keys', () => {
     expect(Object.keys(EMISSIVE_BUDGET).sort()).toEqual(

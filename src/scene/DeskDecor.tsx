@@ -19,13 +19,29 @@
 //   - Desk volume spans x ∈ [-0.6, 0.6], z ∈ [-0.3, 0.3].
 //   - Lamp at [-0.5, 0.78, 0]; keep decor clear of that region.
 //
-// Source: ~/.claude/plans/neon-tabbing-workstation.md Task 4.
+// Source: ~/.claude/plans/neon-tabbing-workstation.md Task 4;
+//         05-CONTEXT.md D-23..D-24 — file-local intensity constants
+//         introduced so the drift-guard (no numeric literals on
+//         emissiveIntensity in src/scene/*.tsx) holds. These HS-redesign
+//         decorative emitters predate D-23's named budget; once Phase 6
+//         lands the Pi-cluster rack LED (CYB-02), `KEYBOARD_BACKLIGHT_*`
+//         and `TOWER_*` should be reconsidered for inclusion in
+//         EMISSIVE_BUDGET — for now they stay file-local to preserve
+//         exact HS-redesign behavior without inventing un-decisioned
+//         budget keys.
 
 import { SCENE_COLORS } from './colors';
 
 // HS neon accent — matches Task 5 neon strip; same value reused across
 // every emissive accent so the scene reads as one HS-tinted palette.
 const NEON_CYAN = '#22d3ee';
+
+// File-local emissive intensities (HS-redesign era, pre-D-23). Drift-
+// guard-compliant: any future change should consider centralizing into
+// EMISSIVE_BUDGET if a similar surface lands in Phase 6+.
+const KEYBOARD_BACKLIGHT_INTENSITY = 1.0;
+const TOWER_LED_INTENSITY = 1.4;
+const TOWER_INTAKE_INTENSITY = 0.6;
 
 const DESK_TOP_Y = 0.77;
 
@@ -48,7 +64,7 @@ function Keyboard() {
         <meshStandardMaterial
           color={NEON_CYAN}
           emissive={NEON_CYAN}
-          emissiveIntensity={1.0}
+          emissiveIntensity={KEYBOARD_BACKLIGHT_INTENSITY}
           toneMapped={false}
         />
       </mesh>
@@ -107,7 +123,7 @@ function TowerPC() {
         <meshStandardMaterial
           color={NEON_CYAN}
           emissive={NEON_CYAN}
-          emissiveIntensity={1.4}
+          emissiveIntensity={TOWER_LED_INTENSITY}
           toneMapped={false}
         />
       </mesh>
@@ -117,7 +133,7 @@ function TowerPC() {
         <meshStandardMaterial
           color={NEON_CYAN}
           emissive={NEON_CYAN}
-          emissiveIntensity={0.6}
+          emissiveIntensity={TOWER_INTAKE_INTENSITY}
           toneMapped={false}
         />
       </mesh>
