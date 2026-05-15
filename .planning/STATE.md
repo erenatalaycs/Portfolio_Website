@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Room Build-Out + Pre-Launch Close
-status: in_progress
-last_updated: "2026-05-15T12:30:00.000Z"
+status: executing
+stopped_at: "v1.1 roadmap created. Phases 5–10 defined with 28/28 REQ coverage. Phase 5 (Room Shell) ready to enter `/gsd-plan-phase 5`. Phases 9 + 10 are autonomous:false with closes_v1.0 tags; Phase 9 blocked on calendar date commit; Phase 10 blocked on lab-progress forcing question."
+last_updated: "2026-05-15T13:45:57.296Z"
 last_activity: 2026-05-15
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 3
+  completed_plans: 1
+  percent: 33
 ---
 
 # Project State
@@ -20,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-15)
 
 **Core value:** Make a cyber recruiter or hiring manager think *"this person actually gets this field"* within seconds — without forcing recruiters to wait for a 3D scene before they can find the CV and contact details.
-**Current focus:** v1.1 Room Build-Out + Pre-Launch Close — Phase 5 (Room Shell) ready to plan. v1.0 shipped 2026-05-15 at `https://erenatalaycs.github.io/Portfolio_Website/` (tag `hs-redesign-v1`).
+**Current focus:** Phase 05 — Room Shell
 
 ## Current Position
 
-Phase: 5 (Room Shell) — ready to start
-Plan: — (next: `/gsd-plan-phase 5`)
-Status: Roadmap defined; awaiting plan-phase entry for Phase 5
-Last activity: 2026-05-15 — Milestone v1.1 roadmap created (Phases 5–10, 28 v1.1 REQs mapped, 100% coverage)
+Phase: 05 (Room Shell) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-05-15
 
 ## v1.1 Phase Map
 
@@ -104,6 +105,8 @@ Last activity: 2026-05-15 — Milestone v1.1 roadmap created (Phases 5–10, 28 
 - Last 5 plans: HS-redesign 8-task pass (v1.0 late visual pivot), Plan 04-06 (CC0 GLB workstation), Plan 04-04 (SEO host reconciliation), Plan 04-03 (LiveProfiles), Plan 04-02 (Web3Forms)
 - Trend: v1.0 closed clean; v1.1 begins on a healthy shipped codebase
 
+| Phase 05 P01 | 16 min | 3 tasks | 10 files |
+
 ## Accumulated Context
 
 ### Decisions
@@ -122,6 +125,7 @@ Recent decisions affecting current work:
 - v1.1 (2026-05-15): Phase 10 forcing question at discuss-phase: "Has any of (PortSwigger JWT / SigmaHQ vs Sysmon / MalwareBazaar triage) been started?" If no, phase plans labs only and write-ups defer to v1.2.
 - v1.1 (2026-05-15): Phase 7 whiteboard requires public-source citation (attack.mitre.org) recorded in component file header; no fabricated CVEs/IPs/incident text.
 - v1.1 (2026-05-15): Phase 7 visual-overload guardrail = ≤ 4 distinct emissive hues + per-tab readability screenshot pass in VERIFICATION.
+- [Phase ?]: v1.1 Plan 05-01 (2026-05-15): EMISSIVE_BUDGET landed (8 D-23 keys) + maxDistance 4.0→2.6 + wall token mirrored. DeskDecor.tsx refactor was a Rule 3 scope-expansion. D-33 light baseline: 4 dynamic, 1 shadow-caster (cap = 6/1).
 
 ### Pending Todos
 
@@ -155,10 +159,10 @@ Items carried forward from v1.0 close (2026-05-15) into v1.1:
 
 ## Session Continuity
 
-Last session: 2026-05-15T12:30:00.000Z
+Last session: 2026-05-15T13:45:51.096Z
 Stopped at: v1.1 roadmap created. Phases 5–10 defined with 28/28 REQ coverage. Phase 5 (Room Shell) ready to enter `/gsd-plan-phase 5`. Phases 9 + 10 are autonomous:false with closes_v1.0 tags; Phase 9 blocked on calendar date commit; Phase 10 blocked on lab-progress forcing question.
 Outstanding deferred: All v1.0 deferrals re-homed to v1.1 Phase 9 + Phase 10 (see Deferred Items table above).
-Resume file: (none — HANDOFF.json + .continue-here.md cleared)
+Resume file: None
 
 ## Operator Next Steps
 
