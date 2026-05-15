@@ -1,218 +1,115 @@
 # Project Research Summary
 
-**Project:** Eren Atalay — Portfolio Website (3D hacker workstation)
-**Domain:** Junior cybersecurity analyst portfolio for the UK job market — 3D immersive scene + fast 2D recruiter path, static-deployed to GitHub Pages, solo-built in ~1 month
-**Researched:** 2026-05-06
-**Confidence:** HIGH overall
+**Project:** Eren Atalay — Portfolio Website
+**Milestone:** v1.1 Room Build-Out + Pre-Launch Close
+**Domain:** 3D portfolio site / cyber-analyst hacker-room scene
+**Researched:** 2026-05-15
+**Confidence:** HIGH (technical execution) / MEDIUM (cat silhouette recognition + bed framing)
 
 ## Executive Summary
 
-This is a *content-led cybersecurity portfolio dressed in a 3D hacker-workstation*, not a 3D-tech demo with a CV bolted on. Eren is a summer-2025 graduate currently in a non-cyber QA role trying to break into a junior cyber analyst seat in the UK. The audience splits 50/50: recruiters who skim for name/role/CV/contact in under 30 seconds, and technical hiring managers who will explore write-ups and home-lab evidence. Every load-bearing decision below flows from that dual-audience reality — the 3D scene must impress hiring managers without ever being able to gate a recruiter from finding the CV.
+v1.1 is an **additive** milestone on a healthy shipped v1.0 codebase. The task: wrap the existing desk-island into a full hacker's room (walls, ceiling, window, server rack, whiteboard, bed corner, cat, warmth touches, optional secondary devices) AND close two v1.0-inherited tracks (human pre-launch sign-off + MDX CTF write-ups). Critical finding: **no new runtime dependencies are needed for categories A–G** — every required pattern (canvas-texture hooks, emissive-plus-Bloom for LED glow, procedural geometry composition, OrbitControls clamping) is already proven in the shipped v1.0 codebase.
 
-The recommended approach is a **single-repo, single-build Vite + React 19 + R3F v9 SPA** that mounts one of two shells at the App boundary based on `?view=` and a synchronous capability check. The text shell ships in the initial bundle (~80 KB gz) so the recruiter contract is unconditional; the 3D shell is `React.lazy`-loaded and reuses the same content + UI components via drei `<Html transform occlude>` projected onto monitor screens. Routing is **query params + a `404.html` copy of `index.html`** — no React Router, no HashRouter — because the "pages" are monitors in one scene, not separate documents. Content is typed `.ts` data plus MDX for long-form CTF write-ups; both shells render the same data through shared `ui/*` components, so they cannot drift. Deployment is GitHub Actions → `actions/deploy-pages`.
+Architecture is strictly additive: 13–18 new flat `src/scene/PascalCase.tsx` files plus a `src/scene/textures/` subfolder, all imported by `Workstation.tsx`. Only two structural changes: tighten `Controls.tsx` `maxDistance` 4.0 → 2.6 (no wall-collision raycast — distance clamp is the right shape), and add at most 2 new `<pointLight>` instances in `Lighting.tsx` (keeping the cap at 6 dynamic lights with 1 shadow-caster). No new zustand slice; no new camera poses; HS-redesign's overview-pose consolidation stays.
 
-The four risks that most plausibly sink the project: (1) the recruiter cannot reach the CV without loading 3D — fix by making CV/contact links plain HTML in the document at first paint, and by building the 2D shell first; (2) the 3D scene crashes on a mid-tier mobile or fails for a `prefers-reduced-motion` user — fix by capability-gating the default view and treating the 2D shell as the accessibility story; (3) OPSEC slips (EXIF, home-lab IPs, live CTF flags, employer/NDA leaks) — uniquely damaging for a *cyber* candidate; (4) junior-authenticity traps (Matrix rain, skill bars, padded tool lists, plagiarised write-ups) — actively lower credibility with the exact audience being targeted.
+Highest-risk dimension is **honest content authoring**, not technical execution. Whiteboard fabrication, cat-vs-real-cat implication, bed-vs-couch room-context implication, and window-backdrop OPSEC are all addressed by user decisions captured below; remaining risks (lab progress for write-ups, calendar date for sign-off) get forced into `/gsd-discuss-phase` before the relevant phases plan.
 
-## Key Findings
+## User Decisions (captured 2026-05-15)
 
-### Recommended Stack
+These are pre-committed at milestone start, ahead of the questions the research recommended for `/gsd-discuss-phase`:
 
-**Vite 8 + React 19 + TypeScript 5.9** baseline (TS 5.9, *not* 6 — R3F/drei type defs lag); 3D layer is **R3F 9.6 + Three.js 0.184 + drei 10.7 + @react-three/postprocessing 3**, with versions pinned (`~`, not `^`). Tailwind CSS v4 via `@tailwindcss/vite` is zero-config and serves both 3D HUD and 2D shell. MDX through `@mdx-js/rollup` (official path, not `vite-plugin-mdx`) with `rehype-pretty-code` + Shiki. Animation tooling split: `useFrame` + `@react-spring/three` inside Canvas, `motion/react` for 2D UI, GSAP only for boot-up + camera choreography. Contact form is **Web3Forms** (250 free/month, no backend). Asset pipeline is **`gltfjsx --transform`** at author time only.
+| # | Question | Decision | Impact |
+|---|---|---|---|
+| 1 | Cat real or invented? | **Invented — decorative prop, no real-cat claim** | Phase 8 cat ships as scene element only; never personalized in content |
+| 2 | Bed or couch? | **Bed** (single, accepts bedroom/studio-flat implication) | Phase 6 ships bed + nightstand + bedside lamp |
+| 3 | Lab progress for write-ups? | **Plan labs together in v1.1**; write-ups + lab planning paired | Phase 10 includes lab-planning sub-task before write-up authoring |
+| 4 | GLB workstation revisit? | **Path C — pass on v1.1, formally promote to v1.2 V2-3D-01** | Procedural Workstation stays canonical; `public/assets/workstation/` GLB files left as v2 seed (decide v1.2 whether to delete or reuse) |
+| 5 | OPS-04 Android device? | **Android Studio Emulator (Pixel 6, 4 GB, throttled) + documented limit; physical → v1.2** | Phase 9 sign-off accepts emulator as Android coverage with caveat row in CHECKLIST-LAUNCH |
+| 6 | Window backdrop technique? | **Procedural canvas-texture night-city (OPSEC-clean, no real photos)** | Phase 5 ships procedural blinds + behind-blinds CanvasTexture |
 
-**Core technologies:**
-- **Vite 8 + React 19 + TypeScript 5.9** — fast dev, static build, zero SSR baggage
-- **R3F 9.6 + Three.js 0.184 + drei 10.7** — declarative 3D; drei is non-optional (`<Html transform occlude>`, OrbitControls, useGLTF)
-- **@react-three/postprocessing 3** — Bloom + Scanline + ChromaticAberration + Noise (avoid Glitch/DOF/SSAO permanent loop)
-- **Tailwind CSS v4** via `@tailwindcss/vite` — terminal palette tokens in `@theme`
-- **MDX (`@mdx-js/rollup`) + rehype-pretty-code + Shiki** — build-time syntax highlighting, zero runtime cost
-- **motion/react** + **GSAP** — 2D UI animation, 3D timeline choreography
-- **Web3Forms** — static-friendly contact form
-- **GitHub Actions (`actions/deploy-pages`)** — clean CI deploy
-- **`gltfjsx --transform` + `@gltf-transform/cli`** — once-per-asset CLI optimization, target <2 MB total GLB
+## Stack Findings (STACK.md)
 
-**Explicitly do NOT use:** `@react-three/a11y` (last release May 2022, dead), `framer-motion` (legacy name; use `motion`), CRA, Next.js, `vite-plugin-mdx` (third-party), Prism.js, Tailwind v3, `mailto:` in raw HTML, custom shaders in v1.
+**No new runtime deps for v1.1 categories A–G.** Existing pins remain valid (R3F 9.6.1 / drei 10.7.7 / three 0.184 / Tailwind v4.2 / Vite 8).
 
-### The 2D Fallback Is the Spine of the Project
+**Optional devDependencies** (only if GLB path reactivates — currently deferred to v1.2 per decision #4):
+- `gltfjsx@~6.5.3`
+- `@gltf-transform/cli@~4.3.0`
 
-The 2D shell is **not** an accessibility consolation prize — it *is* the recruiter view, the accessibility story, the SEO surface, and the mobile experience. Build it first (Phase 1), styled with the same terminal aesthetic as the 3D scene, containing every section the 3D scene contains. There is exactly **one source of truth for content** (`src/content/*.ts` + MDX), and exactly **one set of UI components** (`src/ui/*`). The 3D scene wraps those components in drei `<Html transform occlude>` projected onto monitor screens; the 2D shell renders them in a normal column. The text shell ships in the initial bundle; the 3D shell is `React.lazy`-loaded so recruiters never pay for Three.js they will not see.
+**Hidden risk:** canvas-texture GPU memory; cap textures at 1024×1024.
 
-### Expected Features
+**First `useFrame` consumer in the codebase:** the cat breathing animation (Phase 8). Three commitments must land together — `usePrefersReducedMotion` reused for animation gate, current `<Canvas frameloop>` prop verified before animation starts, animation pattern documented for future per-frame consumers (rack LEDs reuse it).
 
-**Must have (table stakes):**
-- Name + "Junior Cybersecurity Analyst" + UK location above the fold, plain HTML at first paint
-- CV PDF download as plain `<a href>` (`Eren-Atalay-CV.pdf`)
-- Obfuscated email (JS-decoded), GitHub link, LinkedIn link — reachable in <2s
-- About / education / certifications (honest "in progress" labels) / skills as tag list (no skill bars)
-- 3-5 projects with title/tools/what-was-done/link
-- 2-3 CTF or lab write-ups (MDX, with screenshots, MITRE ATT&CK / NIST mapping where genuine)
-- TryHackMe + HackTheBox profile links
-- `prefers-reduced-motion` honoured site-wide; keyboard-navigable; semantic HTML
-- OpenGraph card + JSON-LD `Person` schema + real `<title>` + favicon
-- Custom 404 page in terminal style
+**size-limit budgets unchanged.** Estimated 3D chunk delta is +10–20 KB gz on a 450 KB ceiling (current usage 38.95 KB gz).
 
-**Should have (differentiators):**
-- 3D hacker-workstation scene (defining feature, but only with 2D escape hatch)
-- Animated `whoami` terminal greeting (constrained, not a fake REPL)
-- Per-monitor "apps" — each monitor *is* a content surface
-- Real artifact-rich write-ups (Wireshark/Splunk/Nmap/Burp screenshots, sanitised, watermarked "Home Lab — Synthetic Data")
-- Home-lab architecture diagram (Mermaid is fine)
-- Honest "currently learning / next cert" section
-- Web3Forms contact form (paired with obfuscated email as fallback)
+## Feature Priority Bands (FEATURES.md)
 
-**Defer to v1.x or v2:** Custom domain, light/dark theme toggle, multi-language, analytics, blog with RSS, keyboard shortcut overlay, source-code Easter egg, PGP key, live HTB/THM badge widgets, full Blender-modelled workstation, custom CRT shader, scroll-driven camera tour, BrowserRouter for clean URLs.
+| Band | Items |
+|---|---|
+| **P1 (must ship)** | A1 walls, A2 ceiling, A3 window with blinds, A4 ceiling light; B1 server rack, B2 Pi cluster with LEDs, B3 cable bundle; C1 whiteboard with abbreviated MITRE ATT&CK tactic strip (NOT full matrix), C2 wall clock (static time, no real-time scroll), C3 framed cert; D1 book spines on bookshelf, D2 snake plant (not pothos, not cactus), D3 screen bias-light, D4 under-desk LED strip; E1 single bed, E2 nightstand, E3 bedside lamp; F1 procedural loaf-pose cat with breathing animation (reduced-motion gated); H1 04-08 sign-off close; I1 lab planning + write-up authoring |
+| **P2 (differentiator if budget)** | G2 SDR/radio dongle on desk |
+| **P3 (deferred to v1.2)** | GLB workstation revisit (V2-3D-01); G1 open laptop screen; G3 secondary monitor; A5 door |
 
-**Anti-features (do NOT build):**
-- Matrix code rain, padlock/shield/binary motifs, hooded-hacker silhouettes, fake "hacking in progress" GIFs
-- Self-titling as "Ethical Hacker" or "Pentester" when evidence is TryHackMe rooms
-- Skill bars / star ratings ("Python 87%", "★★★☆☆")
-- Fake interactive password prompt; fake terminal that doesn't accept input; fake security dashboard with random data
-- Type-out animation on every paragraph
-- Pure black + saturated pure green text (fails WCAG AA)
-- Listing every TryHackMe room ever; padded skills lists
-- Home address, personal phone, full DOB on the public site
-- Auto-playing music, "Hire me" pop-up modals, custom cursors that hide system cursor
-- Any screenshot with un-redacted IPs, hostnames, employer data, or live CTF flags
+## Architecture Findings (ARCHITECTURE.md)
 
-### Architecture Approach
+**6-phase build order (Phases 5–10):**
 
-**Single SPA, two shells, query-param routing, content-as-data.** `<App />` reads `?view=` and runs a one-shot capability check (`detectCapability()`: WebGL2? `deviceMemory < 4`? `hardwareConcurrency < 4`? mobile UA? `prefers-reduced-motion`?), then mounts exactly one of `<TextShell />` (eager) or `<ThreeDShell />` (`React.lazy`). Both shells import from `src/content/*.ts` (typed data + MDX) and render through shared `src/ui/*` components. The 3D scene is composed (one file per element: `Desk`, `Monitor`, `Lamp`, `Bookshelf`), reading from one consolidated Draco-compressed `workstation.glb` (target <2 MB). Monitor screens use **drei `<Html transform occlude="blending">`** so content remains real, selectable, copy-paste-able DOM with full Tailwind styling. Deep links: `?view=text|3d&focus=projects|ctfs|cv|contact`.
+| Phase | Category | Title | Type |
+|---|---|---|---|
+| 5 | A | Room Shell | autonomous |
+| 6 | B + E | Cyber Detail + Bed Corner | autonomous |
+| 7 | C + D | Wall Content + Warmth | autonomous |
+| 8 | F + G(P2) | Cat + SDR | autonomous |
+| 9 | H | Human Sign-off Close | **autonomous: false** (closes v1.0 OPS-03/04/05 + CTC-01 delivery) |
+| 10 | I | Write-ups + Lab Planning | **autonomous: false** (closes v1.0 CNT-02/03) |
 
-**Major components:**
-1. `<App />` — synchronous shell selector, ~50 LOC, no R3F dependency
-2. `<TextShell />` — eager, semantic HTML CV; first paint <800ms
-3. `<ThreeDShell />` — lazy, hosts `<Canvas>`, drei `<Loader>`, scene overlay (sibling DOM)
-4. `src/scene/*` — composed: `<Workstation />`, `<Desk />`, `<Monitor />` ×3, `<Lamp />`, `<Bookshelf />`, `<Camera />`, `<Controls />`, `<MonitorScreen />`
-5. `src/ui/*` — shared between shells (`<TerminalPrompt />`, `<ProjectCard />`, `<CTFCard />`, `<ContactBlock />`, `<ViewToggle />`)
-6. `src/content/*` — typed TS data + `ctf-writeups/*.mdx`
-7. `src/lib/device.ts` — capability detection, ~30 LOC
-8. `public/assets/` — `models/workstation.glb`, `textures/*.webp`, `cv.pdf`, `og-image.png`
-9. `.github/workflows/deploy.yml` — checkout → install → build → `cp dist/index.html dist/404.html` → `actions/deploy-pages`
+**Rationale:** structural before decorative. Phase 5 (shell) anchors every later phase's placement. Phase 6 anchors floor with large objects (rack + bed). Phase 7 dresses walls + adds warmth. Phase 8 is last visual because cat depends on bed (Phase 6) AND it's the only animated element (want everything else stable). Phases 9 + 10 are human-driven and don't gate the visual chain.
 
-### Critical Pitfalls (Surfaced Next to Their Decisions)
+**Inherited-deferral tagging:** Phases 9 and 10 plan frontmatter includes `closes_v1.0: [OPS-03, OPS-04, OPS-05, CTC-01]` and `closes_v1.0: [CNT-02, CNT-03]` respectively — surfaces the v1.0 → v1.1 ownership chain for the eventual milestone audit.
 
-1. **Recruiter cannot find CV without loading 3D.** Highest-impact failure mode. *Prevention:* CV link, obfuscated email, GitHub, LinkedIn must be plain `<a>` tags in the document at first paint, before any R3F code runs. Text shell ships in the initial bundle. `?view=text` always serves the 2D shell. Verify on throttled "Slow 4G."
+**Modified files (only 4):**
+- `src/scene/Workstation.tsx` (composition root — every new component imported here)
+- `src/scene/Controls.tsx` (maxDistance 4.0 → 2.6)
+- `src/scene/Lighting.tsx` (at most 2 new `<pointLight>` for ceiling + bedside)
+- `src/scene/WallDecor.tsx` (optional refactor — extract canvas helper for `src/scene/textures/`)
 
-2. **3D crashes on mid-tier mobile / iOS Safari context-loss / no fallback for `prefers-reduced-motion`.** *Prevention:* Default mobile + `deviceMemory < 4` + `hardwareConcurrency <= 4` + missing-WebGL2 + `prefers-reduced-motion: reduce` to text shell. `<Canvas dpr={[1, 1.5]} />`. Listen for `webglcontextlost` and swap to text shell on fire. Test on real iOS + real Android.
+**Leave alone:** FocusController, cameraPoses (single overview pose), tabStore, MonitorTabs, MonitorOverlay, all of `src/3d/*`, `src/sections/*`, `src/ui/*` (except possibly a new UI element if the cat gets a hover-tooltip — TBD Phase 8).
 
-3. **2D fallback ships as second-class citizen.** *Prevention:* Content-as-data architecture from day one. Both shells are views over `src/content/*`. Build text shell first; build 3D scene over it. Pre-launch checklist enforces section-by-section parity.
+**Lighting cap:** 6 dynamic lights / 1 shadow-caster. All decorative glow (rack LEDs, neon strip, bias-light, under-desk LED, plant grow-light if added) via `emissive` + Bloom postprocessing, NOT additional `<pointLight>`.
 
-4. **OPSEC slips — EXIF/IPs/flags/employer leaks.** Uniquely damaging for a cyber candidate. *Prevention:* Asset-pipeline checklist: `exiftool -all=`; manual full-resolution review for IPs/hostnames/tab-titles/file-paths; CTF write-ups only after the box retires; flags redacted with black-box overlay (never blur — reversible); CV PDF metadata stripped + verified; city-only on public CV.
+**emissiveBudget.ts** — new file in Phase 5; all v1.1 emissive components reference it for consistent intensity ceilings. `toneMapped={false}` privilege is neon strip only.
 
-5. **Cyber-portfolio clichés + junior-authenticity traps.** *Prevention:* Anti-cliché list at Phase 1; every tool listed in skills must have a project/write-up demonstrating it (provenance rule); every CTF write-up cites platform + date + sources consulted (including walkthroughs/hints); peer review by one real cyber professional before launch.
+**Test rule:** v1.0 convention preserved — visual components not unit-tested. Unit-test only pure logic (canvas drawing helpers, LED phase math, clamp-value contract for OrbitControls).
 
-Secondary technical pitfalls absorbed by the chosen architecture: `setState` in `useFrame` (refs only — codify as ESLint or grep rule); GLB oversize (gltf-transform pipeline + 1024² hero / 512² prop caps + `size-limit`); GH Pages base-path / SPA-404 (Vite `base` + `cp dist/index.html dist/404.html`); `<Html>` z-fighting + click-through (deliberate `transform occlude="blending"` + `e.stopPropagation()`); debug helpers in production (`import.meta.env.DEV` gate); contact form failure (Web3Forms paired with obfuscated email + LinkedIn).
+## Top Pitfalls to Address in Roadmap (PITFALLS.md)
 
-## Reconciled Disagreements
+1. **Whiteboard fabrication** — Phase 7 `/gsd-discuss-phase` forces public-source citation (MITRE ATT&CK URL, Lockheed kill chain URL); refuses plan execution if not answered.
+2. **Window OPSEC leak** — already prevented by decision #6 (procedural-only, no real photos).
+3. **Sign-off deferring indefinitely** — Phase 9 must have a calendar date BEFORE plan opens; milestone-close gate refuses transition if any `___` remains in CHECKLIST-LAUNCH.md.
+4. **Visual-overload / "hacker mağarası" trap** — Phase 7 VERIFICATION includes a per-tab readability screenshot pass + a ≤ 4 hues palette cap.
+5. **Cat reads as alien** — Phase 8 hard rule: 3-second silhouette test with fresh viewer in VERIFICATION; CC0 GLB fallback path pre-committed before Phase 8 opens. Loaf pose preferred (blob-with-ears is more forgiving procedurally than standing).
 
-### Routing: query params + `404.html` copy (NOT React Router)
+**Carried v1.0 anti-feature list still binds** (Matrix code rain, padlock/shield/glowing-binary motifs, hooded-hacker silhouettes, fake "hacking in progress" GIFs, fake terminal accepting input it can't handle, fake security dashboards with random data, type-out animation on every paragraph, pure-black + saturated-green text, auto-playing music, "hire me" pop-ups, custom cursors hiding system cursor, home address / phone / DOB on the public site, backend / SSR, auth, real-time/multiplayer 3D, plagiarised CTF write-ups).
 
-STACK.md recommends HashRouter; ARCHITECTURE.md recommends no router — query params + `public/404.html` as a copy of `index.html`. **Architecture recommendation wins for v1.**
+**New v1.1-specific bans:** fake employer logos on the framed cert, animated typing fingers on the keyboard, hooded-cat avatar (defeats the warmth purpose), daylight window (cyber-room convention is night), fake cert names on the book spines, animated cat tail wag, fake `tcpdump` scroll on the laptop screen (if G1 ever lands in v1.2).
 
-Reasoning:
-- Tiny routing surface — at most ~6 destinations: text shell, 3D shell, 4 monitor focuses. `?view=3d&focus=projects` covers all of it.
-- The "pages" are monitors in one scene, not separate documents. No semantic gain from path-based URLs because there is exactly one HTML document either way.
-- HashRouter URLs (`/#/projects/foo`) are aesthetically poor and offer zero SEO benefit on a single-document site.
-- `cp dist/index.html dist/404.html` in the GitHub Actions workflow is a single-line solution.
-- HashRouter remains a clean v2 escape hatch.
+## Open Questions Remaining (forwarded to `/gsd-discuss-phase`)
 
-**Revisit-trigger for v2:** if write-up count grows past ~10 and per-write-up shareable URLs become valuable, promote MDX write-ups to first-class routes via React Router 7 declarative mode + HashRouter. This is a code change, not an architecture change.
+- **Phase 7:** Which ATT&CK column gets the "highlighted" annotation on the whiteboard? Should reflect Eren's actual learning focus (Persistence / Initial Access / Defense Evasion / Credential Access).
+- **Phase 8:** Cat placement — on the bed (E1, requires bed-corner overview frame visibility), on the window ledge (requires A2 ledge depth), or on top of the tower PC (already exists, simplest)?
+- **Phase 9:** Specific calendar date for the sign-off session — required input to lock the phase.
+- **Phase 10:** Lab order — which of the 3 candidate labs starts first (PortSwigger JWT lab / SigmaHQ vs Sysmon / MalwareBazaar retired-sample triage)?
 
-### 2D fallback: build it FIRST, parity is mandatory
+## Confidence per Decision
 
-FEATURES.md (P1), ARCHITECTURE.md (structurally), PITFALLS.md ("build 2D first") all say the same thing. **Unified directive:** Text shell is built first (Phase 1) as the actual content layout — fully terminal-styled, every section present, recruiter-grade. The 3D scene (Phase 2-3) is built *over it*, reusing `src/content/*` and `src/ui/*` so the two views cannot drift. Pre-launch verification requires section-by-section content parity.
+- HIGH for stack additions (4 research files cross-verified versions)
+- HIGH for architecture (additive-only, no new state, lighting cap is conservative)
+- HIGH for build order (structural → decorative is well-established in v1.0 itself)
+- MEDIUM for cat silhouette recognition at distance (mitigated by pre-committed GLB fallback)
+- MEDIUM for bed-in-overview-frame composition (will iterate during Phase 6 plan)
 
-## Implications for Roadmap
+## Sources
 
-The build order is constrained by one principle: **something demoable and recruiter-grade must be live by the end of Week 1.** The 3D scene has the most unknowns and gets the middle weeks; polish absorbs unbounded time and is quarantined to Week 4.
-
-### Phase 1 — Foundation + 2D Recruiter-Grade Shell (Week 1)
-
-**Rationale:** The recruiter contract (CV + contact + GitHub + LinkedIn in <2s) must be unconditionally satisfied before any 3D code is written. Locks in the deploy pipeline early so GH-Pages quirks surface with placeholder content, not Week 4 with finished content.
-
-**Delivers:**
-- Vite 8 + React 19 + TS 5.9 + Tailwind v4 scaffolded; pinned `~` versions for the R3F/three/drei trio.
-- `src/content/*.ts` populated with real CV data; `ctf-writeups/` MDX directory created.
-- Fully functional `<TextShell />` — terminal-styled, every section, plain `<a>` tags for CV/email/GitHub/LinkedIn at first paint, custom 404, OG tags, JSON-LD `Person` schema, favicon, real `<title>`.
-- Email obfuscation utility (`src/lib/obfuscate.ts`).
-- Reduced-motion hook stub; contrast-safe terminal palette decided (off-black `#0a0e0a` + softened green `#7ee787`, NOT pure black + saturated `#00ff41`).
-- GitHub Actions deploy workflow live; site at `eren-atalay.github.io/Portfolio_Website/`; `vite.config.ts` `base: '/Portfolio_Website/'`; `404.html` copy in workflow; `.gitignore` excludes `dist/`.
-- OPSEC asset pipeline: `exiftool` strip step documented; CV PDF metadata-stripped + verified; pre-publish checklist drafted.
-
-### Phase 2 — 3D Shell + Asset Pipeline + Capability Gating (Week 2)
-
-**Rationale:** Validates the entire 3D pipeline (lazy load, asset fetch, capability gating, performance budgets) with a placeholder scene before pouring content into it.
-
-**Delivers:**
-- `<ThreeDShell />` lazy-loaded via `React.lazy`; Suspense fallback is `<TextShell />` skeleton.
-- `detectCapability()` defaulting mobile / low-memory / no-WebGL2 / `prefers-reduced-motion` users to text shell; `?view=` overrides; always-visible toggle.
-- Placeholder workstation: procedural primitives + emissive screens. drei `<Loader>` (terminal-styled progress).
-- Clamped OrbitControls (rotate-only on mobile or `touch-action: pan-y`); camera focus animation skeleton.
-- gltfjsx + `@gltf-transform/cli` documented; WebP + Draco + KTX2 with Draco-only + WebP fallback path.
-- `webglcontextlost` listener swaps to text shell.
-- `<Canvas dpr={[1, 1.5]} />`, `frameloop="demand"` where appropriate.
-- View-toggle DOM overlay (sibling of Canvas).
-- `size-limit`: text shell <120 KB gz, 3D chunk <450 KB gz, GLB <2.5 MB.
-
-### Phase 3 — Content Integration + MDX Write-ups + Camera Choreography (Week 3)
-
-**Rationale:** Components in `src/ui/*` are already mature from Phase 1, so this week is reuse, not authoring. drei `<Html transform occlude>` is exercised in earnest.
-
-**Delivers:**
-- drei `<Html transform occlude="blending">` bindings on each monitor reading from `src/content/*` via shared `src/ui/*`.
-- Animated `whoami` terminal greeting on main monitor (constrained, not fake REPL); freezes long enough to read; respects reduced-motion.
-- Per-monitor click → camera focus animation (GSAP timeline) → optional "fullscreen" CSS class on focused `<Html>`.
-- Deep-link support: `?focus=projects` opens 3D shell with camera animating; `?view=text&focus=projects` scrolls to `#projects`.
-- MDX-rendered CTF write-ups (P1 2-3 write-ups) reachable both inside 3D scene's write-ups monitor AND in text shell.
-- Reduced-motion handling for camera moves (instant cuts or short opacity fades).
-- Keyboard navigation: arrow keys cycle monitor focus; Enter activates; Escape returns to wide view; `?` cheat-sheet panel.
-- `e.stopPropagation()` on `<Html>` chrome click handlers.
-
-### Phase 4 — Real Asset, Postprocessing, Polish, Pre-Launch QA (Week 4)
-
-**Rationale:** Polish work is obvious technically but absorbs unbounded time. Quarantining to Week 4 forces shipment. All Week 4 work is gated by the pre-launch checklist.
-
-**Delivers:**
-- Real workstation GLB (Blender-modelled or sourced + customised, passed through `gltfjsx --transform`). Target <2 MB.
-- Lighting: emissive monitors + lamp + rim light. drei `<Environment preset="night">` (no large HDRI fetch).
-- Postprocessing: Bloom + Scanline (density 1.25, opacity 0.15) + ChromaticAberration (offset 0.0008) + low Noise (opacity 0.04). `Glitch` only on boot-up sequence (one-shot). NO DOF, NO SSAO, NO permanent Glitch. Disabled entirely on `perfTier='low'` via drei `<PerformanceMonitor>`.
-- Web3Forms contact form wired (endpoint in `VITE_FORM_ENDPOINT`, public); paired with obfuscated email + LinkedIn DM as fallback. End-to-end test: real submission → confirm Gmail + Outlook inbox (not spam).
-- TryHackMe + HTB profile links in contact / certs section.
-- Mobile pass on real iOS + real Android.
-- SEO completeness: meta description, OG image (1200×630), JSON-LD `Person`, sitemap, robots.txt.
-- Final size pass: hit budgets, Lighthouse on text shell (Performance ≥80, Accessibility ≥90, Best Practices ≥90, SEO ≥90).
-- Pre-launch checklist (23-item "Looks Done But Isn't" list) executed; OPSEC final audit.
-- Strip all dev helpers via `import.meta.env.DEV` gate; verify with `grep` + bundle inspection.
-- One peer review by cyber professional + one usability review by non-cyber person.
-- CSP `<meta>` tag (baseline); `npm audit` clean; external links `rel="noopener noreferrer"`.
-
-### Phase Ordering Rationale
-
-- **Recruiter contract first.** End-of-Week-1 must be live and shippable. If anything goes wrong in Weeks 2-4, Eren still has a recruiter-grade portfolio.
-- **Validate the scary pipeline before pouring content into it.** Week 2's placeholder 3D scene exists to surface R3F + GH Pages quirks while the cost is throwaway primitive geometry.
-- **Reuse, don't re-author.** Week 3's content integration only works because Week 1 already built `src/content/*` and `src/ui/*`.
-- **Quarantine polish.** Week 4 work is unbounded otherwise. By gating it explicitly behind the pre-launch checklist, polish becomes a finite list.
-- **OPSEC + anti-cliché are rules, not phases.** Set in Week 1, enforced at every content touch through Week 4.
-
-## Confidence Assessment
-
-| Area | Confidence | Notes |
-|------|------------|-------|
-| Stack | **HIGH** | Versions verified live against npm registry 2026-05-06; pairing rules verified in R3F + drei docs. |
-| Features | **HIGH** | Multiple converging cyber-portfolio sources; live junior portfolios surveyed; UK-market grounding. |
-| Architecture | **HIGH** | Component boundaries, data flow, deploy approach map to standard R3F + GH Pages patterns. |
-| Pitfalls | **HIGH** | Technical pitfalls cite official docs; OPSEC + cliché traps MEDIUM but consistent across sources. |
-
-**Overall confidence:** HIGH
-
-### Gaps to Address
-
-- **Real-device QA matrix.** "Mid-tier mobile" is intentionally vague — Phase 2 must commit to specific test devices (e.g., iPhone 12 / iOS 17, Android in 3-4 GB RAM range, M1 iPad).
-- **Whether to ship a custom CRT shader.** Decision: pure postprocessing recipe in Phase 4 first; only fall back to shader-on-mesh if postprocessing fails the perf budget.
-- **Workstation GLB authoring path.** Roadmap recommends procedural for v1 budget; if Eren has Blender skill or finds a CC0 model, swap in via gltfjsx. Week-4 fork point.
-- **Source maps in production.** Default Vite ships them. Decision: turn off `build.sourcemap` for production builds. Flag for Phase 1.
-- **Reduced-motion and the `whoami` greeting.** Skip-to-final-state if reduced-motion is set; do NOT skip the greeting entirely (it's content). Codify in Phase 1.
-
----
-
-*Research completed: 2026-05-06*
-*Ready for roadmap: yes*
+- `.planning/research/STACK.md` (versions verified against npm registry 2026-05-15)
+- `.planning/research/FEATURES.md` (MITRE ATT&CK Matrix, Oracle/HPE/Intel server LED docs, cat respiratory rate)
+- `.planning/research/ARCHITECTURE.md` (Three.js forum: point-light limits, mrdoob/three.js#8463, Discover three.js Tips & Tricks)
+- `.planning/research/PITFALLS.md` (memory/feedback_no_fabricated_lab_evidence.md binding rule + v1.0 REQUIREMENTS.md Out-of-Scope inheritance)
