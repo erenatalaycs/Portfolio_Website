@@ -145,7 +145,7 @@ v1.1 wraps the shipped desk-island in a believable hacker room (walls, ceiling, 
 | 2. 3D Shell + Asset Pipeline + Capability Gating | v1.0 | 5/5 | Complete | 2026-05-06 |
 | 3. Content Integration + MDX Write-ups + Camera Choreography | v1.0 | 6/7 | Complete (1 override-deferred) | 2026-05-08 |
 | 4. Real Asset + Postprocessing + Polish + Pre-Launch QA | v1.0 | 7/8 | Complete (Plan 04-08 carried into v1.1 Phase 9) | 2026-05-14 |
-| 5. Room Shell | v1.1 | 0/? | Not started | — |
+| 5. Room Shell | v1.1 | 3/3 | Complete (ready for VERIFICATION) | 2026-05-15 |
 | 6. Cyber Detail + Bed Corner | v1.1 | 0/? | Not started | — |
 | 7. Wall Content + Warmth | v1.1 | 0/? | Not started | — |
 | 8. Cat + Secondary Devices | v1.1 | 0/? | Not started | — |

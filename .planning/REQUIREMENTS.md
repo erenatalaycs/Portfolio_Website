@@ -22,7 +22,7 @@ v1.0 requirements (FND/CNT/TXT/3D/CTC/OPS) shipped 2026-05-15 — see `.planning
 
 - [x] **ROOM-01**: Left, right, and back wall planes enclose the desk-island; OrbitControls `maxDistance` clamped from 4.0 → 2.6 so camera cannot exit the room.
 - [x] **ROOM-02**: Ceiling plane rendered above the desk at a height that does not clip Bookshelf or Lamp; a single new `<pointLight>` for ceiling illumination (counts against 6-dynamic-light cap).
-- [ ] **ROOM-03**: Window with blinds slats on the back wall, behind which a procedural canvas-texture night-city pattern renders (NO real photos, NO real skyline — OPSEC-clean). Blinds fixed-open posture, not animated.
+- [x] **ROOM-03**: Window with blinds slats on the back wall, behind which a procedural canvas-texture night-city pattern renders (NO real photos, NO real skyline — OPSEC-clean). Blinds fixed-open posture, not animated.
 - [x] **ROOM-04**: `src/scene/emissiveBudget.ts` introduced as the single source for emissive-intensity ceilings; every new emissive component in v1.1 reads from it.
 
 ### Cyber Detail (Phase 6 first half)
@@ -109,7 +109,7 @@ Inherits v1.0 anti-feature list verbatim (Matrix code rain, padlock motifs, hood
 |---|---|---|
 | ROOM-01 | Phase 5 | Complete |
 | ROOM-02 | Phase 5 | Complete |
-| ROOM-03 | Phase 5 | Pending |
+| ROOM-03 | Phase 5 | Complete |
 | ROOM-04 | Phase 5 | Complete |
 | CYB-01 | Phase 6 | Pending |
 | CYB-02 | Phase 6 | Pending |
